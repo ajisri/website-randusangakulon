@@ -1,0 +1,186 @@
+.card {
+  position: relative;
+
+  &.card-plain {
+    background: transparent;
+    box-shadow: none;
+    border: none;
+  }
+}
+
+.profile-page {
+  .card-profile {
+    margin-top: -150px;
+
+    .card-profile-image {
+      position: relative;
+      //min-height: 130px;
+
+      img {
+        max-width: 180px;
+        border-radius: $border-radius;
+        @extend .shadow;
+        transform: translate(-50%, -30%);
+        position: absolute;
+        left: 50%;
+        transition: $transition-base;
+
+        &:hover {
+          transform: translate(-50%, -33%);
+        }
+      }
+    }
+
+    .card-profile-stats {
+      padding: 1rem 0;
+
+      > div {
+        text-align: center;
+        margin-right: 1rem;
+        padding: 0.875rem;
+
+        &:last-child {
+          margin-right: 0;
+        }
+
+        .heading {
+          font-size: 1.1rem;
+          font-weight: bold;
+          display: block;
+        }
+        .description {
+          font-size: 0.875rem;
+          color: $gray-500;
+        }
+      }
+    }
+
+    .card-profile-actions {
+      padding: 0.875rem;
+    }
+
+    @include media-breakpoint-down(xs) {
+      .card-profile-actions {
+        margin-top: 110px;
+      }
+    }
+
+    @include media-breakpoint-between(sm, md) {
+      .card-profile-stats {
+        margin-top: 30px;
+      }
+    }
+  }
+}
+
+// Card with blockquotes
+
+.card {
+  .card-blockquote {
+    padding: 2rem;
+    position: relative;
+
+    .svg-bg {
+      display: block;
+      width: 100%;
+      height: 95px;
+      position: absolute;
+      top: -94px;
+      left: 0;
+    }
+  }
+}
+
+// Animated cards
+
+.card-lift--hover {
+  &:hover {
+    transform: translateY(-20px);
+    @include transition($transition-base);
+  }
+}
+
+.service-item {
+  position: relative;
+  text-align: center;
+  width: 100%; /* Memastikan komponen mengambil seluruh lebar kontainer */
+  // max-width: 400px; /* Batas maksimum lebar komponen */
+  min-height: 400px;
+  margin: auto; /* Membuat komponen tetap di tengah */
+}
+
+.service-item .service-img {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+  z-index: -1;
+}
+
+.service-item .service-img img {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  object-fit: cover;
+  transform: scale(1.2);
+  transition: 0.3s;
+  z-index: -1;
+}
+
+.service-item:hover .service-img img {
+  transform: scale(1);
+}
+
+.service-item .service-text {
+  background: #ffffff;
+  box-shadow: 0 0 45px rgba(0, 0, 0, 0.08);
+  transition: 0.3s;
+}
+
+.service-item:hover .service-text {
+  background: rgba(15, 66, 41, 0.6);
+}
+
+.service-item .service-text h4,
+.service-item .service-text p {
+  transition: 0.3;
+}
+
+.service-item:hover .service-text h4 {
+  color: #ffffff;
+}
+
+.service-item:hover .service-text p {
+  color: var(--light);
+}
+
+.service-item .service-text .btn-square {
+  width: 100px;
+  height: 100px;
+  background: transparent;
+  transition: 0.5s;
+}
+
+.service-item:hover .service-text .btn-square {
+  background: var(--light);
+}
+
+.service-item .service-text .btn {
+  width: 31px;
+  height: 31px;
+  display: inline-flex;
+  align-items: center;
+  color: var(--dark);
+  background: var(--light);
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  transition: 0.3s;
+}
+
+.service-item:hover .service-text .btn {
+  width: 112px;
+}

@@ -1,0 +1,33 @@
+/* App.css */
+.app-container {
+  display: flex;
+}
+
+.main-content {
+  margin-left: 250px; /* Sama dengan lebar sidebar */
+  padding: 20px;
+  width: calc(100% - 250px);
+  background-color: #f4f4f4;
+  min-height: 100vh;
+}
+
+.main-content {
+  margin-left: 250px; /* Sama dengan lebar sidebar */
+  padding: 20px;
+  width: calc(100% - 250px);
+  background-color: #f4f4f4;
+  min-height: 100vh;
+}
+
+.main-content h2 {
+  color: #2d353c;
+  margin-bottom: 20px;
+}
+
+.mt-3 {
+  margin-top: 1rem;
+}
+
+.mt-2 {
+  margin-top: 0.5rem;
+}

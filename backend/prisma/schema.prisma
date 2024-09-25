@@ -1,0 +1,204 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum EducationLevel {
+  SD
+  SMP
+  SMA
+  DIPLOMA
+  SARJANA
+  MAGISTER
+  DOKTOR
+}
+
+// Enum untuk status publikasi konten
+enum Status {
+  DRAFT
+  PUBLISH
+}
+
+// Tabel Administrator
+model Administrator {
+  id              Int      @id @default(autoincrement())
+  uuid            String   @default(uuid()) @unique
+  name            String
+  username        String   @unique
+  email           String   @unique
+  password        String
+  role            String
+  created_at      DateTime @default(now())
+  created_by      String?  // Referensi ke siapa yang membuat Administrator
+  updated_by      String?  // Referensi ke siapa yang mengupdate Administrator
+  refresh_token   String?  @db.VarChar(255) @unique
+  profiles        Profile[]
+
+  @@index([email])
+  Lembaga Lembaga[]
+  VisiMisi VisiMisi[]
+  TugasPokok TugasPokok[]
+}
+
+model User{
+  id Int @id @default(autoincrement())
+  uuid String @default(uuid()) @unique
+  name String
+  username String @unique
+  email String @unique
+  role String
+  password String
+  refresh_token String? @db.VarChar(255) @unique
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+}
+
+// Tabel Profil dengan submenu
+model Profile {
+  id              Int             @id @default(autoincrement())
+  uuid            String          @default(uuid()) @unique
+  pname           String
+  title           String
+  content         String          @db.LongText
+  file_url        String?         // URL file yang di-upload
+  status          Status          @default(DRAFT)
+  created_at      DateTime        @default(now())
+  updated_at      DateTime        @updatedAt
+  createdbyId Int
+  createdBy     Administrator? @relation(fields: [createdbyId], references: [id])
+  Geography       Geography?
+}
+
+// Tabel Lembaga
+model Lembaga {
+  id            Int           @id @default(autoincrement())
+  uuid          String        @default(uuid()) @unique
+  nama          String
+  singkatan     String
+  dasar_hukum   String
+  alamat_kantor String
+  created_at    DateTime      @default(now())
+  updated_at    DateTime      @updatedAt
+
+  // Always refer to an Administrator
+  createdbyId   Int
+  createdBy     Administrator  @relation(fields: [createdbyId], references: [id])
+  
+  anggota       Demographics[]  @relation("LembagaAnggota")
+  visi_misi     VisiMisi[]
+  tugas_pokok   TugasPokok[]
+}
+
+// Tabel Visi dan Misi
+model VisiMisi {
+  id            Int          @id @default(autoincrement())
+  uuid          String       @default(uuid()) @unique
+  lembagaId     Int
+  lembaga       Lembaga      @relation(fields: [lembagaId], references: [id])
+  title         String
+  content       String       @db.LongText
+  created_at    DateTime     @default(now())
+  updated_at    DateTime     @updatedAt
+  
+  // Relasi ke Administrator yang membuat visi misi
+  createdbyId   Int?
+  createdBy     Administrator? @relation(fields: [createdbyId], references: [id])
+}
+
+// Tabel Tugas Pokok
+model TugasPokok {
+  id            Int          @id @default(autoincrement())
+  uuid          String       @default(uuid()) @unique
+  lembagaId     Int
+  lembaga       Lembaga      @relation(fields: [lembagaId], references: [id])
+  content       String       @db.LongText    // Digunakan untuk Quill Editor
+  file_url      String?      // URL gambar yang diupload (optional)
+  created_at    DateTime     @default(now())
+  updated_at    DateTime     @updatedAt
+  
+  // Relasi ke Administrator yang membuat tugas pokok
+  createdbyId   Int?
+  createdBy     Administrator? @relation(fields: [createdbyId], references: [id])
+}
+
+// Tabel Geografi dengan relasi ke Profile
+model Geography {
+  id              Int      @id @default(autoincrement())
+  uuid            String   @default(uuid()) @unique
+  north_boundary  String
+  south_boundary  String
+  east_boundary   String
+  west_boundary   String
+  profile_id      Int @unique
+  profile         Profile  @relation(fields: [profile_id], references: [id])
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+  created_by      String?
+  updated_by      String?
+}
+
+// Tabel Demografi dengan normalisasi data dan index pada NIK
+model Demographics {
+  id             Int           @id @default(autoincrement())
+  uuid           String        @default(uuid()) @unique
+  nik            String        @unique
+  name           String
+  gender         String        
+  birth_date     DateTime
+  marital_status String 
+  education_id   Int
+  education      Education  @relation(fields: [education_id], references: [id])
+  job            String
+  rt             String
+  rw             String
+  hamlet         String        // Dusun
+  file_url        String?
+  religion_id    Int
+  religion       Religion      @relation(fields: [religion_id], references: [id]) // Relasi ke Religion
+  created_at     DateTime      @default(now())
+  updated_at     DateTime      @updatedAt
+  created_by     String?
+  updated_by     String?
+
+  @@index([nik])
+  Lembaga Lembaga[] @relation("LembagaAnggota")
+}
+
+// Tabel Agama untuk normalisasi data
+model Religion {
+  id            Int           @id @default(autoincrement())
+  name          String
+  demographics  Demographics[]
+}
+
+// Tabel Pendidikan untuk normalisasi data
+model Education {
+  id              Int      @id @default(autoincrement())
+  level           String
+  demographics    Demographics[]
+}
+
+// Tabel untuk menu Layanan dengan poin-poin
+model Service {
+  id              Int      @id @default(autoincrement())
+  uuid            String   @default(uuid()) @unique
+  title           String
+  file_url        String?
+  pname           String
+  status          Status          @default(DRAFT)
+  content         String   @db.LongText
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+  created_by      String?
+  updated_by      String?
+}

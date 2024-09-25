@@ -1,0 +1,62 @@
+.my-sidebar {
+  transition: all 0.3s ease-in-out;
+  padding-left: 1rem; /* Padding untuk memastikan konsistensi jarak */
+}
+
+.my-sidebar .p-menu {
+  border: none; /* Hilangkan kotak pembatas */
+  box-shadow: none; /* Hilangkan bayangan */
+}
+
+.submenu {
+  transition: opacity 0.3s ease;
+}
+
+.icon-bar {
+  transition: all 0.3s ease-in-out;
+  position: fixed;
+  top: 0;
+  height: 100%;
+  background-color: #ffffff;
+  overflow: hidden;
+  transition: width 0.5s;
+}
+
+.p-component-overlay-enter {
+  animation: none !important;
+  opacity: 1 !important;
+  pointer-events: none !important;
+}
+
+.menu-item {
+  position: relative;
+  padding: 15px;
+  color: #333;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+}
+
+.menu-item i {
+  font-size: 20px;
+  margin-right: 20px;
+  color: #333;
+}
+
+.menu-item span {
+  display: inline-block;
+}
+
+.submenu .menu-item {
+  padding-left: 20px;
+}
+
+.menu-item {
+  padding: 10px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.menu-item:hover {
+  background-color: #f0f0f0; /* Warna latar belakang saat di-hover */
+  color: #008080; /* Warna teks saat di-hover */
+}
