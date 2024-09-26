@@ -48,6 +48,7 @@ model Administrator {
   Lembaga Lembaga[]
   VisiMisi VisiMisi[]
   TugasPokok TugasPokok[]
+  ProdukHukum ProdukHukum[]
 }
 
 model User{
@@ -201,4 +202,19 @@ model Service {
   updated_at      DateTime @updatedAt
   created_by      String?
   updated_by      String?
+}
+
+//Tabel menu transparansi
+//tabel produk hukum
+model ProdukHukum {
+  id              Int             @id @default(autoincrement())
+  uuid            String          @default(uuid()) @unique
+  name           String
+  deskripsi           String
+  waktu           DateTime
+  file_url        String?         
+  created_at      DateTime        @default(now())
+  updated_at      DateTime        @updatedAt
+  createdbyId Int
+  createdBy     Administrator? @relation(fields: [createdbyId], references: [id])
 }

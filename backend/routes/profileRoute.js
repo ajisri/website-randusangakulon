@@ -146,6 +146,7 @@ router.put(
 );
 
 // Route to delete a demographic record
-router.delete("/demografi/:nik", deleteDemografi);
+
+router.delete("/demografi/:nik", verifyToken, superOnly, deleteDemografi);
 
 export default router;

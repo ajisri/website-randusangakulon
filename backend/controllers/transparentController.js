@@ -57,63 +57,57 @@ export const getProdukHukumAdmin = async (req, res) => {
 };
 
 export const createProdukHukum = async (req, res) => {
-  // Validasi input
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
 
   const { name, deskripsi, waktu } = req.body;
-  const file = req.file; // Mengambil file dari upload
+  const file = req.file;
 
   try {
     const refreshToken = req.cookies.refreshToken;
-    // Cek keberadaan refresh token
     if (!refreshToken) {
       return res.status(401).json({ msg: "Token tidak ditemukan" });
     }
 
-    // Dekode token untuk mendapatkan informasi administrator
     const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
     const administrator = await prisma.administrator.findUnique({
       where: { id: decoded.administratorId },
     });
 
-    // Cek apakah administrator ditemukan dan memiliki akses yang sesuai
     if (!administrator || administrator.role !== "administrator") {
       return res.status(403).json({ msg: "Akses ditolak" });
     }
 
-    // Cek apakah produk hukum dengan nama yang sama sudah ada
-    const existingProdukHukum = await prisma.produkHukum.findUnique({
-      where: { name: name },
+    // Cek apakah kombinasi nama dan waktu sudah ada
+    const existingProdukHukum = await prisma.produkHukum.findFirst({
+      where: {
+        name,
+        waktu: new Date(waktu),
+      },
     });
 
     if (existingProdukHukum) {
-      // Jika produk hukum sudah ada, kembalikan error
       return res.status(400).json({
-        status: "fail",
-        errors: [
-          { msg: "Produk hukum sudah ada, tidak bisa membuat data baru" },
-        ],
-      });
-    } else {
-      // Buat produk hukum baru jika tidak ada yang sama
-      const newProdukHukum = await prisma.produkHukum.create({
-        data: {
-          name,
-          deskripsi,
-          waktu: new Date(waktu), // Pastikan waktu dikonversi ke tipe Date
-          file_url: file ? `/uploads/produk_hukum/${file.filename}` : null, // Mengatur URL file
-          createdbyId: administrator.id, // Menyimpan ID administrator yang membuat produk hukum
-        },
-      });
-
-      return res.status(201).json({
-        msg: "Produk hukum dibuat dengan sukses",
-        produkHukum: newProdukHukum,
+        msg: "Nama dan waktu sudah ada, tidak bisa membuat data baru",
       });
     }
+
+    const newProdukHukum = await prisma.produkHukum.create({
+      data: {
+        name,
+        deskripsi,
+        waktu: new Date(waktu),
+        file_url: file ? `/uploads/produk_hukum/${file.filename}` : null,
+        createdbyId: administrator.id,
+      },
+    });
+
+    return res.status(201).json({
+      msg: "Produk hukum dibuat dengan sukses",
+      produkHukum: newProdukHukum,
+    });
   } catch (error) {
     console.error("Error saat membuat produk hukum:", error);
     res.status(500).json({ msg: "Terjadi kesalahan pada server" });
@@ -126,7 +120,7 @@ export const updateProdukHukum = async (req, res) => {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const { uuid, name, deskripsi, waktu } = req.body; // Menggunakan uuid
+  const { uuid, name, deskripsi, waktu } = req.body;
   const file = req.file;
 
   try {
@@ -145,11 +139,26 @@ export const updateProdukHukum = async (req, res) => {
     }
 
     const existingProdukHukum = await prisma.produkHukum.findUnique({
-      where: { uuid }, // Mencari berdasarkan uuid
+      where: { uuid },
     });
 
     if (!existingProdukHukum) {
       return res.status(404).json({ msg: "Produk hukum tidak ditemukan" });
+    }
+
+    // Cek apakah ada produk hukum lain dengan nama dan waktu yang sama
+    const duplicateProdukHukum = await prisma.produkHukum.findFirst({
+      where: {
+        name,
+        waktu: new Date(waktu),
+        NOT: { uuid }, // Mengecualikan produk hukum yang sedang di-update
+      },
+    });
+
+    if (duplicateProdukHukum) {
+      return res.status(400).json({
+        msg: "Nama dan waktu sudah ada pada produk hukum lain, tidak bisa memperbarui data",
+      });
     }
 
     let filePathToDelete = null;
@@ -163,7 +172,7 @@ export const updateProdukHukum = async (req, res) => {
     }
 
     const updatedProdukHukum = await prisma.produkHukum.update({
-      where: { uuid }, // Mencari berdasarkan uuid
+      where: { uuid },
       data: {
         name,
         deskripsi,
@@ -172,6 +181,7 @@ export const updateProdukHukum = async (req, res) => {
           ? `/uploads/produk_hukum/${file.filename}`
           : existingProdukHukum.file_url,
         updated_at: new Date(),
+        createdbyId: administrator.id, // Perbarui id pembuat data
       },
     });
 

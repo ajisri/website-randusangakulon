@@ -1037,6 +1037,65 @@ export const getDemografipengunjung = async (req, res) => {
       _count: { id: true },
     });
 
+    // Pastikan data jobCounts sudah valid
+    try {
+      // Mengambil data jumlah berdasarkan pekerjaan
+      const jobCounts = await prisma.demographics.groupBy({
+        by: ["job"],
+        _count: { id: true },
+      });
+
+      console.log("Job Counts:", jobCounts);
+
+      // Pastikan data jobCounts sudah valid
+      if (!jobCounts || jobCounts.length === 0) {
+        throw new Error("No job data available.");
+      }
+
+      // Mengurutkan pekerjaan berdasarkan jumlah terbesar
+      const sortedJobs = jobCounts.sort((a, b) => b._count.id - a._count.id);
+      console.log("Sorted Jobs:", sortedJobs);
+
+      // Mengambil 5 pekerjaan terbesar
+      const topJobs = sortedJobs.slice(0, 5);
+      console.log("Top Jobs:", topJobs);
+
+      // Menghitung jumlah pekerjaan yang lain selain dari top 5
+      const otherJobCount = sortedJobs
+        .slice(5)
+        .reduce((acc, job) => acc + job._count.id, 0);
+      console.log("Other Job Count:", otherJobCount);
+
+      // Menambahkan kategori "Others" jika ada pekerjaan selain dari top 5
+      const labels = topJobs.map((job) => job.job || "Unknown");
+      console.log("Labels Before Adding 'Others':", labels);
+      if (otherJobCount > 0) {
+        labels.push("Others");
+      }
+      console.log("Labels After Adding 'Others':", labels);
+
+      // Menyiapkan data untuk Chart
+      const jobChartData = {
+        labels: labels,
+        datasets: [
+          {
+            data: [
+              ...topJobs.map((job) => job._count.id),
+              otherJobCount,
+            ].filter(
+              (count) => count > 0 // Hanya menampilkan data yang lebih dari 0
+            ),
+            backgroundColor: [...generateColors(topJobs.length), "grey"], // Gunakan fungsi untuk generate warna
+          },
+        ],
+      };
+
+      console.log("Job Chart Data:", jobChartData);
+    } catch (error) {
+      console.error("Error processing job chart data:", error);
+      // Penanganan error
+    }
+
     const religionCounts = await prisma.demographics.groupBy({
       by: ["religion_id"],
       _count: { id: true },
