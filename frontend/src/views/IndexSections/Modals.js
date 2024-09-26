@@ -63,6 +63,31 @@ const Modals = () => {
 
   const [chartOptions, setChartOptions] = useState({});
 
+  // Fungsi untuk menghasilkan warna berdasarkan jumlah data
+  function generateColors(count) {
+    // Array warna standar
+    const baseColors = [
+      "#FF6384",
+      "#36A2EB",
+      "#FFCE56",
+      "#4BC0C0",
+      "#9966FF",
+      "#FF9F40",
+      "#C9CBCF",
+      "#FF8C00",
+      "#2E8B57",
+      "#4682B4",
+      "#8A2BE2",
+      "#FFD700",
+    ];
+
+    // Jika jumlah data lebih banyak dari jumlah warna yang tersedia, ulangi warna
+    return Array.from(
+      { length: count },
+      (_, i) => baseColors[i % baseColors.length]
+    );
+  }
+
   useEffect(() => {
     if (demografiData) {
       // Safely handle gender data
@@ -82,9 +107,24 @@ const Modals = () => {
       console.log("Education Counts: ", educationCounts);
 
       // Safely handle job data
-      const jobLabels = demografiData.jobCounts?.map((item) => item?.job) || [];
+      // const jobLabels = demografiData.jobCounts?.map((item) => item?.job) || [];
       const jobCounts =
         demografiData.jobCounts?.map((item) => item?._count?.id || 0) || [];
+
+      // Generate the topJobs array based on jobCounts
+      const topJobs = demografiData.jobCounts?.slice(0, 5) || []; // Misalnya, ambil 5 pekerjaan teratas
+      const otherJobCount = jobCounts.slice(5).reduce((a, b) => a + b, 0); // Hitung jumlah pekerjaan lainnya
+
+      // Create jobChartData
+      const jobChartData = {
+        labels: [...topJobs.map((job) => job.job), "Others"],
+        datasets: [
+          {
+            data: [...topJobs.map((job) => job._count.id), otherJobCount],
+            backgroundColor: generateColors(topJobs.length + 1), // Menghasilkan warna sesuai jumlah label
+          },
+        ],
+      };
 
       // Safely handle religion data
       const religionLabels =
@@ -126,16 +166,18 @@ const Modals = () => {
         ],
       });
 
-      setJobChartData({
-        labels: jobLabels,
-        datasets: [
-          {
-            data: jobCounts,
-            backgroundColor: ["#26A69A", "#66BB6A", "#FF7043"],
-            hoverBackgroundColor: ["#4DB6AC", "#81C784", "#FF8A65"],
-          },
-        ],
-      });
+      setJobChartData(jobChartData);
+
+      // setJobChartData({
+      //   labels: jobLabels,
+      //   datasets: [
+      //     {
+      //       data: jobCounts,
+      //       backgroundColor: ["#26A69A", "#66BB6A", "#FF7043"],
+      //       hoverBackgroundColor: ["#4DB6AC", "#81C784", "#FF8A65"],
+      //     },
+      //   ],
+      // });
 
       setReligionChartData({
         labels: religionLabels,
@@ -481,21 +523,25 @@ const Modals = () => {
             <Dialog
               header="Demografi"
               visible={dialogVisible}
-              style={{ width: "75vw" }}
+              style={{ width: "80vw" }}
               maximizable
               modal
-              contentStyle={{
-                height: "500px",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "flex-start",
-              }}
+              contentStyle={{ height: "auto" }}
               onHide={() => setDialogVisible(false)}
             >
-              <div className="modal-body col-lg">
-                {/* Consistent section styling for alignment */}
-                <div style={{ width: "100%", padding: "10px 0" }}>
-                  <h2 style={{ textAlign: "left" }}>Gender Distribution</h2>
+              <div
+                className="modal-body"
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(2, 1fr)",
+                  gap: "20px",
+                }}
+              >
+                {/* Gender Chart */}
+                <div style={{ gridColumn: "span 1" }}>
+                  <h3 style={{ textAlign: "left", marginBottom: "10px" }}>
+                    Gender Distribution
+                  </h3>
                   {genderChartData && (
                     <Chart
                       type="pie"
@@ -506,17 +552,20 @@ const Modals = () => {
                           ...chartOptions.plugins,
                           legend: {
                             ...chartOptions.plugins.legend,
-                            align: "start",
-                          }, // Align legend left
+                            position: "bottom", // Legend positioned below
+                          },
                         },
                       }}
-                      style={{ marginBottom: "30px", width: "100%" }}
+                      style={{ width: "100%", height: "250px" }} // Smaller chart size
                     />
                   )}
                 </div>
 
-                <div style={{ width: "100%", padding: "10px 0" }}>
-                  <h2 style={{ textAlign: "left" }}>Education Distribution</h2>
+                {/* Education Chart */}
+                <div style={{ gridColumn: "span 1" }}>
+                  <h3 style={{ textAlign: "left", marginBottom: "10px" }}>
+                    Education Distribution
+                  </h3>
                   {educationChartData && (
                     <Chart
                       type="pie"
@@ -527,20 +576,23 @@ const Modals = () => {
                           ...chartOptions.plugins,
                           legend: {
                             ...chartOptions.plugins.legend,
-                            align: "start",
-                          }, // Align legend left
+                            position: "bottom", // Legend positioned below
+                          },
                         },
                       }}
-                      style={{ marginBottom: "30px", width: "100%" }}
+                      style={{ width: "100%", height: "250px" }} // Smaller chart size
                     />
                   )}
                 </div>
 
-                <div style={{ width: "100%", padding: "10px 0" }}>
-                  <h2 style={{ textAlign: "left" }}>Job Distribution</h2>
+                {/* Job Chart */}
+                <div style={{ gridColumn: "span 1" }}>
+                  <h3 style={{ textAlign: "left", marginBottom: "10px" }}>
+                    Job Distribution
+                  </h3>
                   {jobChartData && (
                     <Chart
-                      type="pie"
+                      type="doughnut" // Using doughnut instead of pie
                       data={jobChartData}
                       options={{
                         ...chartOptions,
@@ -548,17 +600,20 @@ const Modals = () => {
                           ...chartOptions.plugins,
                           legend: {
                             ...chartOptions.plugins.legend,
-                            align: "start",
+                            position: "bottom", // Legend positioned below
                           },
                         },
                       }}
-                      style={{ marginBottom: "30px", width: "100%" }}
+                      style={{ width: "100%", height: "250px" }} // Smaller chart size
                     />
                   )}
                 </div>
 
-                <div style={{ width: "100%", padding: "10px 0" }}>
-                  <h2 style={{ textAlign: "left" }}>Religion Distribution</h2>
+                {/* Religion Chart */}
+                <div style={{ gridColumn: "span 1" }}>
+                  <h3 style={{ textAlign: "left", marginBottom: "10px" }}>
+                    Religion Distribution
+                  </h3>
                   {religionChartData && (
                     <Chart
                       type="pie"
@@ -569,19 +624,20 @@ const Modals = () => {
                           ...chartOptions.plugins,
                           legend: {
                             ...chartOptions.plugins.legend,
-                            align: "start",
+                            position: "bottom", // Legend positioned below
                           },
                         },
                       }}
-                      style={{ marginBottom: "30px", width: "100%" }}
+                      style={{ width: "100%", height: "250px" }} // Smaller chart size
                     />
                   )}
                 </div>
 
-                <div style={{ width: "100%", padding: "10px 0" }}>
-                  <h2 style={{ textAlign: "left" }}>
+                {/* Marital Status Chart */}
+                <div style={{ gridColumn: "span 1" }}>
+                  <h3 style={{ textAlign: "left", marginBottom: "10px" }}>
                     Marital Status Distribution
-                  </h2>
+                  </h3>
                   {maritalStatusChartData && (
                     <Chart
                       type="pie"
@@ -592,11 +648,11 @@ const Modals = () => {
                           ...chartOptions.plugins,
                           legend: {
                             ...chartOptions.plugins.legend,
-                            align: "start",
+                            position: "bottom", // Legend positioned below
                           },
                         },
                       }}
-                      style={{ marginBottom: "30px", width: "100%" }}
+                      style={{ width: "100%", height: "250px" }} // Smaller chart size
                     />
                   )}
                 </div>
