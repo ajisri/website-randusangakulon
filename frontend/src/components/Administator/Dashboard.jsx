@@ -19,6 +19,8 @@ import Kartutandapenduduk from "./Layanan/Kartutandapenduduk";
 import Pembuatansktm from "./Layanan/Pembuatansktm";
 import Pendaftarannikah from "./Layanan/Pendaftarannikah";
 import Aktifasibpjs from "./Layanan/Aktifasibpjs";
+//transparansi
+import Produkhukum from "./Transparansi/ProdukHukum";
 
 import "primereact/resources/themes/saga-blue/theme.css";
 import "primereact/resources/primereact.min.css";
@@ -114,6 +116,8 @@ const Dashboard = () => {
         return <Pembuatansktm />;
       case "Pendaftarannikah":
         return <Pendaftarannikah />;
+      case "Produkhukum":
+        return <Produkhukum />;
       default:
         return <Tentang />;
     }
@@ -455,6 +459,7 @@ const Dashboard = () => {
               <Ripple />
             </div>
             <div
+              onClick={() => setActiveMenu("Produkhukum")}
               className="menu-item"
               style={{
                 marginBottom: "10px",

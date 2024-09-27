@@ -1,0 +1,133 @@
+.demografi-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 20px;
+}
+
+.demografi-header {
+  font-size: 2rem; /* Adjust the size as needed */
+  font-weight: bold;
+  color: #080808; /* Teal color */
+  margin-bottom: 1rem; /* Space below the header */
+  text-align: left; /* Align to the left */
+  padding-bottom: 0.5rem; /* Space below the text */
+  margin-bottom: 2rem;
+}
+
+.demografi-card {
+  background: #ffffff; /* Latar belakang putih */
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  padding: 2rem; /* Jarak yang cukup untuk isi card */
+  margin: 1rem 0;
+  width: 100%; /* Memastikan card mengambil lebar penuh */
+  max-width: 600px; /* Batasi lebar maksimal card */
+  transition: box-shadow 0.3s;
+}
+
+.demografi-card:hover {
+  box-shadow: 0 6px 30px rgba(0, 0, 0, 0.2);
+}
+
+.file-input {
+  width: 100%; /* Lebar penuh untuk input file */
+  border: 1px solid #ccc; /* Garis batas */
+  border-radius: 8px; /* Sudut rounded */
+  padding: 0.5rem; /* Jarak dalam input */
+  background-color: #fff; /* Latar belakang putih */
+}
+
+.file-preview {
+  background: #f9f9f9; /* Latar belakang lembut untuk preview */
+  border: 1px solid #ccc; /* Garis batas */
+  border-radius: 8px; /* Bentuk rounded */
+  padding: 1rem; /* Jarak dalam preview */
+  margin-top: 0.5rem; /* Jarak atas */
+  display: flex; /* Memungkinkan penataan horizontal */
+  align-items: center; /* Vertikal tengah */
+  overflow: hidden; /* Mencegah konten keluar */
+}
+
+.preview-image {
+  max-width: 100px; /* Atur ukuran gambar */
+  border-radius: 4px; /* Sudut melengkung untuk gambar */
+  margin-right: 1rem; /* Jarak kanan antara gambar dan teks */
+}
+
+.preview-text {
+  flex-grow: 1; /* Memungkinkan teks mengambil ruang yang tersisa */
+}
+
+.input-field,
+.dropdown-field {
+  width: 100%;
+  border-radius: 0.5rem;
+}
+
+.detail-container {
+  display: flex;
+  flex-direction: column;
+  padding: 2rem;
+  background-color: #fff; /* White background for contrast */
+  border-radius: 10px; /* Rounded corners */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Soft shadow */
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between; /* Align labels and values */
+  margin-bottom: 10px; /* Space between rows */
+  padding: 0.5rem 0; /* Vertical padding */
+}
+
+.detail-label {
+  font-weight: bold;
+  color: #333; /* Dark gray for a modern look */
+  font-size: 1.1rem; /* Slightly larger font size */
+}
+
+.detail-value {
+  color: #555; /* Medium gray for contrast */
+  font-size: 1.1rem; /* Match font size with label */
+  text-align: right; /* Align values to the right */
+}
+
+.required {
+  color: red;
+}
+
+.submit-button {
+  margin-top: 10px;
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between; /* Distributes space between elements */
+  align-items: center; /* Aligns items vertically */
+}
+
+.search-container {
+  width: 300px; /* Set desired width */
+}
+
+.search-input {
+  width: 100%; /* Makes input take full width of the container */
+  margin-top: 1rem;
+}
+
+.add-data-container {
+  margin-left: auto; /* Pushes the button to the right */
+}
+
+.add-data-button {
+  background-color: #008080; /* Example teal color, adjust as needed */
+  color: white; /* Text color */
+  border-radius: 12px; /* Ensures a rounded button */
+  border: none; /* Removes default border */
+  margin-left: 10px;
+}
+
+.add-data-button:hover {
+  background-color: #006666; /* Darker teal for hover effect */
+}
