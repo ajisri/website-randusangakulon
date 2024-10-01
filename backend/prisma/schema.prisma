@@ -49,6 +49,7 @@ model Administrator {
   VisiMisi VisiMisi[]
   TugasPokok TugasPokok[]
   ProdukHukum ProdukHukum[]
+  Agenda Agenda[]
 }
 
 model User{
@@ -77,7 +78,6 @@ model Profile {
   updated_at      DateTime        @updatedAt
   createdbyId Int
   createdBy     Administrator? @relation(fields: [createdbyId], references: [id])
-  Geography       Geography?
 }
 
 // Tabel Lembaga
@@ -132,21 +132,45 @@ model TugasPokok {
   createdBy     Administrator? @relation(fields: [createdbyId], references: [id])
 }
 
-// Tabel Geografi dengan relasi ke Profile
-model Geography {
-  id              Int      @id @default(autoincrement())
-  uuid            String   @default(uuid()) @unique
-  north_boundary  String
-  south_boundary  String
-  east_boundary   String
-  west_boundary   String
-  profile_id      Int @unique
-  profile         Profile  @relation(fields: [profile_id], references: [id])
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
-  created_by      String?
-  updated_by      String?
+// Tabel Btas wilayah
+
+model BatasWilayah {
+  id        Int      @id @default(autoincrement())
+  uuid      String   @default(uuid()) @unique
+  kategori     String   
+  nilai   String   
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
+
+model OrbitasiDesa {
+  id        Int       @id @default(autoincrement())
+  uuid      String    @default(uuid()) @unique
+  kategori  String    
+  nilai     String
+  satuan     String    
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model JenisLahan {
+  id        Int       @id @default(autoincrement())
+  uuid      String    @default(uuid()) @unique
+  jenis     String    
+  luas      Float     
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model PotensiWisata {
+  id        Int       @id @default(autoincrement())
+  uuid      String    @default(uuid()) @unique
+  jenis     String    // Contoh: "Laut"
+  luas      Float?    // Nullable, Contoh: 50 Ha
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
 
 // Tabel Demografi dengan normalisasi data dan index pada NIK
 model Demographics {
@@ -215,6 +239,21 @@ model ProdukHukum {
   file_url        String?         
   created_at      DateTime        @default(now())
   updated_at      DateTime        @updatedAt
+  createdbyId Int
+  createdBy     Administrator? @relation(fields: [createdbyId], references: [id])
+}
+
+//tabel menu sosial
+//agenda
+model Agenda {
+  id               Int      @id @default(autoincrement())
+  uuid            String          @default(uuid()) @unique
+  nama_agenda      String
+  deskripsi         String   @db.LongText
+  tempat_pelaksanaan String
+  tanggal_agenda   DateTime
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
   createdbyId Int
   createdBy     Administrator? @relation(fields: [createdbyId], references: [id])
 }

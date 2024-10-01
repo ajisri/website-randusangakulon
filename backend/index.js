@@ -7,6 +7,7 @@ import loginRoute from "./routes/loginRoute.js";
 import profileRoute from "./routes/profileRoute.js";
 import serviceRoute from "./routes/serviceRoute.js";
 import transparentRoute from "./routes/transparentRoute.js";
+import socialRoute from "./routes/socialRoute.js";
 dotenv.config();
 
 const app = express();
@@ -19,5 +20,6 @@ app.use(loginRoute);
 app.use(profileRoute);
 app.use(serviceRoute);
 app.use(transparentRoute);
+app.use(socialRoute);
 
 app.listen(5000, () => console.log("Server runing"));

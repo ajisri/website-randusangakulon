@@ -27,6 +27,16 @@ import {
   deleteDemografi,
   getEducationOptions,
   getAgama,
+  getBatasWilayahPengunjung,
+  getBatasWilayahAdmin,
+  createBatasWilayah,
+  updateBatasWilayah,
+  deleteBatasWilayah,
+  getOrbitasiPengunjung,
+  getOrbitasiAdmin,
+  createOrbitasi,
+  updateOrbitasi,
+  deleteOrbitasi,
 } from "../controllers/profileController.js";
 import { verifyToken, superOnly } from "../middleware/verifyToken.js";
 
@@ -146,7 +156,32 @@ router.put(
 );
 
 // Route to delete a demographic record
-
 router.delete("/demografi/:nik", verifyToken, superOnly, deleteDemografi);
+
+//batas wilayah pengunjung
+router.get("/batawilayahpengunjung", getBatasWilayahPengunjung);
+//batas wilayah admin
+router.get("/bataswilayah", verifyToken, superOnly, getBatasWilayahAdmin);
+
+// POST route for creating batas wilayah data
+router.post("/cbataswilayah", verifyToken, superOnly, createBatasWilayah);
+router.patch("/bataswilayah/:uuid", verifyToken, superOnly, updateBatasWilayah);
+router.delete(
+  "/bataswilayah/:uuid",
+  verifyToken,
+  superOnly,
+  deleteBatasWilayah
+);
+
+//orbitasi
+//orbitasi pengunjung
+router.get("/orbitasipengunjung", getOrbitasiPengunjung);
+//orbitasi admin
+router.get("/orbitasi", verifyToken, superOnly, getOrbitasiAdmin);
+
+// POST route for creating orbitasi data
+router.post("/corbitasi", verifyToken, superOnly, createOrbitasi);
+router.patch("/orbitasi/:uuid", verifyToken, superOnly, updateOrbitasi);
+router.delete("/orbitasi/:uuid", verifyToken, superOnly, deleteOrbitasi);
 
 export default router;

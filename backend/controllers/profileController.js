@@ -1037,6 +1037,18 @@ export const getDemografipengunjung = async (req, res) => {
       _count: { id: true },
     });
 
+    const generateColors = (count) => {
+      const colors = [];
+      for (let i = 0; i < count; i++) {
+        // Generate random RGB color
+        const color = `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(
+          Math.random() * 255
+        )}, ${Math.floor(Math.random() * 255)}, 0.6)`; // Adjust alpha as needed
+        colors.push(color);
+      }
+      return colors;
+    };
+
     // Pastikan data jobCounts sudah valid
     try {
       // Mengambil data jumlah berdasarkan pekerjaan
@@ -1044,9 +1056,6 @@ export const getDemografipengunjung = async (req, res) => {
         by: ["job"],
         _count: { id: true },
       });
-
-      console.log("Job Counts:", jobCounts);
-
       // Pastikan data jobCounts sudah valid
       if (!jobCounts || jobCounts.length === 0) {
         throw new Error("No job data available.");
@@ -1054,26 +1063,17 @@ export const getDemografipengunjung = async (req, res) => {
 
       // Mengurutkan pekerjaan berdasarkan jumlah terbesar
       const sortedJobs = jobCounts.sort((a, b) => b._count.id - a._count.id);
-      console.log("Sorted Jobs:", sortedJobs);
-
       // Mengambil 5 pekerjaan terbesar
       const topJobs = sortedJobs.slice(0, 5);
-      console.log("Top Jobs:", topJobs);
-
       // Menghitung jumlah pekerjaan yang lain selain dari top 5
       const otherJobCount = sortedJobs
         .slice(5)
         .reduce((acc, job) => acc + job._count.id, 0);
-      console.log("Other Job Count:", otherJobCount);
-
       // Menambahkan kategori "Others" jika ada pekerjaan selain dari top 5
       const labels = topJobs.map((job) => job.job || "Unknown");
-      console.log("Labels Before Adding 'Others':", labels);
       if (otherJobCount > 0) {
         labels.push("Others");
       }
-      console.log("Labels After Adding 'Others':", labels);
-
       // Menyiapkan data untuk Chart
       const jobChartData = {
         labels: labels,
@@ -1089,8 +1089,6 @@ export const getDemografipengunjung = async (req, res) => {
           },
         ],
       };
-
-      console.log("Job Chart Data:", jobChartData);
     } catch (error) {
       console.error("Error processing job chart data:", error);
       // Penanganan error
@@ -1398,6 +1396,364 @@ export const deleteDemografi = async (req, res) => {
     return res.status(200).json({ msg: "Demographic deleted successfully" });
   } catch (error) {
     console.error("Error deleting demographic:", error);
+    res.status(500).json({ msg: "Terjadi kesalahan pada server" });
+  }
+};
+
+//batas wilayah
+// Get: Ambil semua data batas wilayah (tanpa geography)
+export const getBatasWilayahPengunjung = async (req, res) => {
+  try {
+    const batasWilayah = await prisma.batasWilayah.findMany();
+
+    if (batasWilayah.length === 0) {
+      return res.status(200).json({ batasWilayah: [] });
+    }
+
+    res.status(200).json({ batasWilayah });
+  } catch (error) {
+    console.error("Error saat mengambil data batas wilayah:", error);
+    res.status(500).json({ msg: "Terjadi kesalahan pada server" });
+  }
+};
+
+// Admin: Ambil semua data batas wilayah dengan autentikasi
+export const getBatasWilayahAdmin = async (req, res) => {
+  try {
+    const refreshToken = req.cookies.refreshToken;
+
+    if (!refreshToken) {
+      return res.status(401).json({ msg: "Token tidak ditemukan" });
+    }
+
+    const admin = await prisma.administrator.findUnique({
+      where: { refresh_token: refreshToken },
+    });
+
+    if (!admin || admin.role !== "administrator") {
+      return res.status(403).json({ msg: "Akses ditolak" });
+    }
+
+    const batasWilayah = await prisma.batasWilayah.findMany();
+
+    if (batasWilayah.length === 0) {
+      return res.status(200).json({ batasWilayah: [] });
+    }
+
+    res.status(200).json({ batasWilayah });
+  } catch (error) {
+    console.error(
+      "Error saat mengambil data batas wilayah untuk admin:",
+      error
+    );
+    res.status(500).json({ msg: "Terjadi kesalahan pada server" });
+  }
+};
+
+// Create: Membuat data batas wilayah baru (tanpa geographyId)
+export const createBatasWilayah = async (req, res) => {
+  const { kategori, nilai } = req.body;
+  try {
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) {
+      return res.status(401).json({ msg: "Token tidak ditemukan" });
+    }
+
+    const admin = await prisma.administrator.findUnique({
+      where: { refresh_token: refreshToken },
+    });
+
+    if (!admin || admin.role !== "administrator") {
+      return res.status(403).json({ msg: "Akses ditolak" });
+    }
+
+    // Validasi input
+    if (!kategori || !nilai) {
+      return res.status(400).json({ msg: "Semua field wajib diisi" });
+    }
+
+    const newBatasWilayah = await prisma.batasWilayah.create({
+      data: {
+        kategori,
+        nilai,
+      },
+    });
+
+    res.status(201).json({
+      msg: "Batas wilayah berhasil dibuat",
+      batasWilayah: newBatasWilayah,
+    });
+  } catch (error) {
+    console.error("Error saat membuat batas wilayah:", error);
+
+    // Handling error spesifik dari Prisma
+    if (error.code === "P2002") {
+      return res.status(409).json({ msg: "Data batas wilayah sudah ada" });
+    }
+
+    res.status(500).json({ msg: "Terjadi kesalahan pada server" });
+  }
+};
+
+// Update: Memperbarui data batas wilayah yang ada
+export const updateBatasWilayah = async (req, res) => {
+  const { uuid } = req.params; // Mengambil UUID dari URL params
+  const { kategori, nilai } = req.body;
+
+  try {
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) {
+      return res.status(401).json({ msg: "Token tidak ditemukan" });
+    }
+
+    const admin = await prisma.administrator.findUnique({
+      where: { refresh_token: refreshToken },
+    });
+
+    if (!admin || admin.role !== "administrator") {
+      return res.status(403).json({ msg: "Akses ditolak" });
+    }
+
+    const existingBatasWilayah = await prisma.batasWilayah.findUnique({
+      where: { uuid },
+    });
+
+    if (!existingBatasWilayah) {
+      return res.status(404).json({ msg: "Batas wilayah tidak ditemukan" });
+    }
+
+    const updatedBatasWilayah = await prisma.batasWilayah.update({
+      where: { uuid },
+      data: {
+        kategori,
+        nilai,
+        updatedAt: new Date(),
+      },
+    });
+
+    res.status(200).json({
+      msg: "Batas wilayah diperbarui",
+      batasWilayah: updatedBatasWilayah,
+    });
+  } catch (error) {
+    console.error("Error saat memperbarui batas wilayah:", error);
+    res.status(500).json({ msg: "Terjadi kesalahan pada server" });
+  }
+};
+
+// Delete: Menghapus data batas wilayah berdasarkan UUID
+export const deleteBatasWilayah = async (req, res) => {
+  const { uuid } = req.params;
+
+  try {
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) {
+      return res.status(401).json({ msg: "Token tidak ditemukan" });
+    }
+
+    const admin = await prisma.administrator.findUnique({
+      where: { refresh_token: refreshToken },
+    });
+
+    if (!admin || admin.role !== "administrator") {
+      return res.status(403).json({ msg: "Akses ditolak" });
+    }
+
+    const existingBatasWilayah = await prisma.batasWilayah.findUnique({
+      where: { uuid },
+    });
+
+    if (!existingBatasWilayah) {
+      return res.status(404).json({ msg: "Batas wilayah tidak ditemukan" });
+    }
+
+    await prisma.batasWilayah.delete({
+      where: { uuid },
+    });
+
+    res.status(200).json({ msg: "Batas wilayah dihapus dengan sukses" });
+  } catch (error) {
+    console.error("Error saat menghapus batas wilayah:", error);
+    res.status(500).json({ msg: "Terjadi kesalahan pada server" });
+  }
+};
+
+//Orbitasi
+// Get: Ambil semua data batas wilayah (tanpa geography)
+export const getOrbitasiPengunjung = async (req, res) => {
+  try {
+    const orbitasi = await prisma.orbitasiDesa.findMany();
+
+    if (orbitasi.length === 0) {
+      return res.status(200).json({ orbitasi: [] });
+    }
+
+    res.status(200).json({ orbitasi });
+  } catch (error) {
+    console.error("Error saat mengambil data batas wilayah:", error);
+    res.status(500).json({ msg: "Terjadi kesalahan pada server" });
+  }
+};
+
+// Admin: Ambil semua data batas wilayah dengan autentikasi
+export const getOrbitasiAdmin = async (req, res) => {
+  try {
+    const refreshToken = req.cookies.refreshToken;
+
+    if (!refreshToken) {
+      return res.status(401).json({ msg: "Token tidak ditemukan" });
+    }
+
+    const admin = await prisma.administrator.findUnique({
+      where: { refresh_token: refreshToken },
+    });
+
+    if (!admin || admin.role !== "administrator") {
+      return res.status(403).json({ msg: "Akses ditolak" });
+    }
+
+    const orbitasi = await prisma.orbitasiDesa.findMany();
+
+    if (orbitasi.length === 0) {
+      return res.status(200).json({ orbitasi: [] });
+    }
+
+    res.status(200).json({ orbitasi });
+  } catch (error) {
+    console.error(
+      "Error saat mengambil data batas wilayah untuk admin:",
+      error
+    );
+    res.status(500).json({ msg: "Terjadi kesalahan pada server" });
+  }
+};
+
+// Create: Membuat data batas wilayah baru (tanpa geographyId)
+export const createOrbitasi = async (req, res) => {
+  const { kategori, nilai, satuan } = req.body;
+  try {
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) {
+      return res.status(401).json({ msg: "Token tidak ditemukan" });
+    }
+
+    const admin = await prisma.administrator.findUnique({
+      where: { refresh_token: refreshToken },
+    });
+
+    if (!admin || admin.role !== "administrator") {
+      return res.status(403).json({ msg: "Akses ditolak" });
+    }
+
+    // Validasi input
+    if (!kategori || !nilai || !satuan) {
+      return res.status(400).json({ msg: "Semua field wajib diisi" });
+    }
+
+    const newOrbitasi = await prisma.orbitasiDesa.create({
+      data: {
+        kategori,
+        nilai,
+        satuan,
+      },
+    });
+
+    res.status(201).json({
+      msg: "Orbitasi berhasil dibuat",
+      orbitasi: newOrbitasi,
+    });
+  } catch (error) {
+    console.error("Error saat membuat Orbitasi Desa:", error);
+
+    // Handling error spesifik dari Prisma
+    if (error.code === "P2002") {
+      return res.status(409).json({ msg: "Data Orbitasi Desa sudah ada" });
+    }
+
+    res.status(500).json({ msg: "Terjadi kesalahan pada server" });
+  }
+};
+
+// Update: Memperbarui data batas wilayah yang ada
+export const updateOrbitasi = async (req, res) => {
+  const { uuid } = req.params; // Mengambil UUID dari URL params
+  const { kategori, nilai, satuan } = req.body;
+
+  try {
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) {
+      return res.status(401).json({ msg: "Token tidak ditemukan" });
+    }
+
+    const admin = await prisma.administrator.findUnique({
+      where: { refresh_token: refreshToken },
+    });
+
+    if (!admin || admin.role !== "administrator") {
+      return res.status(403).json({ msg: "Akses ditolak" });
+    }
+
+    const existingOrbitasi = await prisma.orbitasiDesa.findUnique({
+      where: { uuid },
+    });
+
+    if (!existingOrbitasi) {
+      return res.status(404).json({ msg: "Batas wilayah tidak ditemukan" });
+    }
+
+    const updatedOrbitasi = await prisma.orbitasiDesa.update({
+      where: { uuid },
+      data: {
+        kategori,
+        nilai,
+        satuan,
+        updatedAt: new Date(),
+      },
+    });
+
+    res.status(200).json({
+      msg: "Orbitasi Desa diperbarui",
+      orbitasi: updatedOrbitasi,
+    });
+  } catch (error) {
+    console.error("Error saat memperbarui batas wilayah:", error);
+    res.status(500).json({ msg: "Terjadi kesalahan pada server" });
+  }
+};
+
+// Delete: Menghapus data batas wilayah berdasarkan UUID
+export const deleteOrbitasi = async (req, res) => {
+  const { uuid } = req.params;
+
+  try {
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) {
+      return res.status(401).json({ msg: "Token tidak ditemukan" });
+    }
+
+    const admin = await prisma.administrator.findUnique({
+      where: { refresh_token: refreshToken },
+    });
+
+    if (!admin || admin.role !== "administrator") {
+      return res.status(403).json({ msg: "Akses ditolak" });
+    }
+
+    const existingOrbitasi = await prisma.orbitasiDesa.findUnique({
+      where: { uuid },
+    });
+
+    if (!existingOrbitasi) {
+      return res.status(404).json({ msg: "Batas wilayah tidak ditemukan" });
+    }
+
+    await prisma.orbitasiDesa.delete({
+      where: { uuid },
+    });
+
+    res.status(200).json({ msg: "Batas wilayah dihapus dengan sukses" });
+  } catch (error) {
+    console.error("Error saat menghapus batas wilayah:", error);
     res.status(500).json({ msg: "Terjadi kesalahan pada server" });
   }
 };

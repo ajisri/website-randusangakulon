@@ -10,6 +10,42 @@ const prisma = new PrismaClient();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+export const getProdukHukumPengunjung = async (req, res) => {
+  try {
+    // Ambil data dari tabel ProdukHukum
+    const produkHukump = await prisma.produkHukum.findMany({
+      include: {
+        createdBy: true, // Jika Anda ingin menyertakan informasi tentang administrator yang membuat entri
+      },
+    });
+
+    // Cek jika tidak ada data
+    if (produkHukump.length === 0) {
+      return res.status(200).json({ produkHukum: [] });
+    }
+
+    // Kirimkan data produk hukum
+    res.status(200).json({ produkHukump });
+  } catch (error) {
+    console.error("Error saat mengambil data produk hukum untuk admin:", error);
+    res.status(500).json({ msg: "Terjadi kesalahan pada server" });
+  }
+};
+
+export const downloadFile = (req, res) => {
+  const filename = req.params.filename;
+  const filePath = path.join(__dirname, "../uploads/produk_hukum", filename); // Path file
+
+  res.download(filePath, (err) => {
+    if (err) {
+      res.status(500).send({
+        message: "File tidak dapat diunduh.",
+        error: err.message,
+      });
+    }
+  });
+};
+
 export const getProdukHukumAdmin = async (req, res) => {
   try {
     const refreshToken = req.cookies.refreshToken;
@@ -64,8 +100,23 @@ export const createProdukHukum = async (req, res) => {
 
   const { name, deskripsi, waktu } = req.body;
   const file = req.file;
-
   try {
+    // Validasi format waktu
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/; // Format YYYY-MM-DD
+    if (!dateRegex.test(waktu)) {
+      return res.status(400).json({
+        msg: "Format waktu tidak valid. Harus dalam format YYYY-MM-DD",
+      });
+    }
+
+    const parsedWaktu = new Date(waktu);
+    if (isNaN(parsedWaktu.getTime())) {
+      return res.status(400).json({ msg: "Format waktu tidak valid" });
+    }
+
+    // Simpan dalam format Date
+    const formattedDate = new Date(parsedWaktu.toISOString().split("T")[0]);
+
     const refreshToken = req.cookies.refreshToken;
     if (!refreshToken) {
       return res.status(401).json({ msg: "Token tidak ditemukan" });
@@ -84,13 +135,13 @@ export const createProdukHukum = async (req, res) => {
     const existingProdukHukum = await prisma.produkHukum.findFirst({
       where: {
         name,
-        waktu: new Date(waktu),
+        waktu: formattedDate,
       },
     });
 
     if (existingProdukHukum) {
       return res.status(400).json({
-        msg: "Nama dan waktu sudah ada, tidak bisa membuat data baru",
+        msg: "Nama dan Tanggal SK sudah ada, tidak bisa membuat data baru",
       });
     }
 
@@ -98,7 +149,7 @@ export const createProdukHukum = async (req, res) => {
       data: {
         name,
         deskripsi,
-        waktu: new Date(waktu),
+        waktu: formattedDate, // Simpan sebagai objek Date
         file_url: file ? `/uploads/produk_hukum/${file.filename}` : null,
         createdbyId: administrator.id,
       },
@@ -110,7 +161,9 @@ export const createProdukHukum = async (req, res) => {
     });
   } catch (error) {
     console.error("Error saat membuat produk hukum:", error);
-    res.status(500).json({ msg: "Terjadi kesalahan pada server" });
+    return res.status(500).json({
+      msg: "Terjadi kesalahan pada server",
+    });
   }
 };
 
@@ -120,7 +173,8 @@ export const updateProdukHukum = async (req, res) => {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const { uuid, name, deskripsi, waktu } = req.body;
+  const { uuid } = req.params; // Mengambil UUID dari URL params
+  const { name, deskripsi, waktu } = req.body;
   const file = req.file;
 
   try {
@@ -161,6 +215,7 @@ export const updateProdukHukum = async (req, res) => {
       });
     }
 
+    // Jika ada file baru dan file sebelumnya ada, maka kita akan menghapus file lama
     let filePathToDelete = null;
     if (file && existingProdukHukum.file_url) {
       filePathToDelete = path.join(
@@ -171,6 +226,7 @@ export const updateProdukHukum = async (req, res) => {
       );
     }
 
+    // Update produk hukum dengan data baru
     const updatedProdukHukum = await prisma.produkHukum.update({
       where: { uuid },
       data: {
@@ -178,13 +234,14 @@ export const updateProdukHukum = async (req, res) => {
         deskripsi,
         waktu: new Date(waktu),
         file_url: file
-          ? `/uploads/produk_hukum/${file.filename}`
-          : existingProdukHukum.file_url,
+          ? `/uploads/produk_hukum/${file.filename}` // File URL baru jika ada file baru
+          : existingProdukHukum.file_url, // Tetap menggunakan file URL lama jika tidak ada file baru
         updated_at: new Date(),
         createdbyId: administrator.id, // Perbarui id pembuat data
       },
     });
 
+    // Hapus file lama jika ada
     if (filePathToDelete && fs.existsSync(filePathToDelete)) {
       fs.unlinkSync(filePathToDelete);
       console.log(`Successfully deleted old file: ${filePathToDelete}`);
