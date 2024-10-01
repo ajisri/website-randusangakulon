@@ -4,8 +4,8 @@ import { useNavigate } from "react-router-dom";
 import useAuth from "../../../hooks/useAuth";
 import { Card } from "primereact/card";
 import { InputText } from "primereact/inputtext";
+import { InputTextarea } from "primereact/inputtextarea";
 import { Calendar } from "primereact/calendar";
-import { RadioButton } from "primereact/radiobutton";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
 import { DataTable } from "primereact/datatable";
@@ -16,6 +16,7 @@ import "./ProdukHukum.css"; // Custom CSS for styling
 
 const Produkhukum = () => {
   const [formData, setFormData] = useState({
+    uuid: "",
     name: "",
     deskrispsi: "",
     waktu: null,
@@ -31,6 +32,8 @@ const Produkhukum = () => {
   const [filters, setFilters] = useState({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }, // Use FilterMatchMode
   });
+  const [produkhukumList, setProdukhukumList] = useState([]);
+  const [fileDialogVisible, setFileDialogVisible] = useState(false);
 
   const navigate = useNavigate();
   const toast = useRef(null);
@@ -39,6 +42,7 @@ const Produkhukum = () => {
   const fetcher = useCallback(
     async (url) => {
       const response = await axiosJWT.get(url);
+      console.log(response.data);
       return response.data;
     },
     [axiosJWT]
@@ -51,8 +55,8 @@ const Produkhukum = () => {
   } = useSWR("http://localhost:5000/produk_hukum", fetcher);
 
   useEffect(() => {
-    if (produkhukumData?.produkhukums) {
-      setProdukhukumList(produkhukumData.produkhukums);
+    if (produkhukumData?.produkHukum) {
+      setProdukhukumList(produkhukumData.produkHukum); // Menggunakan produkHukum
     }
   }, [produkhukumData]);
 
@@ -72,6 +76,42 @@ const Produkhukum = () => {
 
   const closeDialog = () => {
     setDialogVisible(false);
+  };
+
+  const showFileInModal = (fileUrl) => {
+    // console.log("Opening file URL:", fileUrl);
+    if (fileUrl) {
+      setSelectedFile(fileUrl);
+      setFileDialogVisible(true);
+    } else {
+      console.error("File is not valid");
+    }
+  };
+
+  const renderFileDialog = () => {
+    return (
+      <Dialog
+        header="File Preview"
+        visible={fileDialogVisible}
+        onHide={() => setFileDialogVisible(false)}
+        modal
+        style={{ width: "70vw" }} // Set width sesuai kebutuhan
+      >
+        {selectedFile ? (
+          <>
+            <iframe
+              src={selectedFile}
+              width="100%"
+              height="400px"
+              title="File Viewer"
+            />
+          </>
+        ) : (
+          <p>No file selected.</p>
+        )}
+        <Button label="Close" onClick={() => setFileDialogVisible(false)} />
+      </Dialog>
+    );
   };
 
   const renderHeader = () => {
@@ -102,8 +142,6 @@ const Produkhukum = () => {
 
   const header = renderHeader();
 
-  const [ProdukhukumList, setProdukhukumList] = useState([]);
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -122,10 +160,10 @@ const Produkhukum = () => {
       );
       setFormData({
         ...formData,
-        birth_date: adjustedDate.toISOString().split("T")[0], // Format to yyyy-mm-dd
+        waktu: adjustedDate.toISOString().split("T")[0], // Format to yyyy-mm-dd
       });
     } else {
-      setFormData({ ...formData, birth_date: null });
+      setFormData({ ...formData, waktu: null });
     }
   };
 
@@ -151,7 +189,7 @@ const Produkhukum = () => {
 
     try {
       if (isEditMode) {
-        await axiosJWT.put(
+        await axiosJWT.patch(
           `http://localhost:5000/produk_hukum/${currentProdukhukum.uuid}`,
           dataToSend,
           {
@@ -216,6 +254,7 @@ const Produkhukum = () => {
 
   const resetForm = () => {
     setFormData({
+      uuid: "",
       name: "",
       deskrispsi: "",
       waktu: null,
@@ -225,14 +264,6 @@ const Produkhukum = () => {
     setPreview(null);
     setEditMode(false);
     setCurrentProdukhukum(null);
-  };
-
-  const [detailDialogVisible, setDetailDialogVisible] = useState(false);
-  const [selectedProdukhukum, setSelectedProdukhukum] = useState(null);
-
-  const showDetails = (rowData) => {
-    setSelectedProdukhukum(rowData);
-    setDetailDialogVisible(true);
   };
 
   const editProdukhukum = (produkhukum) => {
@@ -269,61 +300,65 @@ const Produkhukum = () => {
   if (error) return <p>{error.message}</p>;
 
   return (
-    <div className="demografi-container">
+    <div>
       <h1 className="demografi-header">Produk Hukum</h1>
       <Toast ref={toast} />
       <DataTable
-        value={ProdukhukumList}
+        value={produkhukumList}
         paginator
         rows={5}
         rowsPerPageOptions={[5, 10, 25, 50]}
         filters={filters}
         globalFilterFields={["name", "deskripsi", "waktu"]}
         header={header}
-        tableStyle={{ minWidth: "50rem" }}
-        breakpoints={{
-          "960px": {
-            columns: [
-              { field: "name", header: "Name" },
-              { field: "deskripsi", header: "Deskripsi" },
-              // Add other columns you want to display for smaller screens
-            ],
-          },
-          "640px": {
-            columns: [
-              { field: "name", header: "Name" }, // You can hide columns based on screen size
-            ],
-          },
-        }}
-        className="datagrid"
+        // tableStyle={{
+        //   width: "100%",
+        //   minWidth: "70rem",
+        //   maxWidth: "85rem",
+        // }}
+        // breakpoints={{
+        //   "960px": {
+        //     columns: [
+        //       { field: "name", header: "Name" },
+        //       { field: "deskripsi", header: "Deskripsi" },
+        //       // Add other columns you want to display for smaller screens
+        //     ],
+        //   },
+        //   "640px": {
+        //     columns: [
+        //       { field: "name", header: "Name" }, // You can hide columns based on screen size
+        //     ],
+        //   },
+        // }}
+        // className="datagrid"
       >
         <Column field="name" header="Name" />
         <Column field="deskripsi" header="Deskripsi" />
         <Column field="waktu" header="Tanggal" />
-        <Column field="file_url" header="File" />
+        <Column
+          field="file_url"
+          header="File"
+          body={(rowData) => {
+            const fileUrl = `http://localhost:5000${rowData.file_url}`;
+            return (
+              <Button
+                label="Lihat"
+                onClick={() => showFileInModal(fileUrl)} // Gunakan URL lengkap
+                className="coastal-button p-button-rounded"
+                tooltip="Lihat File"
+                tooltipOptions={{ position: "bottom" }}
+              />
+            );
+          }}
+        />
         <Column
           header="Actions"
           body={(rowData) => (
-            <div
-              className="edit-delete-buttons"
-              style={{ display: "flex", gap: "0.5rem" }}
-            >
-              <Button
-                label="Detail"
-                onClick={() => showDetails(rowData)}
-                className="detail-button p-button-rounded"
-                tooltip="View Details"
-                tooltipOptions={{ position: "bottom" }}
-                style={{
-                  backgroundColor: "#009688",
-                  border: "none",
-                  color: "white",
-                }}
-              />
+            <div style={{ display: "flex", gap: "0.5rem" }}>
               <Button
                 icon="pi pi-pencil"
                 onClick={() => editProdukhukum(rowData)}
-                className="edit-button p-button-rounded"
+                className="edit-button coastal-button p-button-rounded"
                 tooltip="Edit"
                 tooltipOptions={{ position: "bottom" }}
                 style={{
@@ -335,7 +370,7 @@ const Produkhukum = () => {
               <Button
                 icon="pi pi-trash"
                 onClick={() => deleteProdukhukum(rowData.uuid)}
-                className="delete-button p-button-rounded"
+                className="delete-button coastal-button p-button-rounded"
                 tooltip="Delete"
                 tooltipOptions={{ position: "bottom" }}
                 style={{
@@ -348,214 +383,112 @@ const Produkhukum = () => {
           )}
         />
       </DataTable>
-
-      <Dialog
-        header="Produk Hukum Details"
-        visible={detailDialogVisible}
-        onHide={() => setDetailDialogVisible(false)}
-        style={{
-          width: "40vw",
-          border: "none",
-          boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)",
-        }}
-      >
-        {selectedProdukhukum && (
-          <div className="detail-container">
-            {/* Highlighted important sections */}
-            <h4 style={{ color: "#00796B" }}>Important Information</h4>
-            <div className="detail-row">
-              <span className="detail-label">
-                <strong>Name:</strong>
-              </span>
-              <span className="detail-value">{selectedProdukhukum.name}</span>
-            </div>
-            <div className="detail-row">
-              <span className="detail-label">
-                <strong>Deskripsi:</strong>
-              </span>
-              <span className="detail-value">
-                {selectedProdukhukum.deskripsi}
-              </span>
-            </div>
-            <div className="detail-row">
-              <span className="detail-label">
-                <strong>Tanggal SK:</strong>
-              </span>
-              <span className="detail-value">{selectedProdukhukum.waktu}</span>
-            </div>
-            <div className="detail-row">
-              <span className="detail-label">
-                <strong>File:</strong>
-              </span>
-              <span className="detail-value">
-                {selectedProdukhukum.file_url}
-              </span>
-            </div>
-          </div>
-        )}
-      </Dialog>
+      {renderFileDialog()}
 
       <Dialog
         header={isEditMode ? "Edit Produk Hukum Data" : "Add Produk Hukum Data"}
         visible={isDialogVisible}
         onHide={closeDialog}
-        style={{ width: "50vw" }}
+        dismissableMask={true}
+        modal={true}
+        style={{ width: "70vw" }}
       >
-        <form onSubmit={handleSubmit} encType="multipart/form-data">
-          <Card className="demografi-card">
-            <h3 className="section-title">Produk Hukum Information</h3>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "100%",
+          }}
+        >
+          <form onSubmit={handleSubmit} encType="multipart/form-data">
+            <Card
+              className="demografi-card"
+              style={{
+                boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)",
+                padding: "20px",
+              }}
+            >
+              <h3 className="section-title" style={{ color: "#00796B" }}>
+                Produk Hukum Information
+              </h3>
 
-            <div className="form-group">
-              <label htmlFor="nik">
-                NIK <span className="required">*</span>
-              </label>
-              <InputText
-                id="nik"
-                name="nik"
-                value={formData.nik}
-                onChange={handleChange}
-                className="input-field"
-                required
-                disabled={isEditMode}
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="name">
-                Name <span className="required">*</span>
-              </label>
-              <InputText
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                className="input-field"
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label>
-                Gender <span className="required">*</span>
-              </label>
-              <div className="radio-group">
-                <RadioButton
-                  inputId="male"
-                  name="gender"
-                  value="male"
+              <div className="form-group">
+                <label htmlFor="name">
+                  Name <span className="required">*</span>
+                </label>
+                <InputText
+                  id="name"
+                  name="name"
+                  value={formData.name}
                   onChange={handleChange}
-                  checked={formData.gender === "male"}
+                  className="input-field"
+                  required
                 />
-                <label htmlFor="male">Male</label>
-                <RadioButton
-                  inputId="female"
-                  name="gender"
-                  value="female"
-                  onChange={handleChange}
-                  checked={formData.gender === "female"}
-                />
-                <label htmlFor="female">Female</label>
               </div>
-            </div>
 
-            <div className="form-group">
-              <label htmlFor="birth_date">
-                Birth Date <span className="required">*</span>
-              </label>
-              <Calendar
-                id="birth_date"
-                name="birth_date"
-                value={
-                  formData.birth_date ? new Date(formData.birth_date) : null
-                }
-                onChange={handleDateChange}
-                dateFormat="yy-mm-dd"
-                showIcon
-                placeholder="Select Birth Date"
-              />
-            </div>
+              <div className="form-group">
+                <label htmlFor="deskripsi">
+                  Deskripsi <span className="required">*</span>
+                </label>
+                <InputTextarea
+                  id="deskripsi"
+                  name="deskripsi"
+                  value={formData.deskripsi}
+                  onChange={handleChange}
+                  className="input-field"
+                  rows={5}
+                  required
+                />
+              </div>
 
-            <div className="form-group">
-              <label htmlFor="marital_status">
-                Marital Status <span className="required">*</span>
-              </label>
-              <InputText
-                id="marital_status"
-                name="marital_status"
-                value={formData.marital_status}
-                onChange={handleChange}
-                className="input-field"
-                required
-              />
-            </div>
+              <div className="form-group">
+                <label htmlFor="waktu">
+                  Tanggal SK <span className="required">*</span>
+                </label>
+                <Calendar
+                  id="waktu"
+                  name="waktu"
+                  value={formData.waktu ? new Date(formData.waktu) : null}
+                  onChange={handleDateChange}
+                  dateFormat="yy-mm-dd"
+                  showIcon
+                  placeholder="Select Date"
+                  className="input-field"
+                  required
+                />
+              </div>
 
-            <div className="form-group">
-              <label htmlFor="job">Job</label>
-              <InputText
-                id="job"
-                name="job"
-                value={formData.job}
-                onChange={handleChange}
-                className="input-field"
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="rt">RT</label>
-              <InputText
-                id="rt"
-                name="rt"
-                value={formData.rt}
-                onChange={handleChange}
-                className="input-field"
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="rw">RW</label>
-              <InputText
-                id="rw"
-                name="rw"
-                value={formData.rw}
-                onChange={handleChange}
-                className="input-field"
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="hamlet">Hamlet</label>
-              <InputText
-                id="hamlet"
-                name="hamlet"
-                value={formData.hamlet}
-                onChange={handleChange}
-                className="input-field"
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="file">Upload File</label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="file-input"
-              />
-              {preview && (
-                <div className="file-preview">
-                  <img src={preview} alt="Preview" className="preview-image" />
-                  <span className="preview-text">Preview of uploaded file</span>
-                </div>
-              )}
-            </div>
-
-            <Button
-              type="submit"
-              label={isEditMode ? "Update" : "Save"}
-              className="submit-button p-button-rounded p-button-primary"
-            />
-          </Card>
-        </form>
+              <div className="form-group">
+                <label htmlFor="file_url">Upload File</label>
+                <input
+                  type="file"
+                  accept="application/pdf"
+                  onChange={handleFileChange}
+                  className="file-input"
+                />
+                {preview && (
+                  <div className="file-preview">
+                    <iframe
+                      src={preview}
+                      title="File Preview"
+                      className="preview-file"
+                      style={{ width: "100%", height: "400px" }}
+                    />
+                  </div>
+                )}
+              </div>
+              <div className="button-sub">
+                <Button
+                  type="submit"
+                  label={isEditMode ? "Update" : "Save"}
+                  className="coastal-button submit-button p-button-rounded"
+                  style={{ marginTop: "20px" }}
+                />
+              </div>
+            </Card>
+          </form>
+        </div>
       </Dialog>
     </div>
   );

@@ -16,14 +16,16 @@ const fetcher = (url) => fetch(url).then((res) => res.json());
 const Modalt = () => {
   const [dialogVisible, setDialogVisible] = useState(false);
   const [dialogVisiblePH, setDialogVisiblePH] = useState(false);
+  const [dialogVisibleAPB, setDialogVisibleAPB] = useState(false);
+  const [dialogVisibleD, setDialogVisibleD] = useState(false);
 
   const { data: produkhukumData, error: produkhukumError } = useSWR(
-    "http://localhost:5000/produk_hukum",
+    "http://localhost:5000/produk_hukump",
     fetcher
   );
-
   const loadingProdukhukum = !produkhukumData && !produkhukumError;
 
+  const produkhukumList = produkhukumData?.produkHukump || [];
   const dialogFooterTemplate = () => {
     return (
       <Button
@@ -52,8 +54,24 @@ const Modalt = () => {
     setDialogVisiblePH(true);
   };
 
+  const showDialogAPB = () => {
+    setDialogVisibleAPB(true);
+  };
+
+  const showDialogD = () => {
+    setDialogVisibleD(true);
+  };
+
   const hideDialog = () => {
     setDialogVisible(false);
+  };
+
+  const hideDialogD = () => {
+    setDialogVisibleD(false);
+  };
+
+  const hideDialogAPB = () => {
+    setDialogVisibleAPB(false);
   };
 
   const hideDialogPH = () => {
@@ -627,7 +645,7 @@ const Modalt = () => {
             <Dialog
               header="Produk Hukum"
               visible={dialogVisiblePH}
-              style={{ width: "75vw" }}
+              style={{ width: "85vw" }}
               maximizable
               modal
               contentStyle={{ height: "300px" }}
@@ -637,41 +655,61 @@ const Modalt = () => {
               {loadingProdukhukum ? (
                 <p>Loading...</p>
               ) : produkhukumError ? (
-                <p>Error loading data.</p>
+                <p>Error loading data: {produkhukumError.message}</p>
+              ) : produkhukumList.length === 0 ? (
+                <p>No data available.</p>
               ) : (
                 <DataTable
-                  value={produkhukumData} // Menggunakan data dari SWR
+                  value={produkhukumList}
                   paginator
                   rows={5}
                   rowsPerPageOptions={[5, 10, 25, 50]}
                   tableStyle={{ minWidth: "50rem" }}
                 >
+                  <Column field="name" header="Name"></Column>
                   <Column
-                    field="name"
-                    header="Name"
-                    style={{ width: "35%" }}
+                    field="deskripsi"
+                    header="Deskripsi"
+                    headerStyle={{
+                      textAlign: "center !important",
+                    }}
+                  />
+                  <Column
+                    field="waktu"
+                    header="Tanggal SK"
+                    body={(rowData) =>
+                      new Date(rowData.waktu).toLocaleDateString()
+                    } // Formatting the date
                   ></Column>
                   <Column
-                    field="description"
-                    header="Description"
-                    style={{ width: "55%" }}
-                  ></Column>
-                  <Column
-                    field="date"
-                    header="Date"
-                    style={{ width: "5%" }}
-                  ></Column>
-                  <Column
-                    field="download"
+                    field="file_url"
                     header="Download"
-                    style={{ width: "5%" }}
-                    body={(rowData) => (
-                      <Button
-                        label="Download"
-                        icon="pi pi-download"
-                        onClick={() => window.open(rowData.download, "_blank")}
-                      />
-                    )}
+                    body={(rowData) => {
+                      const fileName = rowData.file_url.split("/").pop(); // Ambil nama file saja
+                      return (
+                        <a
+                          href={`http://localhost:5000/download/${fileName}`} // Mengarahkan ke controller di backend
+                          download
+                          style={{ textDecoration: "none" }}
+                        >
+                          <Button
+                            label="Download"
+                            style={{
+                              backgroundColor: "#008080", // Background teal
+                              color: "white", // Warna teks
+                              borderRadius: "8px", // Radius border
+                              border: "none", // Tanpa border
+                              padding: "10px 20px", // Padding
+                              fontWeight: "bold", // Tebal teks
+                              transition: "background-color 0.3s", // Efek transisi
+                              cursor: "pointer", // Cursor pointer
+                            }}
+                          >
+                            Download
+                          </Button>
+                        </a>
+                      );
+                    }}
                   ></Column>
                 </DataTable>
               )}
@@ -685,19 +723,19 @@ const Modalt = () => {
             color="default"
             type="button"
             icon="pi pi-external-link"
-            onClick={showDialogPH}
+            onClick={showDialogAPB}
           >
             APB Desa
           </Button>
           <div className="card">
             <Dialog
-              header="Produk Hukum"
-              visible={dialogVisiblePH}
+              header="APB Desa"
+              visible={dialogVisibleAPB}
               style={{ width: "75vw" }}
               maximizable
               modal
               contentStyle={{ height: "300px" }}
-              onHide={hideDialogPH}
+              onHide={hideDialogAPB}
               footer={dialogFooterTemplate}
             >
               <DataTable
@@ -739,42 +777,48 @@ const Modalt = () => {
             color="default"
             type="button"
             icon="pi pi-external-link"
-            onClick={showDialogPH}
+            onClick={showDialogD}
           >
             Download (menu informasi)
           </Button>
           <div className="card">
             <Dialog
-              header="Produk Hukum"
-              visible={dialogVisiblePH}
+              header="Download"
+              visible={dialogVisibleD}
               style={{ width: "75vw" }}
               maximizable
               modal
               contentStyle={{ height: "300px" }}
-              onHide={hideDialogPH}
+              onHide={hideDialogD}
               footer={dialogFooterTemplate}
             >
               <DataTable
                 paginator
                 rows={5}
                 rowsPerPageOptions={[5, 10, 25, 50]}
-                tableStyle={{ minWidth: "50rem" }}
+                tableStyle={{
+                  width: "100%",
+                  minWidth: "70rem",
+                  maxWidth: "85rem",
+                }}
+                breakpoints={{
+                  "960px": {
+                    columns: [
+                      { field: "name", header: "Name" },
+                      { field: "deskripsi", header: "Deskripsi" },
+                      // Add other columns you want to display for smaller screens
+                    ],
+                  },
+                  "640px": {
+                    columns: [
+                      { field: "name", header: "Name" }, // You can hide columns based on screen size
+                    ],
+                  },
+                }}
               >
-                <Column
-                  field="name"
-                  header="Name"
-                  style={{ width: "15%" }}
-                ></Column>
-                <Column
-                  field="description"
-                  header="description"
-                  style={{ width: "65%" }}
-                ></Column>
-                <Column
-                  field="date"
-                  header="date"
-                  style={{ width: "15%" }}
-                ></Column>
+                <Column field="name" header="Name"></Column>
+                <Column field="description" header="description"></Column>
+                <Column field="date" header="date"></Column>
                 <Column
                   field="download"
                   header="download"

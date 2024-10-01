@@ -4,11 +4,11 @@ export const ProductService = {
       {
         id: "1000",
         code: "f230fh0g3",
-        name: "Rapat 1",
+        name: "Pelatihan Peningkatan Kapasitas Aparatur Pemerintah Desa dan Kelembagaan",
         description: "Product Description",
         image: "bamboo-watch.jpg",
         price: "18 Agustus 2024",
-        category: "RT 1",
+        category: "Hotel Dafam Semarang",
         quantity: 24,
         inventoryStatus: "INSTOCK",
         rating: 5,

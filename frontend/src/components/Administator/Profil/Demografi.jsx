@@ -403,259 +403,285 @@ const Demografi = () => {
           )}
         />
       </DataTable>
-
-      <Dialog
-        header="Demographic Details"
-        visible={detailDialogVisible}
-        onHide={() => setDetailDialogVisible(false)}
+      <div
         style={{
-          width: "40vw",
-          border: "none",
-          boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100%",
         }}
       >
-        {selectedDemographic && (
-          <div className="detail-container">
-            {/* Highlighted important sections */}
-            <h4 style={{ color: "#00796B" }}>Important Information</h4>
-            <div className="detail-row">
-              <span className="detail-label">
-                <strong>NIK:</strong>
-              </span>
-              <span className="detail-value">{selectedDemographic.nik}</span>
-            </div>
-            <div className="detail-row">
-              <span className="detail-label">
-                <strong>Name:</strong>
-              </span>
-              <span className="detail-value">{selectedDemographic.name}</span>
-            </div>
-            <div className="detail-row">
-              <span className="detail-label">
-                <strong>Gender:</strong>
-              </span>
-              <span className="detail-value">{selectedDemographic.gender}</span>
-            </div>
-            <div className="detail-row">
-              <span className="detail-label">
-                <strong>RT:</strong>
-              </span>
-              <span className="detail-value">{selectedDemographic.rt}</span>
-            </div>
-            <div className="detail-row">
-              <span className="detail-label">
-                <strong>RW:</strong>
-              </span>
-              <span className="detail-value">{selectedDemographic.rw}</span>
-            </div>
-            <div className="detail-row">
-              <span className="detail-label">
-                <strong>Hamlet:</strong>
-              </span>
-              <span className="detail-value">{selectedDemographic.hamlet}</span>
-            </div>
-          </div>
-        )}
-      </Dialog>
-
-      <Dialog
-        header={isEditMode ? "Edit Demographic Data" : "Add Demographic Data"}
-        visible={isDialogVisible}
-        onHide={closeDialog}
-        style={{ width: "50vw" }}
-      >
-        <form onSubmit={handleSubmit} encType="multipart/form-data">
-          <Card className="demografi-card">
-            <h3 className="section-title">Demographic Information</h3>
-
-            <div className="form-group">
-              <label htmlFor="nik">
-                NIK <span className="required">*</span>
-              </label>
-              <InputText
-                id="nik"
-                name="nik"
-                value={formData.nik}
-                onChange={handleChange}
-                className="input-field"
-                required
-                disabled={isEditMode}
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="name">
-                Name <span className="required">*</span>
-              </label>
-              <InputText
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                className="input-field"
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label>
-                Gender <span className="required">*</span>
-              </label>
-              <div className="radio-group">
-                <RadioButton
-                  inputId="male"
-                  name="gender"
-                  value="male"
-                  onChange={handleChange}
-                  checked={formData.gender === "male"}
-                />
-                <label htmlFor="male">Male</label>
-                <RadioButton
-                  inputId="female"
-                  name="gender"
-                  value="female"
-                  onChange={handleChange}
-                  checked={formData.gender === "female"}
-                />
-                <label htmlFor="female">Female</label>
+        <Dialog
+          header="Demographic Details"
+          visible={detailDialogVisible}
+          onHide={() => setDetailDialogVisible(false)}
+          style={{
+            width: "70vw",
+            border: "none",
+            boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)",
+          }}
+        >
+          {selectedDemographic && (
+            <div className="detail-container">
+              {/* Highlighted important sections */}
+              <h4 style={{ color: "#00796B" }}>Important Information</h4>
+              <div className="detail-row">
+                <span className="detail-label">
+                  <strong>NIK:</strong>
+                </span>
+                <span className="detail-value">{selectedDemographic.nik}</span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-label">
+                  <strong>Name:</strong>
+                </span>
+                <span className="detail-value">{selectedDemographic.name}</span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-label">
+                  <strong>Gender:</strong>
+                </span>
+                <span className="detail-value">
+                  {selectedDemographic.gender}
+                </span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-label">
+                  <strong>RT:</strong>
+                </span>
+                <span className="detail-value">{selectedDemographic.rt}</span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-label">
+                  <strong>RW:</strong>
+                </span>
+                <span className="detail-value">{selectedDemographic.rw}</span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-label">
+                  <strong>Hamlet:</strong>
+                </span>
+                <span className="detail-value">
+                  {selectedDemographic.hamlet}
+                </span>
               </div>
             </div>
+          )}
+        </Dialog>
+      </div>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100%",
+        }}
+      >
+        <Dialog
+          header={isEditMode ? "Edit Demographic Data" : "Add Demographic Data"}
+          visible={isDialogVisible}
+          onHide={closeDialog}
+          style={{ width: "70vw" }}
+        >
+          <form onSubmit={handleSubmit} encType="multipart/form-data">
+            <Card className="demografi-card">
+              <h3 className="section-title">Demographic Information</h3>
 
-            <div className="form-group">
-              <label htmlFor="birth_date">
-                Birth Date <span className="required">*</span>
-              </label>
-              <Calendar
-                id="birth_date"
-                name="birth_date"
-                value={
-                  formData.birth_date ? new Date(formData.birth_date) : null
-                }
-                onChange={handleDateChange}
-                dateFormat="yy-mm-dd"
-                showIcon
-                placeholder="Select Birth Date"
-              />
-            </div>
+              <div className="form-group">
+                <label htmlFor="nik">
+                  NIK <span className="required">*</span>
+                </label>
+                <InputText
+                  id="nik"
+                  name="nik"
+                  value={formData.nik}
+                  onChange={handleChange}
+                  className="input-field"
+                  required
+                  disabled={isEditMode}
+                />
+              </div>
 
-            <div className="form-group">
-              <label htmlFor="marital_status">
-                Marital Status <span className="required">*</span>
-              </label>
-              <InputText
-                id="marital_status"
-                name="marital_status"
-                value={formData.marital_status}
-                onChange={handleChange}
-                className="input-field"
-                required
-              />
-            </div>
+              <div className="form-group">
+                <label htmlFor="name">
+                  Name <span className="required">*</span>
+                </label>
+                <InputText
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className="input-field"
+                  required
+                />
+              </div>
 
-            <div className="form-group">
-              <label htmlFor="education_id">
-                Education <span className="required">*</span>
-              </label>
-              <Dropdown
-                id="education_id"
-                name="education_id"
-                value={formData.education_id}
-                options={educationData}
-                onChange={handleChange}
-                optionLabel="level"
-                optionValue="id"
-                placeholder="Select Education"
-                className="dropdown-field"
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="job">Job</label>
-              <InputText
-                id="job"
-                name="job"
-                value={formData.job}
-                onChange={handleChange}
-                className="input-field"
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="rt">RT</label>
-              <InputText
-                id="rt"
-                name="rt"
-                value={formData.rt}
-                onChange={handleChange}
-                className="input-field"
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="rw">RW</label>
-              <InputText
-                id="rw"
-                name="rw"
-                value={formData.rw}
-                onChange={handleChange}
-                className="input-field"
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="hamlet">Hamlet</label>
-              <InputText
-                id="hamlet"
-                name="hamlet"
-                value={formData.hamlet}
-                onChange={handleChange}
-                className="input-field"
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="religion_id">
-                Religion <span className="required">*</span>
-              </label>
-              <Dropdown
-                id="religion_id"
-                name="religion_id"
-                value={formData.religion_id}
-                options={religionData}
-                onChange={handleChange}
-                optionLabel="name"
-                optionValue="id"
-                placeholder="Select Religion"
-                className="dropdown-field"
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="file">Upload File</label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="file-input"
-              />
-              {preview && (
-                <div className="file-preview">
-                  <img src={preview} alt="Preview" className="preview-image" />
-                  <span className="preview-text">Preview of uploaded file</span>
+              <div className="form-group">
+                <label>
+                  Gender <span className="required">*</span>
+                </label>
+                <div className="radio-group">
+                  <RadioButton
+                    inputId="male"
+                    name="gender"
+                    value="male"
+                    onChange={handleChange}
+                    checked={formData.gender === "male"}
+                  />
+                  <label htmlFor="male">Male</label>
+                  <RadioButton
+                    inputId="female"
+                    name="gender"
+                    value="female"
+                    onChange={handleChange}
+                    checked={formData.gender === "female"}
+                  />
+                  <label htmlFor="female">Female</label>
                 </div>
-              )}
-            </div>
+              </div>
 
-            <Button
-              type="submit"
-              label={isEditMode ? "Update" : "Save"}
-              className="submit-button p-button-rounded p-button-primary"
-            />
-          </Card>
-        </form>
-      </Dialog>
+              <div className="form-group">
+                <label htmlFor="birth_date">
+                  Birth Date <span className="required">*</span>
+                </label>
+                <Calendar
+                  id="birth_date"
+                  name="birth_date"
+                  value={
+                    formData.birth_date ? new Date(formData.birth_date) : null
+                  }
+                  onChange={handleDateChange}
+                  dateFormat="yy-mm-dd"
+                  showIcon
+                  placeholder="Select Birth Date"
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="marital_status">
+                  Marital Status <span className="required">*</span>
+                </label>
+                <InputText
+                  id="marital_status"
+                  name="marital_status"
+                  value={formData.marital_status}
+                  onChange={handleChange}
+                  className="input-field"
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="education_id">
+                  Education <span className="required">*</span>
+                </label>
+                <Dropdown
+                  id="education_id"
+                  name="education_id"
+                  value={formData.education_id}
+                  options={educationData}
+                  onChange={handleChange}
+                  optionLabel="level"
+                  optionValue="id"
+                  placeholder="Select Education"
+                  className="dropdown-field"
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="job">Job</label>
+                <InputText
+                  id="job"
+                  name="job"
+                  value={formData.job}
+                  onChange={handleChange}
+                  className="input-field"
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="rt">RT</label>
+                <InputText
+                  id="rt"
+                  name="rt"
+                  value={formData.rt}
+                  onChange={handleChange}
+                  className="input-field"
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="rw">RW</label>
+                <InputText
+                  id="rw"
+                  name="rw"
+                  value={formData.rw}
+                  onChange={handleChange}
+                  className="input-field"
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="hamlet">Hamlet</label>
+                <InputText
+                  id="hamlet"
+                  name="hamlet"
+                  value={formData.hamlet}
+                  onChange={handleChange}
+                  className="input-field"
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="religion_id">
+                  Religion <span className="required">*</span>
+                </label>
+                <Dropdown
+                  id="religion_id"
+                  name="religion_id"
+                  value={formData.religion_id}
+                  options={religionData}
+                  onChange={handleChange}
+                  optionLabel="name"
+                  optionValue="id"
+                  placeholder="Select Religion"
+                  className="dropdown-field"
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="file">Upload File</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="file-input"
+                />
+                {preview && (
+                  <div className="file-preview">
+                    <img
+                      src={preview}
+                      alt="Preview"
+                      className="preview-image"
+                    />
+                    <span className="preview-text">
+                      Preview of uploaded file
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <Button
+                type="submit"
+                label={isEditMode ? "Update" : "Save"}
+                className="submit-button p-button-rounded p-button-primary"
+              />
+            </Card>
+          </form>
+        </Dialog>
+      </div>
     </div>
   );
 };

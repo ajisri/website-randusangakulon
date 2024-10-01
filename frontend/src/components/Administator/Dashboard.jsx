@@ -11,7 +11,9 @@ import Demografi from "./Profil/Demografi";
 import Lembaga from "./Profil/Lembaga";
 import Strukturorganisasi from "./Profil/Strukturorganisasi";
 import Visimisi from "./Profil/Visimisi";
-import Geografi from "./Profil/Geografi";
+// import Geografi from "./Profil/Geografi";
+import BatasWilayah from "./Profil/BatasWilayah";
+import Orbitasi from "./Profil/Orbitasi";
 // Layanan
 import Aktakelahiran from "./Layanan/Aktakelahiran";
 import Kartukeluarga from "./Layanan/Kartukeluarga";
@@ -19,8 +21,10 @@ import Kartutandapenduduk from "./Layanan/Kartutandapenduduk";
 import Pembuatansktm from "./Layanan/Pembuatansktm";
 import Pendaftarannikah from "./Layanan/Pendaftarannikah";
 import Aktifasibpjs from "./Layanan/Aktifasibpjs";
-//transparansi
+//Transparansi
 import Produkhukum from "./Transparansi/ProdukHukum";
+//sosial
+import Agenda from "./Social/Agenda";
 
 import "primereact/resources/themes/saga-blue/theme.css";
 import "primereact/resources/primereact.min.css";
@@ -36,13 +40,19 @@ const Dashboard = () => {
   const [isLayananSubmenuVisible, setLayananSubmenuVisible] = useState(false);
   const [isTransparansiSubmenuVisible, setTransparansiSubmenuVisible] =
     useState(false);
+  const [isSocialSubmenuVisible, setSocialSubmenuVisible] = useState(false);
   const [activeMenu, setActiveMenu] = useState("Tentang");
   const toggleProfilSubmenu = () =>
     setProfilSubmenuVisible(!isProfilSubmenuVisible);
+  const [isGeografiSubmenuVisible, setGeografiSubmenuVisible] = useState(false);
+  const toggleGeografiSubmenu = () =>
+    setGeografiSubmenuVisible(!isGeografiSubmenuVisible);
   const toggleLayananSubmenu = () =>
     setLayananSubmenuVisible(!isLayananSubmenuVisible);
   const toggleTransparansiSubmenu = () =>
     setTransparansiSubmenuVisible(!isTransparansiSubmenuVisible);
+  const toggleSocialSubmenu = () =>
+    setSocialSubmenuVisible(!isSocialSubmenuVisible);
 
   const refreshToken = async () => {
     try {
@@ -102,8 +112,16 @@ const Dashboard = () => {
         return <Strukturorganisasi />;
       case "Visimisi":
         return <Visimisi />;
-      case "Geografi":
-        return <Geografi />;
+      // case "Geografi":
+      //   return <Geografi />;
+      case "BatasWilayah":
+        return <BatasWilayah />;
+      case "Orbitasi":
+        return <Orbitasi />;
+      case "JenisLahan":
+        return <div>Jenis Lahan Content</div>;
+      case "PotensiDesa":
+        return <div>Potensi Desa</div>;
       case "Aktakelahiran":
         return <Aktakelahiran />;
       case "Aktifasibpjs":
@@ -118,6 +136,8 @@ const Dashboard = () => {
         return <Pendaftarannikah />;
       case "Produkhukum":
         return <Produkhukum />;
+      case "Agenda":
+        return <Agenda />;
       default:
         return <Tentang />;
     }
@@ -247,8 +267,109 @@ const Dashboard = () => {
               {isSidebarHovered && <span>Lembaga</span>}
               <Ripple />
             </div>
+
             <div
-              onClick={() => setActiveMenu("Geografi")}
+              onClick={toggleGeografiSubmenu}
+              className="menu-item"
+              style={{
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                marginBottom: "10px",
+                padding: "10px",
+                paddingLeft: "5px",
+              }}
+            >
+              <i
+                className="pi pi-fw pi-globe"
+                style={{ marginRight: "20px" }}
+              ></i>
+              {isSidebarHovered && <span>Geografi</span>}
+              <i
+                className={`pi pi-fw ${
+                  isGeografiSubmenuVisible
+                    ? "pi-chevron-down"
+                    : "pi-chevron-right"
+                }`}
+                style={{ marginLeft: "auto" }}
+              ></i>
+              <Ripple />
+            </div>
+            {isSidebarHovered && isGeografiSubmenuVisible && (
+              <div
+                className="submenu"
+                style={{ marginLeft: "20px", marginBottom: "10px" }}
+              >
+                <div
+                  onClick={() => setActiveMenu("BatasWilayah")}
+                  className="menu-item"
+                  style={{
+                    marginBottom: "10px",
+                    cursor: "pointer",
+                    padding: "10px",
+                  }}
+                >
+                  <i
+                    className="pi pi-fw pi-map"
+                    style={{ marginRight: "10px" }}
+                  ></i>
+                  {isSidebarHovered && <span>Batas Wilayah</span>}
+                  <Ripple />
+                </div>
+                <div
+                  onClick={() => setActiveMenu("Orbitasi")}
+                  className="menu-item"
+                  style={{
+                    marginBottom: "10px",
+                    cursor: "pointer",
+                    padding: "10px",
+                  }}
+                >
+                  <i
+                    className="pi pi-fw pi-compass"
+                    style={{ marginRight: "10px" }}
+                  ></i>
+                  {isSidebarHovered && <span>Orbitasi Desa</span>}
+                  <Ripple />
+                </div>
+                <div
+                  onClick={() => setActiveMenu("JenisLahan")}
+                  className="menu-item"
+                  style={{
+                    marginBottom: "10px",
+                    cursor: "pointer",
+                    padding: "10px",
+                  }}
+                >
+                  <i
+                    className="pi pi-fw pi-map-marker"
+                    style={{ marginRight: "10px" }}
+                  ></i>
+                  {isSidebarHovered && <span>Jenis Lahan</span>}
+                  <Ripple />
+                </div>
+
+                <div
+                  onClick={() => setActiveMenu("PotensiDesa")}
+                  className="menu-item"
+                  style={{
+                    marginBottom: "10px",
+                    cursor: "pointer",
+                    padding: "10px",
+                  }}
+                >
+                  <i
+                    className="pi pi-fw pi-map"
+                    style={{ marginRight: "10px" }}
+                  ></i>
+                  {isSidebarHovered && <span>Potensi Desa</span>}
+                  <Ripple />
+                </div>
+              </div>
+            )}
+
+            <div
+              // onClick={() => setActiveMenu("Geografi")}
               className="menu-item"
               style={{
                 marginBottom: "10px",
@@ -472,6 +593,85 @@ const Dashboard = () => {
                 style={{ marginRight: "10px" }}
               ></i>
               {isSidebarHovered && <span>Produk Hukum</span>}
+              <Ripple />
+            </div>
+            <div
+              className="menu-item"
+              style={{
+                marginBottom: "10px",
+                cursor: "pointer",
+                padding: "10px",
+              }}
+            >
+              <i
+                className="pi pi-fw pi-dollar"
+                style={{ marginRight: "10px" }}
+              ></i>
+              {isSidebarHovered && <span>APB Desa</span>}
+              <Ripple />
+            </div>
+            <div
+              className="menu-item"
+              style={{
+                marginBottom: "10px",
+                cursor: "pointer",
+                padding: "10px",
+              }}
+            >
+              <i
+                className="pi pi-fw pi-download"
+                style={{ marginRight: "10px" }}
+              ></i>
+              {isSidebarHovered && <span>Download</span>}
+              <Ripple />
+            </div>
+          </div>
+        )}
+
+        <div
+          onClick={toggleSocialSubmenu}
+          className="menu-item"
+          style={{
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            marginBottom: "10px",
+            padding: "10px",
+            paddingLeft: "5px",
+          }}
+        >
+          <i
+            className="pi pi-fw pi-desktop"
+            style={{ marginRight: "20px" }}
+          ></i>
+          {isSidebarHovered && <span>Social</span>}
+          <i
+            className={`pi pi-fw ${
+              isSocialSubmenuVisible ? "pi-chevron-down" : "pi-chevron-right"
+            }`}
+            style={{ marginLeft: "auto" }}
+          ></i>
+          <Ripple />
+        </div>
+        {isSidebarHovered && isSocialSubmenuVisible && (
+          <div
+            className="submenu"
+            style={{ marginLeft: "20px", marginBottom: "10px" }}
+          >
+            <div
+              onClick={() => setActiveMenu("Agenda")}
+              className="menu-item"
+              style={{
+                marginBottom: "10px",
+                cursor: "pointer",
+                padding: "10px",
+              }}
+            >
+              <i
+                className="pi pi-fw pi-calendar-clock"
+                style={{ marginRight: "10px" }}
+              ></i>
+              {isSidebarHovered && <span>Agenda</span>}
               <Ripple />
             </div>
             <div
