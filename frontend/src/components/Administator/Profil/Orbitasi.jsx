@@ -276,7 +276,7 @@ const OrbitasiDesa = () => {
                       { label: "Unit", value: "Unit" },
                     ]}
                     placeholder="Pilih Satuan"
-                    className="input-field"
+                    className="dropdown-field"
                     required
                   />
                 </div>
