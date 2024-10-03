@@ -37,6 +37,11 @@ import {
   createOrbitasi,
   updateOrbitasi,
   deleteOrbitasi,
+  getJenisLahanPengunjung,
+  getJenisLahanAdmin,
+  createJenisLahan,
+  updateJenisLahan,
+  deleteJenisLahan,
 } from "../controllers/profileController.js";
 import { verifyToken, superOnly } from "../middleware/verifyToken.js";
 
@@ -105,14 +110,22 @@ const demographicValidationRules = [
     .withMessage("NIK harus 16 karakter"),
   body("name").notEmpty().withMessage("Nama harus diisi"),
   body("gender")
-    .isIn(["male", "female"])
-    .withMessage("Gender harus 'male' atau 'female'"),
+    .isIn(["Laki-Laki", "Perempuan"])
+    .withMessage("Gender harus 'Laki-Laki' atau 'Perempuan'"),
   body("birth_date")
     .isISO8601()
     .withMessage("Tanggal lahir harus dalam format YYYY-MM-DD"),
   body("marital_status")
-    .isIn(["single", "married"])
-    .withMessage("Status pernikahan harus 'single' atau 'married'"),
+    .isIn([
+      "Kawin Tercatat",
+      "Kawin Tidak Tercatat",
+      "Cerai Hidup",
+      "Cerai Mati",
+      "Belum Kawin",
+    ])
+    .withMessage(
+      "Status pernikahan harus 'Kawin Tercatat' atau 'Kawin Tidak Tercatat' atau 'Cerai Hidup' atau 'Cerai Mati' atau 'Belum Kawin'"
+    ),
   body("education_id").isInt().withMessage("ID pendidikan harus berupa angka"),
   body("job").optional().isString().withMessage("Pekerjaan harus berupa teks"),
   body("rt").optional().isInt().withMessage("RT harus berupa angka"),
@@ -183,5 +196,16 @@ router.get("/orbitasi", verifyToken, superOnly, getOrbitasiAdmin);
 router.post("/corbitasi", verifyToken, superOnly, createOrbitasi);
 router.patch("/orbitasi/:uuid", verifyToken, superOnly, updateOrbitasi);
 router.delete("/orbitasi/:uuid", verifyToken, superOnly, deleteOrbitasi);
+
+//jenislahan
+//jenislahan pengunjung
+router.get("/jenislahanpengunjung", getJenisLahanPengunjung);
+//jenislahan admin
+router.get("/jenislahan", verifyToken, superOnly, getJenisLahanAdmin);
+
+// POST route for creating JenisLahan data
+router.post("/cjenislahan", verifyToken, superOnly, createJenisLahan);
+router.patch("/jenislahan/:uuid", verifyToken, superOnly, updateJenisLahan);
+router.delete("/jenislahan/:uuid", verifyToken, superOnly, deleteJenisLahan);
 
 export default router;

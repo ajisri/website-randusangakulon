@@ -157,6 +157,7 @@ model JenisLahan {
   id        Int       @id @default(autoincrement())
   uuid      String    @default(uuid()) @unique
   jenis     String    
+  nama     String    
   luas      Float     
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -188,7 +189,7 @@ model Demographics {
   rw             String
   hamlet         String        // Dusun
   status_aktif   String
-  tmt_status_aktif DateTime
+  tmt_status_aktif DateTime?
   keterangan_status String?
   file_url        String?
   religion_id    Int

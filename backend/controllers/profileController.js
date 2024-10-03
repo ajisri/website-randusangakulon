@@ -1193,6 +1193,9 @@ export const createDemografi = async (req, res) => {
     rw,
     hamlet,
     religion_id,
+    status_aktif,
+    tmt_status_aktif,
+    keterangan_status,
   } = req.body;
 
   const file = req.file;
@@ -1239,6 +1242,10 @@ export const createDemografi = async (req, res) => {
           rt,
           rw,
           hamlet,
+          status_aktif,
+          tmt_status_aktif: status_aktif === "aktif" ? null : tmt_status_aktif,
+          keterangan_status:
+            status_aktif === "aktif" ? null : keterangan_status,
           religion_id: parsedReligionId,
           file_url: file ? `/uploads/demografi/${file.filename}` : null,
           created_by: administrator.name,
@@ -1274,6 +1281,9 @@ export const updateDemografi = async (req, res) => {
     rw,
     hamlet,
     religion_id,
+    status_aktif,
+    tmt_status_aktif,
+    keterangan_status,
   } = req.body;
   const file = req.file;
 
@@ -1321,6 +1331,9 @@ export const updateDemografi = async (req, res) => {
         rt,
         rw,
         hamlet,
+        status_aktif,
+        tmt_status_aktif,
+        keterangan_status,
         religion_id: parseInt(religion_id, 10),
         file_url: file
           ? `/uploads/demografi/${file.filename}`
@@ -1755,6 +1768,183 @@ export const deleteOrbitasi = async (req, res) => {
     res.status(200).json({ msg: "Batas wilayah dihapus dengan sukses" });
   } catch (error) {
     console.error("Error saat menghapus batas wilayah:", error);
+    res.status(500).json({ msg: "Terjadi kesalahan pada server" });
+  }
+};
+
+//JenisLahan
+export const getJenisLahanPengunjung = async (req, res) => {
+  try {
+    const jenisLahan = await prisma.jenisLahan.findMany();
+
+    if (jenisLahan.length === 0) {
+      return res.status(200).json({ jenisLahan: [] });
+    }
+
+    res.status(200).json({ jenisLahan });
+  } catch (error) {
+    console.error("Error saat mengambil data Jenis Lahan:", error);
+    res.status(500).json({ msg: "Terjadi kesalahan pada server" });
+  }
+};
+
+// Admin: Ambil semua data batas wilayah dengan autentikasi
+export const getJenisLahanAdmin = async (req, res) => {
+  try {
+    const refreshToken = req.cookies.refreshToken;
+
+    if (!refreshToken) {
+      return res.status(401).json({ msg: "Token tidak ditemukan" });
+    }
+
+    const admin = await prisma.administrator.findUnique({
+      where: { refresh_token: refreshToken },
+    });
+
+    if (!admin || admin.role !== "administrator") {
+      return res.status(403).json({ msg: "Akses ditolak" });
+    }
+
+    const jenisLahan = await prisma.jenisLahan.findMany();
+    console.log("Jenis Lahan:", jenisLahan);
+
+    if (jenisLahan.length === 0) {
+      return res.status(200).json({ jenisLahan: [] });
+    }
+
+    res.status(200).json({ jenisLahan });
+  } catch (error) {
+    console.error("Error saat mengambil data Jenis Lahan untuk admin:", error);
+    res.status(500).json({ msg: "Terjadi kesalahan pada server" });
+  }
+};
+
+// Create: Membuat data batas wilayah baru (tanpa geographyId)
+export const createJenisLahan = async (req, res) => {
+  const { jenis, nama, luas } = req.body;
+  try {
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) {
+      return res.status(401).json({ msg: "Token tidak ditemukan" });
+    }
+
+    const admin = await prisma.administrator.findUnique({
+      where: { refresh_token: refreshToken },
+    });
+
+    if (!admin || admin.role !== "administrator") {
+      return res.status(403).json({ msg: "Akses ditolak" });
+    }
+
+    // Validasi input
+    if (!jenis || !nama || !luas) {
+      return res.status(400).json({ msg: "Semua field wajib diisi" });
+    }
+
+    const newJenisLahan = await prisma.jenisLahan.create({
+      data: {
+        jenis,
+        nama,
+        luas: parseFloat(luas),
+      },
+    });
+
+    res.status(201).json({
+      msg: "Jenis Lahan berhasil dibuat",
+      jenisLahan: newJenisLahan,
+    });
+  } catch (error) {
+    console.error("Error saat membuat Jenis Lahan:", error);
+
+    // Handling error spesifik dari Prisma
+    if (error.code === "P2002") {
+      return res.status(409).json({ msg: "Data Jenis Lahan sudah ada" });
+    }
+
+    res.status(500).json({ msg: "Terjadi kesalahan pada server" });
+  }
+};
+
+// Update: Memperbarui data batas wilayah yang ada
+export const updateJenisLahan = async (req, res) => {
+  const { uuid } = req.params; // Mengambil UUID dari URL params
+  const { jenis, nama, luas } = req.body;
+
+  try {
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) {
+      return res.status(401).json({ msg: "Token tidak ditemukan" });
+    }
+
+    const admin = await prisma.administrator.findUnique({
+      where: { refresh_token: refreshToken },
+    });
+
+    if (!admin || admin.role !== "administrator") {
+      return res.status(403).json({ msg: "Akses ditolak" });
+    }
+
+    const existingJenisLahan = await prisma.jenisLahan.findUnique({
+      where: { uuid },
+    });
+
+    if (!existingJenisLahan) {
+      return res.status(404).json({ msg: "Jenis lahan tidak ditemukan" });
+    }
+
+    const updatedJenisLahan = await prisma.jenisLahan.update({
+      where: { uuid },
+      data: {
+        jenis,
+        nama,
+        luas: parseFloat(luas),
+        updatedAt: new Date(),
+      },
+    });
+
+    res.status(200).json({
+      msg: "Jenis Lahan diperbarui",
+      jenisLahan: updatedJenisLahan,
+    });
+  } catch (error) {
+    console.error("Error saat memperbarui jenis lahan:", error);
+    res.status(500).json({ msg: "Terjadi kesalahan pada server" });
+  }
+};
+
+// Delete: Menghapus data Jenis Lahan berdasarkan UUID
+export const deleteJenisLahan = async (req, res) => {
+  const { uuid } = req.params;
+
+  try {
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) {
+      return res.status(401).json({ msg: "Token tidak ditemukan" });
+    }
+
+    const admin = await prisma.administrator.findUnique({
+      where: { refresh_token: refreshToken },
+    });
+
+    if (!admin || admin.role !== "administrator") {
+      return res.status(403).json({ msg: "Akses ditolak" });
+    }
+
+    const existingJenisLahan = await prisma.jenisLahan.findUnique({
+      where: { uuid },
+    });
+
+    if (!existingJenisLahan) {
+      return res.status(404).json({ msg: "Jenis Lahan tidak ditemukan" });
+    }
+
+    await prisma.jenisLahan.delete({
+      where: { uuid },
+    });
+
+    res.status(200).json({ msg: "Jenis Lahan dihapus dengan sukses" });
+  } catch (error) {
+    console.error("Error saat menghapus Jenis Lahan:", error);
     res.status(500).json({ msg: "Terjadi kesalahan pada server" });
   }
 };
