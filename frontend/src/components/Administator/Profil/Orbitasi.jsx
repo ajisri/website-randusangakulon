@@ -7,14 +7,14 @@ import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
 import { DataTable } from "primereact/datatable";
-import { Dropdown } from "primereact/dropdown";
 import { Column } from "primereact/column";
 import { FilterMatchMode } from "primereact/api";
 import { Dialog } from "primereact/dialog";
+import { Dropdown } from "primereact/dropdown";
 
 import "./Orbitasi.css"; // Custom CSS for styling
 
-const Orbitasi = () => {
+const OrbitasiDesa = () => {
   const [formData, setFormData] = useState({
     uuid: "",
     kategori: "",
@@ -49,8 +49,8 @@ const Orbitasi = () => {
   );
 
   useEffect(() => {
-    if (data?.Orbitasi) {
-      setDataList(data.Orbitasi);
+    if (data?.orbitasi) {
+      setDataList(data.orbitasi);
     }
   }, [data]);
 
@@ -115,7 +115,6 @@ const Orbitasi = () => {
       uuid: "",
       kategori: "",
       nilai: "",
-      satuan: "",
     });
     setEditMode(false);
     setCurrentData(null);
@@ -184,7 +183,7 @@ const Orbitasi = () => {
 
   return (
     <div>
-      <h1 className="demografi-header">Orbitasi</h1>
+      <h1 className="demografi-header">Orbitasi Desa</h1>
       <Toast ref={toast} />
       <DataTable
         value={dataList}
@@ -195,9 +194,9 @@ const Orbitasi = () => {
         header={header}
         filterDisplay="menu"
       >
-        <Column field="kategori" header="Nama" />
-        <Column field="nilai" header="nilai" />
-        <Column field="satuan" header="satuan" />
+        <Column field="kategori" header="Orbitasi" />
+        <Column field="nilai" header="Nilai" />
+        <Column field="satuan" header="Satuan" />
         <Column
           body={(rowData) => (
             <div
@@ -220,7 +219,7 @@ const Orbitasi = () => {
       </DataTable>
 
       <Dialog
-        header={isEditMode ? "Edit Orbitasi Desa" : "Add Orbitasi Desa"}
+        header={isEditMode ? "Edit Batas Wilayah" : "Add Batas Wilayah"}
         visible={isDialogVisible}
         onHide={closeDialog}
         dismissableMask={true}
@@ -236,9 +235,9 @@ const Orbitasi = () => {
         >
           <form onSubmit={handleSubmit}>
             <Card className="demografi-card" style={{ padding: "20px" }}>
-              <h3 className="section-title">Orbitasi Desa</h3>
+              <h3 className="section-title">Orbitasi Desa Information</h3>
               <div className="form-group">
-                <label htmlFor="Nama">Nama</label>
+                <label htmlFor="Orbitasi Desa">Orbitasi Desa</label>
                 <InputText
                   id="kategori"
                   name="kategori"
@@ -282,7 +281,6 @@ const Orbitasi = () => {
                   />
                 </div>
               </div>
-
               <div className="button-sub">
                 <Button
                   type="submit"
@@ -298,4 +296,4 @@ const Orbitasi = () => {
   );
 };
 
-export default Orbitasi;
+export default OrbitasiDesa;

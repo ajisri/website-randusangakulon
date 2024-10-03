@@ -298,7 +298,7 @@ const Demografi = () => {
     return <p>Error fetching data</p>;
 
   return (
-    <div className="demografi-container">
+    <div>
       <h1 className="demografi-header">Demografi</h1>
       <Toast ref={toast} />
       <DataTable
@@ -366,7 +366,7 @@ const Demografi = () => {
               <Button
                 label="Detail"
                 onClick={() => showDetails(rowData)}
-                className="detail-button p-button-rounded"
+                className="detail-button coastal-button p-button-rounded"
                 tooltip="View Details"
                 tooltipOptions={{ position: "bottom" }}
                 style={{
@@ -378,7 +378,7 @@ const Demografi = () => {
               <Button
                 icon="pi pi-pencil"
                 onClick={() => editDemographic(rowData)}
-                className="edit-button p-button-rounded"
+                className="edit-button coastal-button p-button-rounded"
                 tooltip="Edit"
                 tooltipOptions={{ position: "bottom" }}
                 style={{
@@ -390,7 +390,7 @@ const Demografi = () => {
               <Button
                 icon="pi pi-trash"
                 onClick={() => deleteDemographic(rowData.nik)}
-                className="delete-button p-button-rounded"
+                className="delete-button coastal-button p-button-rounded"
                 tooltip="Delete"
                 tooltipOptions={{ position: "bottom" }}
                 style={{
@@ -474,14 +474,18 @@ const Demografi = () => {
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          height: "100%",
+          height: "100vh", // Full screen height
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
         }}
       >
         <Dialog
           header={isEditMode ? "Edit Demographic Data" : "Add Demographic Data"}
           visible={isDialogVisible}
           onHide={closeDialog}
-          style={{ width: "70vw" }}
+          style={{ width: "65vw" }}
         >
           <form onSubmit={handleSubmit} encType="multipart/form-data">
             <Card className="demografi-card">
@@ -517,26 +521,34 @@ const Demografi = () => {
               </div>
 
               <div className="form-group">
-                <label>
+                <label htmlFor="gender">
                   Gender <span className="required">*</span>
                 </label>
                 <div className="radio-group">
-                  <RadioButton
-                    inputId="male"
-                    name="gender"
-                    value="male"
-                    onChange={handleChange}
-                    checked={formData.gender === "male"}
-                  />
-                  <label htmlFor="male">Male</label>
-                  <RadioButton
-                    inputId="female"
-                    name="gender"
-                    value="female"
-                    onChange={handleChange}
-                    checked={formData.gender === "female"}
-                  />
-                  <label htmlFor="female">Female</label>
+                  <div className="radio-item">
+                    <RadioButton
+                      inputId="male"
+                      name="gender"
+                      value="male"
+                      onChange={handleChange}
+                      checked={formData.gender === "male"}
+                    />
+                    <label htmlFor="male" className="radio-label">
+                      Male
+                    </label>
+                  </div>
+                  <div className="radio-item">
+                    <RadioButton
+                      inputId="female"
+                      name="gender"
+                      value="female"
+                      onChange={handleChange}
+                      checked={formData.gender === "female"}
+                    />
+                    <label htmlFor="female" className="radio-label">
+                      Female
+                    </label>
+                  </div>
                 </div>
               </div>
 
@@ -554,6 +566,7 @@ const Demografi = () => {
                   dateFormat="yy-mm-dd"
                   showIcon
                   placeholder="Select Birth Date"
+                  className="input-field"
                 />
               </div>
 
@@ -584,7 +597,7 @@ const Demografi = () => {
                   optionLabel="level"
                   optionValue="id"
                   placeholder="Select Education"
-                  className="dropdown-field"
+                  className="input-field"
                   required
                 />
               </div>

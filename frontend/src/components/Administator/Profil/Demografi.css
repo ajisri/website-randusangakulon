@@ -22,6 +22,7 @@
   padding: 2rem; /* Jarak yang cukup untuk isi card */
   margin: 1rem 0;
   width: 100%; /* Memastikan card mengambil lebar penuh */
+  min-width: 60vw;
   max-width: 600px; /* Batasi lebar maksimal card */
   transition: box-shadow 0.3s;
 }
@@ -59,10 +60,37 @@
   flex-grow: 1; /* Memungkinkan teks mengambil ruang yang tersisa */
 }
 
-.input-field,
+.input-field {
+  width: 100%;
+  border: 1px solid #ccc; /* Warna border default */
+  border-radius: 0.5rem; /* Menambahkan sudut melengkung */
+  padding: 0.5rem; /* Menambahkan padding untuk tampilan lebih baik */
+  transition: border-color 0.3s ease; /* Transisi smooth untuk border saat hover */
+}
+
+.input-field:hover {
+  border-color: #00796b; /* Teal border on hover */
+}
+
+.input-field:focus {
+  border-color: #00796b; /* Teal border when focused */
+  outline: none; /* Remove default outline */
+  box-shadow: 0 0 0.5rem rgba(0, 121, 107, 0.5); /* Optional shadow effect */
+}
+
 .dropdown-field {
   width: 100%;
   border-radius: 0.5rem;
+}
+
+.dropdown-field:hover {
+  border-color: #00796b !important; /* Teal border on hover */
+}
+
+.dropdown-field:focus {
+  border-color: #00796b !important; /* Teal border when focused */
+  outline: none; /* Remove default outline */
+  box-shadow: 0 0 0.5rem rgba(0, 121, 107, 0.5); /* Optional shadow effect */
 }
 
 .detail-container {
@@ -95,6 +123,21 @@
 
 .required {
   color: red;
+}
+
+.radio-group {
+  display: flex; /* Untuk menampilkan radio buttons dan label dalam satu baris */
+  gap: 2rem; /* Mengatur jarak antar radio button */
+  align-items: center; /* Pastikan elemen rata secara vertikal */
+}
+
+.radio-item {
+  display: flex;
+  align-items: center; /* Membuat label sejajar dengan radio button */
+}
+
+.radio-label {
+  margin-left: 0.5rem; /* Tambahkan sedikit jarak antara radio button dan teks */
 }
 
 .submit-button {
@@ -130,4 +173,24 @@
 
 .add-data-button:hover {
   background-color: #006666; /* Darker teal for hover effect */
+}
+
+.coastal-button {
+  background-color: #008080; /* Ganti dengan warna yang diinginkan */
+  color: white; /* Warna teks */
+  border-radius: 8px; /* Mengubah bentuk */
+  border: none; /* Menghapus border */
+  padding: 10px 20px; /* Menambah padding */
+  font-weight: bold; /* Menebalkan teks */
+  transition: background-color 0.3s; /* Efek transisi */
+}
+
+.coastal-button:hover {
+  background-color: #006666; /* Warna saat hover */
+}
+
+.button-sub {
+  display: flex;
+  justify-content: flex-end; /* Aligns buttons to the right */
+  margin-top: 20px;
 }
