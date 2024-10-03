@@ -12,14 +12,14 @@ import { FilterMatchMode } from "primereact/api";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
 
-import "./Orbitasi.css"; // Custom CSS for styling
+import "./JenisLahan.css"; // Custom CSS for styling
 
-const OrbitasiDesa = () => {
+const JenisLahan = () => {
   const [formData, setFormData] = useState({
     uuid: "",
-    kategori: "",
-    nilai: "",
-    satuan: "",
+    jenis: "",
+    nama: "",
+    luas: "",
   });
 
   const [isDialogVisible, setDialogVisible] = useState(false);
@@ -44,13 +44,13 @@ const OrbitasiDesa = () => {
   );
 
   const { data, error, isLoading } = useSWR(
-    "http://localhost:5000/orbitasi",
+    "http://localhost:5000/jenislahan",
     fetcher
   );
 
   useEffect(() => {
-    if (data?.orbitasi) {
-      setDataList(data.orbitasi);
+    if (data?.jenisLahan) {
+      setDataList(data.jenisLahan);
     }
   }, [data]);
 
@@ -73,7 +73,7 @@ const OrbitasiDesa = () => {
     try {
       if (isEditMode) {
         await axiosJWT.patch(
-          `http://localhost:5000/orbitasi/${currentData.uuid}`,
+          `http://localhost:5000/jenislahan/${currentData.uuid}`,
           formData
         );
         toast.current.show({
@@ -83,7 +83,7 @@ const OrbitasiDesa = () => {
           life: 3000,
         });
       } else {
-        await axiosJWT.post("http://localhost:5000/corbitasi", formData);
+        await axiosJWT.post("http://localhost:5000/cjenislahan", formData);
         toast.current.show({
           severity: "success",
           summary: "Success",
@@ -91,7 +91,7 @@ const OrbitasiDesa = () => {
           life: 3000,
         });
       }
-      await mutate("http://localhost:5000/orbitasi");
+      await mutate("http://localhost:5000/jenislahan");
       resetForm();
       setDialogVisible(false);
     } catch (error) {
@@ -113,9 +113,9 @@ const OrbitasiDesa = () => {
   const resetForm = () => {
     setFormData({
       uuid: "",
-      kategori: "",
-      nilai: "",
-      satuan: "",
+      jenis: "",
+      nama: "",
+      luas: "",
     });
     setEditMode(false);
     setCurrentData(null);
@@ -131,14 +131,14 @@ const OrbitasiDesa = () => {
   const deleteData = async (uuid) => {
     if (window.confirm("Are you sure you want to delete this data?")) {
       try {
-        await axiosJWT.delete(`http://localhost:5000/orbitasi/${uuid}`);
+        await axiosJWT.delete(`http://localhost:5000/jenislahan/${uuid}`);
         toast.current.show({
           severity: "success",
           summary: "Success",
           detail: "Data deleted successfully!",
           life: 3000,
         });
-        await mutate("http://localhost:5000/orbitasi");
+        await mutate("http://localhost:5000/jenislahan");
       } catch (error) {
         handleError(error);
       }
@@ -184,7 +184,7 @@ const OrbitasiDesa = () => {
 
   return (
     <div>
-      <h1 className="demografi-header">Orbitasi Desa</h1>
+      <h1 className="demografi-header">Jenis Lahan</h1>
       <Toast ref={toast} />
       <DataTable
         value={dataList}
@@ -195,9 +195,13 @@ const OrbitasiDesa = () => {
         header={header}
         filterDisplay="menu"
       >
-        <Column field="kategori" header="Orbitasi" />
-        <Column field="nilai" header="Nilai" />
-        <Column field="satuan" header="Satuan" />
+        <Column field="jenis" header="Jenis Lahan" />
+        <Column field="nama" header="Nama Lahan" />
+        <Column
+          field="luas"
+          header="Luas"
+          body={(rowData) => `${rowData.luas} Ha`}
+        />
         <Column
           body={(rowData) => (
             <div
@@ -220,7 +224,7 @@ const OrbitasiDesa = () => {
       </DataTable>
 
       <Dialog
-        header={isEditMode ? "Edit Batas Wilayah" : "Add Batas Wilayah"}
+        header={isEditMode ? "Edit Jenis Lahan" : "Add Jenis Lahan"}
         visible={isDialogVisible}
         onHide={closeDialog}
         dismissableMask={true}
@@ -236,50 +240,50 @@ const OrbitasiDesa = () => {
         >
           <form onSubmit={handleSubmit}>
             <Card className="demografi-card" style={{ padding: "20px" }}>
-              <h3 className="section-title">Orbitasi Desa Information</h3>
+              <h3 className="section-title">Informasi Jenis Lahan</h3>
               <div className="form-group">
-                <label htmlFor="Orbitasi Desa">Orbitasi Desa</label>
+                <label htmlFor="Jenis">Jenis Lahan</label>
+                <Dropdown
+                  id="jenis"
+                  name="jenis"
+                  value={formData.jenis}
+                  onChange={handleChange}
+                  options={[
+                    { label: "Tanah Sawah", value: "Tanah Sawah" },
+                    { label: "Tanah Kering", value: "Tanah Kering" },
+                    { label: "Tanah Basah", value: "Tanah Basah" },
+                    { label: "Tanah Hutan", value: "Tanah Hutan" },
+                    { label: "Tanah Perkebunan", value: "Tanah Perkebunan" },
+                    { label: "Tanah Fasum", value: "Tanah Fasum" },
+                  ]}
+                  placeholder="Pilih Jenis Lahan"
+                  className="dropdown-field"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="Nama Lahan">Nama Lahan</label>
                 <InputText
-                  id="kategori"
-                  name="kategori"
-                  value={formData.kategori}
+                  id="nama"
+                  name="nama"
+                  value={formData.nama}
                   onChange={handleChange}
                   className="input-field"
                   required
                 />
               </div>
-              <div
-                className="form-container"
-                style={{ display: "flex", gap: "1rem" }}
-              >
-                <div className="form-group">
-                  <label htmlFor="Nilai">Nilai</label>
+              <div className="form-group">
+                <label htmlFor="Luas">Luas</label>
+                <div className=" p-inputgroup w-full md:w-30rem">
                   <InputText
-                    id="nilai"
-                    name="nilai"
-                    value={formData.nilai}
+                    id="luas"
+                    name="luas"
+                    value={formData.luas}
                     onChange={handleChange}
                     className="input-field"
                     required
                   />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="Satuan">Satuan</label>
-                  <Dropdown
-                    id="satuan"
-                    name="satuan"
-                    value={formData.satuan}
-                    onChange={handleChange}
-                    options={[
-                      { label: "Km", value: "Km" },
-                      { label: "Jam", value: "Jam" },
-                      { label: "Unit", value: "Unit" },
-                    ]}
-                    placeholder="Pilih Satuan"
-                    className="dropdown-field"
-                    required
-                  />
+                  <span className="p-inputgroup-addon rounded-addon">Ha</span>
                 </div>
               </div>
               <div className="button-sub">
@@ -297,4 +301,4 @@ const OrbitasiDesa = () => {
   );
 };
 
-export default OrbitasiDesa;
+export default JenisLahan;

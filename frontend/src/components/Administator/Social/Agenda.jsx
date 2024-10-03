@@ -370,12 +370,14 @@ const Agenda = () => {
                   dateFormat="yy-mm-dd"
                 />
               </div>
-              <Button
-                type="submit"
-                label={isEditMode ? "Update" : "Save"}
-                className="coastal-button submit-button p-button-rounded"
-                style={{ marginTop: "20px" }}
-              />
+              <div className="button-sub">
+                <Button
+                  type="submit"
+                  label={isEditMode ? "Update" : "Save"}
+                  className="coastal-button submit-button p-button-rounded"
+                  style={{ marginTop: "20px" }}
+                />
+              </div>
             </Card>
           </form>
         </div>

@@ -14,6 +14,7 @@ import Visimisi from "./Profil/Visimisi";
 // import Geografi from "./Profil/Geografi";
 import BatasWilayah from "./Profil/BatasWilayah";
 import Orbitasi from "./Profil/Orbitasi";
+import JenisLahan from "./Profil/JenisLahan";
 // Layanan
 import Aktakelahiran from "./Layanan/Aktakelahiran";
 import Kartukeluarga from "./Layanan/Kartukeluarga";
@@ -119,7 +120,7 @@ const Dashboard = () => {
       case "Orbitasi":
         return <Orbitasi />;
       case "JenisLahan":
-        return <div>Jenis Lahan Content</div>;
+        return <JenisLahan />;
       case "PotensiDesa":
         return <div>Potensi Desa</div>;
       case "Aktakelahiran":

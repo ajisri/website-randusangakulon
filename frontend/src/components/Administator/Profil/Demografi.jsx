@@ -27,6 +27,9 @@ const Demografi = () => {
     rt: "",
     rw: "",
     hamlet: "",
+    status_aktif: "",
+    tmt_status_aktif: null,
+    keterangan_status: null,
     religion_id: null,
     file_url: "",
   });
@@ -128,7 +131,7 @@ const Demografi = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleDateChange = (e) => {
+  const handleDateChange = (e, field) => {
     const selectedDate = e.value;
     if (selectedDate) {
       // Create a new Date object, and ensure it's set to the start of the day in UTC
@@ -141,10 +144,10 @@ const Demografi = () => {
       );
       setFormData({
         ...formData,
-        birth_date: adjustedDate.toISOString().split("T")[0], // Format to yyyy-mm-dd
+        [field]: adjustedDate.toISOString().split("T")[0], // Format to yyyy-mm-dd
       });
     } else {
-      setFormData({ ...formData, birth_date: null });
+      setFormData({ ...formData, [field]: null });
     }
   };
 
@@ -166,6 +169,15 @@ const Demografi = () => {
     });
     if (selectedFile) {
       dataToSend.append("file", selectedFile);
+    }
+
+    if (formData.status_aktif === "tidak aktif") {
+      dataToSend.append("tmt_status_aktif", formData.tmt_status_aktif);
+      dataToSend.append("keterangan_status", formData.keterangan_status);
+    } else {
+      // Kosongkan field ini jika status aktif
+      dataToSend.append("tmt_status_aktif", "");
+      dataToSend.append("keterangan_status", "");
     }
 
     try {
@@ -245,6 +257,9 @@ const Demografi = () => {
       rt: "",
       rw: "",
       hamlet: "",
+      status_aktif: "",
+      tmt_status_aktif: "",
+      keterangan_status: "",
       religion_id: null,
       file_url: "",
     });
@@ -317,6 +332,9 @@ const Demografi = () => {
           "rt",
           "rw",
           "hamlet",
+          "status_aktif",
+          "tmt_status_aktif",
+          "keterangan_status",
         ]}
         header={header}
         tableStyle={{ minWidth: "50rem" }}
@@ -336,26 +354,39 @@ const Demografi = () => {
         }}
         className="datagrid"
       >
-        <Column field="nik" header="NIK" />
-        <Column field="name" header="Name" />
-        <Column field="job" header="Job" />
-        <Column field="rt" header="RT" />
-        <Column field="rw" header="RW" />
-        <Column field="hamlet" header="Hamlet" />
+        <Column
+          field="nik"
+          header="NIK"
+          style={{ width: "150px", minWidth: "120px" }} // Lebar tetap dengan batas minimum
+          bodyStyle={{ overflow: "hidden", textOverflow: "ellipsis" }} // Potong teks panjang
+        />
+        <Column
+          field="name"
+          header="Nama"
+          style={{ width: "200px", minWidth: "150px" }} // Lebar tetap dengan batas minimum
+          bodyStyle={{ overflow: "hidden", textOverflow: "ellipsis" }} // Potong teks panjang
+        />
+        <Column
+          field="hamlet"
+          header="Dusun"
+          style={{ width: "200px", minWidth: "150px" }} // Lebar tetap dengan batas minimum
+          bodyStyle={{ overflow: "hidden", textOverflow: "ellipsis" }}
+        />
         <Column
           field="education_id"
-          header="Education"
+          header="Pendidikan"
           body={(rowData) =>
             educationData.find((ed) => ed.id === rowData.education_id)?.level
           }
         />
         <Column
           field="religion_id"
-          header="Religion"
+          header="Agama"
           body={(rowData) =>
             religionData.find((rel) => rel.id === rowData.religion_id)?.name
           }
         />
+        <Column field="status_aktif" header="Status" />
         <Column
           header="Actions"
           body={(rowData) => (
@@ -412,59 +443,86 @@ const Demografi = () => {
         }}
       >
         <Dialog
-          header="Demographic Details"
+          header="Detail Demografi"
           visible={detailDialogVisible}
           onHide={() => setDetailDialogVisible(false)}
           style={{
-            width: "70vw",
+            width: "60vw",
             border: "none",
             boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)",
           }}
         >
           {selectedDemographic && (
             <div className="detail-container">
-              {/* Highlighted important sections */}
-              <h4 style={{ color: "#00796B" }}>Important Information</h4>
-              <div className="detail-row">
-                <span className="detail-label">
-                  <strong>NIK:</strong>
-                </span>
-                <span className="detail-value">{selectedDemographic.nik}</span>
+              <h3 className="detail-title">Informasi Warga</h3>
+              <div className="detail-content">
+                {[
+                  { label: "NIK:", value: selectedDemographic.nik },
+                  { label: "Nama:", value: selectedDemographic.name },
+                  {
+                    label: "Jenis Kelamin:",
+                    value: selectedDemographic.gender,
+                  },
+                  {
+                    label: "Tanggal Lahir:",
+                    value: new Date(
+                      selectedDemographic.birth_date
+                    ).toLocaleDateString(),
+                  },
+                  {
+                    label: "Agama:",
+                    value:
+                      religionData.find(
+                        (ed) => ed.id === selectedDemographic.religion_id
+                      )?.name || "Tidak ada data",
+                  },
+                  {
+                    label: "Pendidikan Terakhir:",
+                    value:
+                      educationData.find(
+                        (ed) => ed.id === selectedDemographic.education_id
+                      )?.level || "Tidak ada data",
+                  },
+                  { label: "Pekerjaan:", value: selectedDemographic.job },
+                  { label: "RT:", value: selectedDemographic.rt },
+                  { label: "RW:", value: selectedDemographic.rw },
+                  { label: "Dusun:", value: selectedDemographic.hamlet },
+                  {
+                    label: "Status Warga:",
+                    value: selectedDemographic.status_aktif,
+                  },
+                  {
+                    label: "TMT Status Warga:",
+                    value:
+                      selectedDemographic.tmt_status_aktif || "Tidak ada data",
+                  },
+                  {
+                    label: "Keterangan Status Warga:",
+                    value:
+                      selectedDemographic.keterangan_status || "Tidak ada data",
+                  },
+                ].map((item, index) => (
+                  <div className="detail-row" key={index}>
+                    <span className="detail-label">{item.label}</span>
+                    <span className="detail-value">{item.value}</span>
+                  </div>
+                ))}
               </div>
-              <div className="detail-row">
-                <span className="detail-label">
-                  <strong>Name:</strong>
-                </span>
-                <span className="detail-value">{selectedDemographic.name}</span>
-              </div>
-              <div className="detail-row">
-                <span className="detail-label">
-                  <strong>Gender:</strong>
-                </span>
-                <span className="detail-value">
-                  {selectedDemographic.gender}
-                </span>
-              </div>
-              <div className="detail-row">
-                <span className="detail-label">
-                  <strong>RT:</strong>
-                </span>
-                <span className="detail-value">{selectedDemographic.rt}</span>
-              </div>
-              <div className="detail-row">
-                <span className="detail-label">
-                  <strong>RW:</strong>
-                </span>
-                <span className="detail-value">{selectedDemographic.rw}</span>
-              </div>
-              <div className="detail-row">
-                <span className="detail-label">
-                  <strong>Hamlet:</strong>
-                </span>
-                <span className="detail-value">
-                  {selectedDemographic.hamlet}
-                </span>
-              </div>
+            </div>
+          )}
+
+          {selectedDemographic.file_url && (
+            <div className="file-preview">
+              <h4>File:</h4>
+              <img
+                src={preview} // Pastikan path ini sesuai dengan server
+                alt="File Preview"
+                style={{
+                  width: "100%",
+                  maxHeight: "300px",
+                  objectFit: "contain",
+                }}
+              />
             </div>
           )}
         </Dialog>
@@ -489,7 +547,7 @@ const Demografi = () => {
         >
           <form onSubmit={handleSubmit} encType="multipart/form-data">
             <Card className="demografi-card">
-              <h3 className="section-title">Demographic Information</h3>
+              <h3 className="section-title">Informasi Demografi</h3>
 
               <div className="form-group">
                 <label htmlFor="nik">
@@ -508,7 +566,7 @@ const Demografi = () => {
 
               <div className="form-group">
                 <label htmlFor="name">
-                  Name <span className="required">*</span>
+                  Nama <span className="required">*</span>
                 </label>
                 <InputText
                   id="name"
@@ -522,31 +580,31 @@ const Demografi = () => {
 
               <div className="form-group">
                 <label htmlFor="gender">
-                  Gender <span className="required">*</span>
+                  Jenis Kelamin <span className="required">*</span>
                 </label>
                 <div className="radio-group">
                   <div className="radio-item">
                     <RadioButton
-                      inputId="male"
+                      inputId="Laki-Laki"
                       name="gender"
-                      value="male"
+                      value="Laki-Laki"
                       onChange={handleChange}
-                      checked={formData.gender === "male"}
+                      checked={formData.gender === "Laki-Laki"}
                     />
-                    <label htmlFor="male" className="radio-label">
-                      Male
+                    <label htmlFor="Laki-Laki" className="radio-label">
+                      Laki-Laki
                     </label>
                   </div>
                   <div className="radio-item">
                     <RadioButton
-                      inputId="female"
+                      inputId="Perempuan"
                       name="gender"
-                      value="female"
+                      value="Perempuan"
                       onChange={handleChange}
-                      checked={formData.gender === "female"}
+                      checked={formData.gender === "Perempuan"}
                     />
-                    <label htmlFor="female" className="radio-label">
-                      Female
+                    <label htmlFor="Perempuan" className="radio-label">
+                      Perempuan
                     </label>
                   </div>
                 </div>
@@ -554,7 +612,7 @@ const Demografi = () => {
 
               <div className="form-group">
                 <label htmlFor="birth_date">
-                  Birth Date <span className="required">*</span>
+                  Tanggal Lahir <span className="required">*</span>
                 </label>
                 <Calendar
                   id="birth_date"
@@ -562,31 +620,40 @@ const Demografi = () => {
                   value={
                     formData.birth_date ? new Date(formData.birth_date) : null
                   }
-                  onChange={handleDateChange}
+                  onChange={(e) => handleDateChange(e, "birth_date")}
                   dateFormat="yy-mm-dd"
                   showIcon
-                  placeholder="Select Birth Date"
+                  placeholder="Select Tanggal"
                   className="input-field"
                 />
               </div>
 
               <div className="form-group">
-                <label htmlFor="marital_status">
-                  Marital Status <span className="required">*</span>
-                </label>
-                <InputText
+                <label htmlFor="Status Kawin">Status Kawin</label>
+                <Dropdown
                   id="marital_status"
                   name="marital_status"
                   value={formData.marital_status}
                   onChange={handleChange}
-                  className="input-field"
+                  options={[
+                    { label: "Kawin Tercatat", value: "Kawin Tercatat" },
+                    {
+                      label: "Kawin Tidak Tercatat",
+                      value: "Kawin Tidak Tercatat",
+                    },
+                    { label: "Cerai Hidup", value: "Cerai Hidup" },
+                    { label: "Cerai Mati", value: "Cerai Mati" },
+                    { label: "Belum Kawin", value: "Belum Kawin" },
+                  ]}
+                  placeholder="Pilih Status Kawin"
+                  className="dropdown-field"
                   required
                 />
               </div>
 
               <div className="form-group">
                 <label htmlFor="education_id">
-                  Education <span className="required">*</span>
+                  Pendidikan Terakhir <span className="required">*</span>
                 </label>
                 <Dropdown
                   id="education_id"
@@ -603,7 +670,7 @@ const Demografi = () => {
               </div>
 
               <div className="form-group">
-                <label htmlFor="job">Job</label>
+                <label htmlFor="job">Pekerjaan</label>
                 <InputText
                   id="job"
                   name="job"
@@ -636,7 +703,7 @@ const Demografi = () => {
               </div>
 
               <div className="form-group">
-                <label htmlFor="hamlet">Hamlet</label>
+                <label htmlFor="hamlet">Dusun</label>
                 <InputText
                   id="hamlet"
                   name="hamlet"
@@ -647,8 +714,75 @@ const Demografi = () => {
               </div>
 
               <div className="form-group">
+                <label htmlFor="status_aktif">Status Warga</label>
+                <div className="radio-group">
+                  <div className="radio-item">
+                    <RadioButton
+                      inputId="aktif"
+                      name="status_aktif"
+                      value="aktif"
+                      onChange={handleChange}
+                      checked={formData.status_aktif === "aktif"}
+                    />
+                    <label htmlFor="aktif" className="radio-label">
+                      Aktif
+                    </label>
+                  </div>
+                  <div className="radio-item">
+                    <RadioButton
+                      inputId="tidak_aktif"
+                      name="status_aktif"
+                      value="tidak_aktif"
+                      onChange={handleChange}
+                      checked={formData.status_aktif === "tidak_aktif"}
+                    />
+                    <label htmlFor="tidak_aktif" className="radio-label">
+                      Tidak Aktif
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {formData.status_aktif === "tidak_aktif" && (
+                <>
+                  <div className="form-group">
+                    <label htmlFor="status">
+                      TMT Status <span className="required">*</span>
+                    </label>
+                    <Calendar
+                      id="tmt_status_aktif"
+                      name="tmt_status_aktif"
+                      value={
+                        formData.tmt_status_aktif
+                          ? new Date(formData.tmt_status_aktif)
+                          : null
+                      }
+                      onChange={(e) => handleDateChange(e, "tmt_status_aktif")}
+                      dateFormat="yy-mm-dd"
+                      showIcon
+                      placeholder="Pilih Tanggal"
+                      className="input-field"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="keterangan_status">
+                      Keterangan Status Warga
+                    </label>
+                    <InputText
+                      id="keterangan_status"
+                      name="keterangan_status"
+                      value={formData.keterangan_status}
+                      onChange={handleChange}
+                      className="input-field"
+                    />
+                  </div>
+                </>
+              )}
+
+              <div className="form-group">
                 <label htmlFor="religion_id">
-                  Religion <span className="required">*</span>
+                  Agama <span className="required">*</span>
                 </label>
                 <Dropdown
                   id="religion_id"
@@ -685,12 +819,13 @@ const Demografi = () => {
                   </div>
                 )}
               </div>
-
-              <Button
-                type="submit"
-                label={isEditMode ? "Update" : "Save"}
-                className="submit-button p-button-rounded p-button-primary"
-              />
+              <div className="button-sub">
+                <Button
+                  type="submit"
+                  label={isEditMode ? "Update" : "Save"}
+                  className="submit-button coastal-button p-button-rounded p-button-primary"
+                />
+              </div>
             </Card>
           </form>
         </Dialog>

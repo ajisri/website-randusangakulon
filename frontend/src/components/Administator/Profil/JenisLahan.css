@@ -61,11 +61,8 @@
 }
 
 .input-field {
-  width: 100%;
-  border: 1px solid #ccc; /* Warna border default */
-  border-radius: 0.5rem; /* Menambahkan sudut melengkung */
-  padding: 0.5rem; /* Menambahkan padding untuk tampilan lebih baik */
-  transition: border-color 0.3s ease; /* Transisi smooth untuk border saat hover */
+  border: 1px solid #ccc; /* Default border color */
+  transition: border-color 0.3s ease; /* Smooth transition for border color */
 }
 
 .input-field:hover {
@@ -83,94 +80,49 @@
   border-radius: 0.5rem;
 }
 
-.dropdown-field:hover {
-  border-color: #00796b !important; /* Teal border on hover */
-}
-
-.dropdown-field:focus {
-  border-color: #00796b !important; /* Teal border when focused */
-  outline: none; /* Remove default outline */
-  box-shadow: 0 0 0.5rem rgba(0, 121, 107, 0.5); /* Optional shadow effect */
+.ha-field {
+  width: 150px;
+  border-radius: 0.5rem;
 }
 
 .detail-container {
   display: flex;
   flex-direction: column;
-  padding: 2.5rem;
-  background-color: #f9f9f9;
-  border-radius: 10px;
-  border: 1px solid #ddd;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-}
-
-.left-column,
-.right-column {
-  width: 50%; /* Membagi dua bagian kolom */
-}
-
-.left-column {
-  border-right: 2px solid #ddd; /* Menambahkan garis vertikal pemisah */
-  padding-right: 1rem;
-}
-
-.right-column {
-  padding-left: 1rem;
-}
-
-.detail-title {
-  color: #00796b;
-  text-align: center;
-  margin-bottom: 2rem; /* Jarak bawah lebih besar */
-  font-size: 1.6rem; /* Ukuran font lebih besar */
-}
-
-.detail-content {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem; /* Jarak antar elemen lebih besar */
+  padding: 2rem;
+  background-color: #fff; /* White background for contrast */
+  border-radius: 10px; /* Rounded corners */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Soft shadow */
 }
 
 .detail-row {
   display: flex;
-  justify-content: space-between;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid #ddd;
+  justify-content: space-between; /* Align labels and values */
+  margin-bottom: 10px; /* Space between rows */
+  padding: 0.5rem 0; /* Vertical padding */
 }
 
 .detail-label {
-  font-size: 1.1rem; /* Sedikit lebih kecil */
-  margin-right: 0.5rem; /* Mengurangi jarak antara label dan value */
-  padding-right: 1rem;
+  font-weight: bold;
+  color: #333; /* Dark gray for a modern look */
+  font-size: 1.1rem; /* Slightly larger font size */
 }
 
 .detail-value {
-  color: #333;
-  text-align: right; /* Rata kiri untuk nilai */
-  font-size: 1.1rem;
-  word-break: break-word;
-}
-
-.detail-row:last-child {
-  border-bottom: none;
+  color: #555; /* Medium gray for contrast */
+  font-size: 1.1rem; /* Match font size with label */
+  text-align: right; /* Align values to the right */
 }
 
 .required {
   color: red;
 }
 
-.radio-group {
-  display: flex; /* Untuk menampilkan radio buttons dan label dalam satu baris */
-  gap: 2rem; /* Mengatur jarak antar radio button */
-  align-items: center; /* Pastikan elemen rata secara vertikal */
-}
-
-.radio-item {
-  display: flex;
-  align-items: center; /* Membuat label sejajar dengan radio button */
-}
-
-.radio-label {
-  margin-left: 0.5rem; /* Tambahkan sedikit jarak antara radio button dan teks */
+.rounded-addon {
+  background-color: #f1f1f1; /* Ubah warna sesuai kebutuhan */
+  border: 1px solid #ccc; /* Ubah warna border sesuai kebutuhan */
+  border-radius: 12px; /* Mengatur border radius untuk rounded */
+  padding: 0.5rem 1rem; /* Tambahkan padding untuk memberi ruang */
+  margin-left: 1px; /* Menyelaraskan dengan border input text */
 }
 
 .submit-button {
