@@ -187,6 +187,9 @@ model Demographics {
   rt             String
   rw             String
   hamlet         String        // Dusun
+  status_aktif   String
+  tmt_status_aktif DateTime
+  keterangan_status String?
   file_url        String?
   religion_id    Int
   religion       Religion      @relation(fields: [religion_id], references: [id]) // Relasi ke Religion

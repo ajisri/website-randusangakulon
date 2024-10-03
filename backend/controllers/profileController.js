@@ -1579,7 +1579,7 @@ export const deleteBatasWilayah = async (req, res) => {
 };
 
 //Orbitasi
-// Get: Ambil semua data batas wilayah (tanpa geography)
+// Get: Ambil semua data Orbitasi (tanpa geography)
 export const getOrbitasiPengunjung = async (req, res) => {
   try {
     const orbitasi = await prisma.orbitasiDesa.findMany();
@@ -1590,7 +1590,7 @@ export const getOrbitasiPengunjung = async (req, res) => {
 
     res.status(200).json({ orbitasi });
   } catch (error) {
-    console.error("Error saat mengambil data batas wilayah:", error);
+    console.error("Error saat mengambil data Orbitasi:", error);
     res.status(500).json({ msg: "Terjadi kesalahan pada server" });
   }
 };
@@ -1613,6 +1613,7 @@ export const getOrbitasiAdmin = async (req, res) => {
     }
 
     const orbitasi = await prisma.orbitasiDesa.findMany();
+    console.log("Data Orbitasi:", orbitasi);
 
     if (orbitasi.length === 0) {
       return res.status(200).json({ orbitasi: [] });
@@ -1621,7 +1622,7 @@ export const getOrbitasiAdmin = async (req, res) => {
     res.status(200).json({ orbitasi });
   } catch (error) {
     console.error(
-      "Error saat mengambil data batas wilayah untuk admin:",
+      "Error saat mengambil data Orbitasi Desa untuk admin:",
       error
     );
     res.status(500).json({ msg: "Terjadi kesalahan pada server" });
