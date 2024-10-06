@@ -1788,7 +1788,7 @@ export const getJenisLahanPengunjung = async (req, res) => {
   }
 };
 
-// Admin: Ambil semua data batas wilayah dengan autentikasi
+// Admin: Ambil semua data Jenis Lahan dengan autentikasi
 export const getJenisLahanAdmin = async (req, res) => {
   try {
     const refreshToken = req.cookies.refreshToken;
@@ -1819,7 +1819,7 @@ export const getJenisLahanAdmin = async (req, res) => {
   }
 };
 
-// Create: Membuat data batas wilayah baru (tanpa geographyId)
+// Create: Membuat data Jenis Lahan baru (tanpa geographyId)
 export const createJenisLahan = async (req, res) => {
   const { jenis, nama, luas } = req.body;
   try {
@@ -1865,7 +1865,7 @@ export const createJenisLahan = async (req, res) => {
   }
 };
 
-// Update: Memperbarui data batas wilayah yang ada
+// Update: Memperbarui data Jenis Lahan yang ada
 export const updateJenisLahan = async (req, res) => {
   const { uuid } = req.params; // Mengambil UUID dari URL params
   const { jenis, nama, luas } = req.body;
@@ -1945,6 +1945,184 @@ export const deleteJenisLahan = async (req, res) => {
     res.status(200).json({ msg: "Jenis Lahan dihapus dengan sukses" });
   } catch (error) {
     console.error("Error saat menghapus Jenis Lahan:", error);
+    res.status(500).json({ msg: "Terjadi kesalahan pada server" });
+  }
+};
+
+//PotensiWisata
+export const getPotensiWisataPengunjung = async (req, res) => {
+  try {
+    const potensiWisata = await prisma.potensiWisata.findMany();
+
+    if (potensiWisata.length === 0) {
+      return res.status(200).json({ potensiWisata: [] });
+    }
+
+    res.status(200).json({ potensiWisata });
+  } catch (error) {
+    console.error("Error saat mengambil data Potensi Wisata:", error);
+    res.status(500).json({ msg: "Terjadi kesalahan pada server" });
+  }
+};
+
+// Admin: Ambil semua data Potensi Wisata dengan autentikasi
+export const getPotensiWisataAdmin = async (req, res) => {
+  try {
+    const refreshToken = req.cookies.refreshToken;
+
+    if (!refreshToken) {
+      return res.status(401).json({ msg: "Token tidak ditemukan" });
+    }
+
+    const admin = await prisma.administrator.findUnique({
+      where: { refresh_token: refreshToken },
+    });
+
+    if (!admin || admin.role !== "administrator") {
+      return res.status(403).json({ msg: "Akses ditolak" });
+    }
+
+    const potensiWisata = await prisma.potensiWisata.findMany();
+    console.log("Potensi Wisata:", potensiWisata);
+
+    if (potensiWisata.length === 0) {
+      return res.status(200).json({ potensiWisata: [] });
+    }
+
+    res.status(200).json({ potensiWisata });
+  } catch (error) {
+    console.error(
+      "Error saat mengambil data Potensi Wisata untuk admin:",
+      error
+    );
+    res.status(500).json({ msg: "Terjadi kesalahan pada server" });
+  }
+};
+
+// Create: Membuat data Potensi Wisata baru (tanpa geographyId)
+export const createPotensiWisata = async (req, res) => {
+  const { jenis, luas } = req.body;
+  try {
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) {
+      return res.status(401).json({ msg: "Token tidak ditemukan" });
+    }
+
+    const admin = await prisma.administrator.findUnique({
+      where: { refresh_token: refreshToken },
+    });
+
+    if (!admin || admin.role !== "administrator") {
+      return res.status(403).json({ msg: "Akses ditolak" });
+    }
+
+    // Validasi input
+    if (!jenis || !luas) {
+      return res.status(400).json({ msg: "Semua field wajib diisi" });
+    }
+
+    const newPotensiWisata = await prisma.potensiWisata.create({
+      data: {
+        jenis,
+        luas: parseFloat(luas),
+      },
+    });
+
+    res.status(201).json({
+      msg: "Potensi Wisata berhasil dibuat",
+      potensiWisata: newPotensiWisata,
+    });
+  } catch (error) {
+    console.error("Error saat membuat Potensi Wisata:", error);
+
+    // Handling error spesifik dari Prisma
+    if (error.code === "P2002") {
+      return res.status(409).json({ msg: "Data Potensi Wisata sudah ada" });
+    }
+
+    res.status(500).json({ msg: "Terjadi kesalahan pada server" });
+  }
+};
+
+// Update: Memperbarui data Potensi Wisata yang ada
+export const updatePotensiWisata = async (req, res) => {
+  const { uuid } = req.params; // Mengambil UUID dari URL params
+  const { jenis, luas } = req.body;
+
+  try {
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) {
+      return res.status(401).json({ msg: "Token tidak ditemukan" });
+    }
+
+    const admin = await prisma.administrator.findUnique({
+      where: { refresh_token: refreshToken },
+    });
+
+    if (!admin || admin.role !== "administrator") {
+      return res.status(403).json({ msg: "Akses ditolak" });
+    }
+
+    const existingPotensiWisata = await prisma.potensiWisata.findUnique({
+      where: { uuid },
+    });
+
+    if (!existingPotensiWisata) {
+      return res.status(404).json({ msg: "Jenis lahan tidak ditemukan" });
+    }
+
+    const updatedPotensiWisata = await prisma.jenisLahan.update({
+      where: { uuid },
+      data: {
+        jenis,
+        luas: parseFloat(luas),
+        updatedAt: new Date(),
+      },
+    });
+
+    res.status(200).json({
+      msg: "Potensi Wisata diperbarui",
+      potensiWisata: updatedPotensiWisata,
+    });
+  } catch (error) {
+    console.error("Error saat memperbarui Potensi Wisata:", error);
+    res.status(500).json({ msg: "Terjadi kesalahan pada server" });
+  }
+};
+
+// Delete: Menghapus data Potensi Wisata berdasarkan UUID
+export const deletePotensiWisata = async (req, res) => {
+  const { uuid } = req.params;
+
+  try {
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) {
+      return res.status(401).json({ msg: "Token tidak ditemukan" });
+    }
+
+    const admin = await prisma.administrator.findUnique({
+      where: { refresh_token: refreshToken },
+    });
+
+    if (!admin || admin.role !== "administrator") {
+      return res.status(403).json({ msg: "Akses ditolak" });
+    }
+
+    const existingPotensiWisata = await prisma.potensiWisata.findUnique({
+      where: { uuid },
+    });
+
+    if (!existingPotensiWisata) {
+      return res.status(404).json({ msg: "Potensi Wisata tidak ditemukan" });
+    }
+
+    await prisma.potensiWisata.delete({
+      where: { uuid },
+    });
+
+    res.status(200).json({ msg: "Potensi Wisata dihapus dengan sukses" });
+  } catch (error) {
+    console.error("Error saat menghapus Potensi Wisata:", error);
     res.status(500).json({ msg: "Terjadi kesalahan pada server" });
   }
 };

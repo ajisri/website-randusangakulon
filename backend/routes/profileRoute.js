@@ -42,6 +42,11 @@ import {
   createJenisLahan,
   updateJenisLahan,
   deleteJenisLahan,
+  getPotensiWisataPengunjung,
+  getPotensiWisataAdmin,
+  createPotensiWisata,
+  updatePotensiWisata,
+  deletePotensiWisata,
 } from "../controllers/profileController.js";
 import { verifyToken, superOnly } from "../middleware/verifyToken.js";
 
@@ -202,10 +207,29 @@ router.delete("/orbitasi/:uuid", verifyToken, superOnly, deleteOrbitasi);
 router.get("/jenislahanpengunjung", getJenisLahanPengunjung);
 //jenislahan admin
 router.get("/jenislahan", verifyToken, superOnly, getJenisLahanAdmin);
-
 // POST route for creating JenisLahan data
 router.post("/cjenislahan", verifyToken, superOnly, createJenisLahan);
 router.patch("/jenislahan/:uuid", verifyToken, superOnly, updateJenisLahan);
 router.delete("/jenislahan/:uuid", verifyToken, superOnly, deleteJenisLahan);
+
+//potensiwisata
+//potensiwisata pengunjung
+router.get("/potensiwisatapengunjung", getPotensiWisataPengunjung);
+//potensiwisata admin
+router.get("/potensiwisata", verifyToken, superOnly, getPotensiWisataAdmin);
+// POST route for creating potensiwisata data
+router.post("/cpotensiwisata", verifyToken, superOnly, createPotensiWisata);
+router.patch(
+  "/potensiwisata/:uuid",
+  verifyToken,
+  superOnly,
+  updatePotensiWisata
+);
+router.delete(
+  "/potensiwisata/:uuid",
+  verifyToken,
+  superOnly,
+  deletePotensiWisata
+);
 
 export default router;
