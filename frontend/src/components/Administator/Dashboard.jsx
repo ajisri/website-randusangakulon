@@ -15,6 +15,7 @@ import Visimisi from "./Profil/Visimisi";
 import BatasWilayah from "./Profil/BatasWilayah";
 import Orbitasi from "./Profil/Orbitasi";
 import JenisLahan from "./Profil/JenisLahan";
+import PotensiWisata from "./Profil/PotensiWisata";
 // Layanan
 import Aktakelahiran from "./Layanan/Aktakelahiran";
 import Kartukeluarga from "./Layanan/Kartukeluarga";
@@ -121,8 +122,8 @@ const Dashboard = () => {
         return <Orbitasi />;
       case "JenisLahan":
         return <JenisLahan />;
-      case "PotensiDesa":
-        return <div>Potensi Desa</div>;
+      case "PotensiWisata":
+        return <PotensiWisata />;
       case "Aktakelahiran":
         return <Aktakelahiran />;
       case "Aktifasibpjs":
@@ -351,7 +352,7 @@ const Dashboard = () => {
                 </div>
 
                 <div
-                  onClick={() => setActiveMenu("PotensiDesa")}
+                  onClick={() => setActiveMenu("PotensiWisata")}
                   className="menu-item"
                   style={{
                     marginBottom: "10px",
@@ -363,7 +364,7 @@ const Dashboard = () => {
                     className="pi pi-fw pi-map"
                     style={{ marginRight: "10px" }}
                   ></i>
-                  {isSidebarHovered && <span>Potensi Desa</span>}
+                  {isSidebarHovered && <span>Potensi Wisata</span>}
                   <Ripple />
                 </div>
               </div>

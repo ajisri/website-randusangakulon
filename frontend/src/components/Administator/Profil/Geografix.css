@@ -64,12 +64,35 @@
   margin-top: 1.5rem;
 }
 
+.custom-button {
+  background-color: #00bcd4; /* Warna biru cerah */
+  border: none;
+  border-radius: 5px; /* Sudut melengkung */
+  color: white;
+  font-weight: bold;
+  padding: 10px 20px; /* Ukuran padding */
+  text-align: center;
+  transition: background-color 0.3s ease, transform 0.3s ease; /* Efek transisi */
+}
+
+.custom-button:hover {
+  background-color: #0097a7; /* Warna lebih gelap saat hover */
+  transform: translateY(-2px); /* Efek naik saat hover */
+}
+
+.custom-button:disabled {
+  background-color: #cccccc !important; /* Warna saat disabled */
+  color: #666666 !important; /* Warna teks saat disabled */
+  cursor: not-allowed;
+}
+
 /* Geografi.css */
 /* Geografi.css */
 .geografi-container {
+  margin-top: 0;
   display: flex;
   flex-direction: column;
-  padding: 1rem;
+  padding: 0;
   min-width: 800px; /* Lebar minimum */
 }
 

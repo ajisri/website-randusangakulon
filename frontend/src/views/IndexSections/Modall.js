@@ -1,10 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import useSWR from "swr"; // Import SWR
 // import axios from "axios";
-import { Chart } from "primereact/chart";
 import { Button, Row, Col } from "reactstrap";
 import { Dialog } from "primereact/dialog";
-import { CustomerService } from "./service/CustomerService";
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 

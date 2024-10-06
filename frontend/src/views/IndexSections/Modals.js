@@ -4,7 +4,7 @@ import useSWR from "swr"; // Import SWR
 import { Chart } from "primereact/chart";
 import { Button, Row, Col } from "reactstrap";
 import { Dialog } from "primereact/dialog";
-// import { CustomerService } from "./service/CustomerService";
+import Geografix from "../../components/Administator/Profil/Geografix";
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
@@ -222,42 +222,6 @@ const Modals = () => {
       });
     }
   }, [demografiData]);
-
-  // useEffect(() => {
-  //   CustomerService.getCustomersMedium().then((data) => setCustomers(data));
-
-  //   const documentStyle = getComputedStyle(document.documentElement);
-  //   const data = {
-  //     labels: ["A", "B", "C"],
-  //     datasets: [
-  //       {
-  //         data: [540, 325, 702],
-  //         backgroundColor: [
-  //           documentStyle.getPropertyValue("--blue-500"),
-  //           documentStyle.getPropertyValue("--yellow-500"),
-  //           documentStyle.getPropertyValue("--green-500"),
-  //         ],
-  //         hoverBackgroundColor: [
-  //           documentStyle.getPropertyValue("--blue-400"),
-  //           documentStyle.getPropertyValue("--yellow-400"),
-  //           documentStyle.getPropertyValue("--green-400"),
-  //         ],
-  //       },
-  //     ],
-  //   };
-  //   const options = {
-  //     plugins: {
-  //       legend: {
-  //         labels: {
-  //           usePointStyle: true,
-  //         },
-  //       },
-  //     },
-  //   };
-
-  //   setChartData(data);
-  //   setChartOptions(options);
-  // }, []);
 
   const dialogFooterTemplate = (hideDialog) => (
     <Button label="Ok" icon="pi pi-check" onClick={hideDialog} />
@@ -494,15 +458,15 @@ const Modals = () => {
             <Dialog
               header="Geografi"
               visible={dialogVisiblege}
-              style={{ width: "75vw" }}
+              style={{ width: "90vw" }}
               maximizable
               modal
-              contentStyle={{ height: "300px" }}
+              contentStyle={{ height: "500px" }}
               onHide={() => setDialogVisiblege(false)}
               footer={dialogFooterTemplate(() => setDialogVisiblege(false))}
             >
               <div className="modal-body col-lg">
-                <p>Desa Randusanga Kulon merupakan daerah pesisir...</p>
+                <Geografix />
               </div>
             </Dialog>
           </div>

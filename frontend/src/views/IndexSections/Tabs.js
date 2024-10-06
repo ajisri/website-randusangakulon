@@ -9,9 +9,9 @@ import {
   TabPane,
 } from "reactstrap";
 import classnames from "classnames";
-import Modals from "./Modals"; // Pastikan Anda mengganti dengan path yang benar
-import Modall from "./Modall"; // Pastikan Anda mengganti dengan path yang benar
-import Modalt from "./Modalt"; // Pastikan Anda mengganti dengan path yang benar
+import Modals from "./Modals";
+import Modall from "./Modall";
+import Modalt from "./Modalt";
 
 class TabsSection extends React.Component {
   state = {
