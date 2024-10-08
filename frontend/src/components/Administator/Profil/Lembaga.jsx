@@ -1,103 +1,338 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import useSWR, { mutate } from "swr";
+import { useNavigate } from "react-router-dom";
+import useAuth from "../../../hooks/useAuth";
 import { Card } from "primereact/card";
 import { InputText } from "primereact/inputtext";
-import { Editor } from "primereact/editor";
-import { FileUpload } from "primereact/fileupload";
-import { RadioButton } from "primereact/radiobutton";
 import { Button } from "primereact/button";
-import "./Editor.css";
+import { Toast } from "primereact/toast";
+import { DataTable } from "primereact/datatable";
+import { Column } from "primereact/column";
+import { FilterMatchMode } from "primereact/api";
+import { Dialog } from "primereact/dialog";
+// import { Dropdown } from "primereact/dropdown";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
-const StrukturOrganisasi = () => {
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [publishStatus, setPublishStatus] = useState("draft");
+import "./Lembaga.css"; // Custom CSS for styling
 
-  const handleFileUpload = (e) => {
-    console.log(e.files);
+const Lembaga = () => {
+  const [formData, setFormData] = useState({
+    uuid: "",
+    nama: "",
+    singkatan: "",
+    dasar_hukum: "",
+    alamat: "",
+    profil: "",
+    visimisi: "",
+    tugaspokok: "",
+  });
+
+  const [isDialogVisible, setDialogVisible] = useState(false);
+  const [isEditMode, setEditMode] = useState(false);
+  const [currentData, setCurrentData] = useState(null);
+  const [dataList, setDataList] = useState([]);
+  const [globalFilterValue, setGlobalFilterValue] = useState("");
+  const [filters, setFilters] = useState({
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+  });
+
+  const navigate = useNavigate();
+  const toast = useRef(null);
+  const axiosJWT = useAuth(navigate);
+
+  const fetcher = useCallback(
+    async (url) => {
+      const response = await axiosJWT.get(url);
+      return response.data;
+    },
+    [axiosJWT]
+  );
+
+  const { data, error, isLoading } = useSWR(
+    "http://localhost:5000/lembaga",
+    fetcher
+  );
+
+  useEffect(() => {
+    if (data?.lembaga) {
+      setDataList(data.lembaga);
+    }
+  }, [data]);
+
+  const onGlobalFilterChange = (e) => {
+    const value = e.target.value;
+    let _filters = { ...filters };
+    _filters["global"].value = value;
+
+    setFilters(_filters);
+    setGlobalFilterValue(value);
   };
 
-  const handlePublish = () => {
-    console.log("Publish status:", publishStatus);
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
+
+  const handleQuillChange = (value, name) => {
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      if (isEditMode) {
+        await axiosJWT.patch(
+          `http://localhost:5000/lembaga/${currentData.uuid}`,
+          formData
+        );
+        toast.current.show({
+          severity: "success",
+          summary: "Success",
+          detail: "Data updated successfully!",
+          life: 3000,
+        });
+      } else {
+        await axiosJWT.post("http://localhost:5000/lembaga", formData);
+        toast.current.show({
+          severity: "success",
+          summary: "Success",
+          detail: "Data created successfully!",
+          life: 3000,
+        });
+      }
+      await mutate("http://localhost:5000/lembaga");
+      resetForm();
+      setDialogVisible(false);
+    } catch (error) {
+      handleError(error);
+    }
+  };
+
+  const handleError = (error) => {
+    const message =
+      error.response?.data?.message || "An unexpected error occurred";
+    toast.current.show({
+      severity: "error",
+      summary: "Error",
+      detail: message,
+      life: 5000,
+    });
+  };
+
+  const resetForm = () => {
+    setFormData({
+      uuid: "",
+      nama: "",
+      singkatan: "",
+      dasar_hukum: "",
+      alamat: "",
+      profil: "",
+      visimisi: "",
+      tugaspokok: "",
+    });
+    setEditMode(false);
+    setCurrentData(null);
+  };
+
+  const editData = (data) => {
+    setFormData(data);
+    setCurrentData(data);
+    setEditMode(true);
+    setDialogVisible(true);
+  };
+
+  const deleteData = async (uuid) => {
+    if (window.confirm("Are you sure you want to delete this data?")) {
+      try {
+        await axiosJWT.delete(`http://localhost:5000/lembaga/${uuid}`);
+        toast.current.show({
+          severity: "success",
+          summary: "Success",
+          detail: "Data deleted successfully!",
+          life: 3000,
+        });
+        await mutate("http://localhost:5000/lembaga");
+      } catch (error) {
+        handleError(error);
+      }
+    }
+  };
+
+  const openDialog = () => {
+    resetForm();
+    setDialogVisible(true);
+  };
+
+  const closeDialog = () => {
+    setDialogVisible(false);
+  };
+
+  const renderHeader = () => {
+    return (
+      <div className="table-header">
+        <span className="p-input-icon-left search-container">
+          <InputText
+            type="search"
+            value={globalFilterValue}
+            onChange={onGlobalFilterChange}
+            placeholder="Pencarian"
+            className="search-input"
+            style={{ width: "300px" }}
+          />
+        </span>
+        <Button
+          label="Add Data"
+          onClick={openDialog}
+          className="add-data-button p-button-rounded p-button-success"
+          icon="pi pi-plus"
+        />
+      </div>
+    );
+  };
+
+  const header = renderHeader();
+
+  if (isLoading) return <p>Loading...</p>;
+  if (error) return <p>{error.message}</p>;
 
   return (
-    <div className="tentang-container">
-      <div className="left-column scrollable-column">
-        <Card title="Create New Post">
-          <div className="p-field">
-            <label htmlFor="file">Upload File</label>
-            <FileUpload
-              name="file"
-              customUpload
-              uploadHandler={handleFileUpload}
-              className="p-fileupload"
-            />
-          </div>
+    <div>
+      <h1 className="demografi-header">Lembaga</h1>
+      <Toast ref={toast} />
+      <DataTable
+        value={dataList}
+        paginator
+        rows={5}
+        rowsPerPageOptions={[5, 10, 25, 50]}
+        filters={filters}
+        header={header}
+        filterDisplay="menu"
+      >
+        <Column field="nama" header="Nama Lembaga" />
+        <Column field="singkatan" header="Singkatan" />
+        <Column field="dasar_hukum" header="Dasar Hukum" />
+        <Column field="alamat" header="Alamat" />
+        <Column
+          body={(rowData) => (
+            <div
+              className="edit-delete-buttons"
+              style={{ display: "flex", gap: "0.5rem" }}
+            >
+              <Button
+                icon="pi pi-pencil"
+                className="edit-button coastal-button p-button-rounded"
+                onClick={() => editData(rowData)}
+              />
+              <Button
+                icon="pi pi-trash"
+                className="delete-button coastal-button p-button-rounded"
+                onClick={() => deleteData(rowData.uuid)}
+              />
+            </div>
+          )}
+        />
+      </DataTable>
 
-          <div className="p-field custom-editor">
-            <label htmlFor="title">Title</label>
-            <InputText
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="p-editor"
-            />
-          </div>
-
-          <div className="p-field custom-editor">
-            <label htmlFor="content">Content</label>
-            <Editor
-              id="content"
-              value={content}
-              onTextChange={(e) => setContent(e.htmlValue)}
-              style={{ height: "200px" }}
-              className="p-editor"
-            />
-          </div>
-        </Card>
-      </div>
-
-      <div className="right-column fixed-column">
-        <Card title="Publish Options">
-          <div className="radio-button-container">
-            <RadioButton
-              inputId="draft"
-              name="status"
-              value="draft"
-              onChange={(e) => setPublishStatus(e.value)}
-              checked={publishStatus === "draft"}
-            />
-            <label htmlFor="draft">Draft</label>
-          </div>
-          <div className="radio-button-container">
-            <RadioButton
-              inputId="publish"
-              name="status"
-              value="publish"
-              onChange={(e) => setPublishStatus(e.value)}
-              checked={publishStatus === "publish"}
-            />
-            <label htmlFor="publish">Publish</label>
-          </div>
-          <div className="button-save">
-            <Button
-              label="Save"
-              raised
-              icon="pi pi-check"
-              onClick={handlePublish}
-              className="mt-2"
-            />
-            <Button
-              label="Discard"
-              raised
-              icon="pi pi-times"
-              className="mt-2"
-            />
-          </div>
-        </Card>
-      </div>
+      <Dialog
+        header={isEditMode ? "Edit Lembaga" : "Add Lembaga"}
+        visible={isDialogVisible}
+        onHide={closeDialog}
+        dismissableMask={true}
+        modal={true}
+        style={{ width: "70vw" }}
+      >
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <form onSubmit={handleSubmit}>
+            <Card className="demografi-card" style={{ padding: "20px" }}>
+              <h3 className="section-title">Informasi Lembaga</h3>
+              <div className="form-group">
+                <label htmlFor="nama">Nama Lembaga</label>
+                <InputText
+                  id="nama"
+                  name="nama"
+                  value={formData.nama}
+                  onChange={handleChange}
+                  className="input-field"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="singkatan">Singkatan</label>
+                <InputText
+                  id="singkatan"
+                  name="singkatan"
+                  value={formData.singkatan}
+                  onChange={handleChange}
+                  className="input-field"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="dasar_hukum">Dasar Hukum</label>
+                <InputText
+                  id="dasar_hukum"
+                  name="dasar_hukum"
+                  value={formData.dasar_hukum}
+                  onChange={handleChange}
+                  className="input-field"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="alamat">Alamat</label>
+                <InputText
+                  id="alamat"
+                  name="alamat"
+                  value={formData.alamat}
+                  onChange={handleChange}
+                  className="input-field"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Profil Lembaga</label>
+                <ReactQuill
+                  value={formData.profil}
+                  onChange={(value) => handleQuillChange(value, "profil")}
+                  className="quill-editor"
+                />
+              </div>
+              <div className="form-group">
+                <label>Visi Misi</label>
+                <ReactQuill
+                  value={formData.visimisi}
+                  onChange={(value) => handleQuillChange(value, "visimisi")}
+                  className="quill-editor"
+                />
+              </div>
+              <div className="form-group">
+                <label>Tugas Pokok</label>
+                <ReactQuill
+                  value={formData.tugaspokok}
+                  onChange={(value) => handleQuillChange(value, "tugaspokok")}
+                  className="quill-editor"
+                />
+              </div>
+              <Button
+                type="submit"
+                label={isEditMode ? "Update Data" : "Add Data"}
+                icon="pi pi-check"
+                className="p-button-rounded p-button-success submit-button"
+                style={{ width: "100%" }}
+              />
+            </Card>
+          </form>
+        </div>
+      </Dialog>
     </div>
   );
 };
 
-export default StrukturOrganisasi;
+export default Lembaga;

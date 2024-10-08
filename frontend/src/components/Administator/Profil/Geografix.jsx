@@ -180,7 +180,7 @@ const Geografix = () => {
                 <Column
                   field="kategori" // Menggunakan 'kategori' dari respons API
                   header="Kategori"
-                  style={{ width: "25rem" }}
+                  style={{ width: "100rem" }}
                 />
                 <Column
                   field="nilai" // Menggunakan 'nilai' dari respons API
@@ -192,7 +192,7 @@ const Geografix = () => {
                       onChange={(e) => options.editorCallback(e.target.value)}
                     />
                   )}
-                  style={{ width: "25rem" }}
+                  style={{ width: "35rem" }}
                 />
               </DataTable>
             )}
@@ -207,7 +207,7 @@ const Geografix = () => {
                 <Column
                   field="kategori" // Menggunakan 'kategori' dari API
                   header="Kategori"
-                  style={{ width: "25rem" }}
+                  style={{ width: "190rem" }}
                 />
                 <Column
                   field="nilai" // Menggunakan 'nilai' dari API

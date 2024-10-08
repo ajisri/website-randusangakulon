@@ -307,6 +307,14 @@ const Demografi = () => {
     }
   };
 
+  useEffect(() => {
+    if (selectedDemographic?.file_url) {
+      setPreview(`http://localhost:5000${selectedDemographic.file_url}`);
+    } else {
+      setPreview("");
+    }
+  }, [selectedDemographic]);
+
   if (isLoading || isEducationLoading || isReligionLoading)
     return <p>Loading...</p>;
   if (error || educationError || religionError)
@@ -511,11 +519,11 @@ const Demografi = () => {
             </div>
           )}
 
-          {selectedDemographic.file_url && (
+          {selectedDemographic?.file_url && (
             <div className="file-preview">
               <h4>File:</h4>
               <img
-                src={preview} // Pastikan path ini sesuai dengan server
+                src={preview} // Menggunakan preview yang sudah di-set
                 alt="File Preview"
                 style={{
                   width: "100%",
