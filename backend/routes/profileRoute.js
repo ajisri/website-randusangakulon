@@ -19,7 +19,7 @@ import {
   createStrukturorganisasi,
   getLembagapengunjung,
   getLembaga,
-  createLembaga,
+  upsertLembaga,
   getDemografipengunjung,
   getDemografiadmin,
   createDemografi,
@@ -105,7 +105,7 @@ router.post(
   verifyToken,
   superOnly,
   upload.single("file"),
-  createLembaga
+  upsertLembaga
 );
 router.get("/demografipengunjung", getDemografipengunjung);
 router.get("/demografi", verifyToken, superOnly, getDemografiadmin);

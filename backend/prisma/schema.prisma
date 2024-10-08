@@ -50,6 +50,7 @@ model Administrator {
   TugasPokok TugasPokok[]
   ProdukHukum ProdukHukum[]
   Agenda Agenda[]
+  ProfilLembaga ProfilLembaga[]
 }
 
 model User{
@@ -88,6 +89,7 @@ model Lembaga {
   singkatan     String
   dasar_hukum   String
   alamat_kantor String
+  file_url        String?
   created_at    DateTime      @default(now())
   updated_at    DateTime      @updatedAt
 
@@ -97,7 +99,23 @@ model Lembaga {
   
   anggota       Demographics[]  @relation("LembagaAnggota")
   visi_misi     VisiMisi[]
+  profil_lembaga     ProfilLembaga[]
   tugas_pokok   TugasPokok[]
+}
+
+// Tabel ProfilLembaga
+model ProfilLembaga {
+  id            Int          @id @default(autoincrement())
+  uuid          String       @default(uuid()) @unique
+  lembagaId     Int
+  lembaga       Lembaga      @relation(fields: [lembagaId], references: [id])
+  content       String       @db.LongText
+  created_at    DateTime     @default(now())
+  updated_at    DateTime     @updatedAt
+  
+  // Relasi ke Administrator yang membuat visi misi
+  createdbyId   Int?
+  createdBy     Administrator? @relation(fields: [createdbyId], references: [id])
 }
 
 // Tabel Visi dan Misi
@@ -106,7 +124,6 @@ model VisiMisi {
   uuid          String       @default(uuid()) @unique
   lembagaId     Int
   lembaga       Lembaga      @relation(fields: [lembagaId], references: [id])
-  title         String
   content       String       @db.LongText
   created_at    DateTime     @default(now())
   updated_at    DateTime     @updatedAt
@@ -123,7 +140,6 @@ model TugasPokok {
   lembagaId     Int
   lembaga       Lembaga      @relation(fields: [lembagaId], references: [id])
   content       String       @db.LongText    // Digunakan untuk Quill Editor
-  file_url      String?      // URL gambar yang diupload (optional)
   created_at    DateTime     @default(now())
   updated_at    DateTime     @updatedAt
   
