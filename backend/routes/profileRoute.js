@@ -2,6 +2,7 @@ import express from "express";
 
 import upload from "../middleware/fileUpload.js";
 import uploadDemografi from "../middleware/fileUploadDemografi.js";
+import uploadLembaga from "../middleware/fileUploadLembaga.js";
 import { body, validationResult } from "express-validator";
 
 import {
@@ -19,7 +20,9 @@ import {
   createStrukturorganisasi,
   getLembagapengunjung,
   getLembaga,
-  upsertLembaga,
+  createLembaga,
+  updateLembaga,
+  addAnggotaToLembaga,
   getDemografipengunjung,
   getDemografiadmin,
   createDemografi,
@@ -104,9 +107,18 @@ router.post(
   "/clembaga",
   verifyToken,
   superOnly,
-  upload.single("file"),
-  upsertLembaga
+  uploadLembaga.single("file"),
+  createLembaga
 );
+router.put(
+  "/clembaga:uuid",
+  verifyToken,
+  superOnly,
+  uploadLembaga.single("file"),
+  updateLembaga
+);
+router.post("/canggota", verifyToken, superOnly, addAnggotaToLembaga);
+
 router.get("/demografipengunjung", getDemografipengunjung);
 router.get("/demografi", verifyToken, superOnly, getDemografiadmin);
 const demographicValidationRules = [

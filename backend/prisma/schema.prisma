@@ -51,6 +51,7 @@ model Administrator {
   ProdukHukum ProdukHukum[]
   Agenda Agenda[]
   ProfilLembaga ProfilLembaga[]
+  Anggota Anggota[]
 }
 
 model User{
@@ -101,6 +102,8 @@ model Lembaga {
   visi_misi     VisiMisi[]
   profil_lembaga     ProfilLembaga[]
   tugas_pokok   TugasPokok[]
+
+  Anggota Anggota[]
 }
 
 // Tabel ProfilLembaga
@@ -148,8 +151,20 @@ model TugasPokok {
   createdBy     Administrator? @relation(fields: [createdbyId], references: [id])
 }
 
-// Tabel Btas wilayah
+model Anggota {
+  id          Int        @id @default(autoincrement())
+  lembagaId   Int
+  lembaga     Lembaga    @relation(fields: [lembagaId], references: [id])
+  demografiId Int
+  demografi   Demographics  @relation(fields: [demografiId], references: [id])
+  jabatan     String
+  createdAt   DateTime   @default(now()) // otomatis menyimpan waktu pembuatan
+  updatedAt   DateTime   @updatedAt      // otomatis meng-update waktu perubahan
+  createdById Int        // foreign key untuk administrator yang membuat
+  createdBy   Administrator @relation(fields: [createdById], references: [id])
+}
 
+// Tabel Batas wilayah
 model BatasWilayah {
   id        Int      @id @default(autoincrement())
   uuid      String   @default(uuid()) @unique
@@ -188,7 +203,6 @@ model PotensiWisata {
   updatedAt DateTime  @updatedAt
 }
 
-
 // Tabel Demografi dengan normalisasi data dan index pada NIK
 model Demographics {
   id             Int           @id @default(autoincrement())
@@ -217,6 +231,7 @@ model Demographics {
 
   @@index([nik])
   Lembaga Lembaga[] @relation("LembagaAnggota")
+  Anggota Anggota[]
 }
 
 // Tabel Agama untuk normalisasi data

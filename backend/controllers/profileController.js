@@ -1948,102 +1948,148 @@ export const getLembaga = async (req, res) => {
 };
 
 // Membuat atau memperbarui data lembaga, termasuk anggota
-export const upsertLembaga = async (req, res) => {
+export const createLembaga = async (req, res) => {
   const {
-    uuid,
     nama,
     singkatan,
     dasar_hukum,
     alamat_kantor,
-    anggotaIds,
-    visiMisi,
-    tugasPokok,
+    profil,
+    visimisi,
+    tugaspokok,
+  } = req.body;
+
+  let file_url = null;
+
+  // Proses upload file jika ada
+  if (req.file) {
+    // Simpan file dan dapatkan URL (atau nama file)
+    file_url = `uploads/lembaga/${req.file.filename}`;
+  }
+
+  // Cek administrator dari token
+  const refreshToken = req.cookies.refreshToken;
+  const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+  const administrator = await prisma.administrator.findUnique({
+    where: { id: decoded.administratorId },
+  });
+
+  if (!administrator || administrator.role !== "administrator") {
+    return res.status(403).json({ msg: "Access denied" });
+  }
+
+  const transaction = await prisma.$transaction(async (prisma) => {
+    // Simpan lembaga
+    const lembaga = await prisma.lembaga.create({
+      data: {
+        nama,
+        singkatan,
+        dasar_hukum,
+        alamat_kantor,
+        file_url,
+        createdbyId: administrator.id, // Mengaitkan lembaga dengan pengguna yang membuat
+      },
+    });
+
+    // Simpan profil lembaga
+    await prisma.profilLembaga.create({
+      data: {
+        lembagaId: lembaga.id,
+        content: profil,
+      },
+    });
+
+    // Simpan visi misi
+    await prisma.visiMisi.create({
+      data: {
+        lembagaId: lembaga.id,
+        content: visimisi,
+      },
+    });
+
+    // Simpan tugas pokok
+    await prisma.tugasPokok.create({
+      data: {
+        lembagaId: lembaga.id,
+        content: tugaspokok,
+      },
+    });
+
+    return lembaga; // Mengembalikan lembaga yang baru dibuat
+  });
+
+  return res.status(201).json({
+    message: "Lembaga created successfully!",
+    lembaga: transaction,
+  });
+};
+
+//update lembaga
+export const updateLembaga = async (req, res) => {
+  const { uuid } = req.params;
+  const {
+    nama,
+    singkatan,
+    dasar_hukum,
+    alamat_kantor,
+    file_url,
+    profil,
+    visimisi,
+    tugaspokok,
   } = req.body;
 
   try {
-    const refreshToken = req.cookies.refreshToken;
-    const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
-    const administrator = await prisma.administrator.findUnique({
-      where: { id: decoded.administratorId },
+    // Update lembaga
+    const updatedLembaga = await Lembaga.update({
+      where: { uuid },
+      data: {
+        nama,
+        singkatan,
+        dasar_hukum,
+        alamat_kantor,
+        file_url,
+        // Anda juga bisa menambahkan properti lain di sini sesuai dengan schema
+      },
     });
 
-    if (!administrator || administrator.role !== "administrator") {
-      return res.status(403).json({ msg: "Akses ditolak" });
+    // Jika lembaga tidak ditemukan
+    if (!updatedLembaga) {
+      return res.status(404).json({ message: "Lembaga not found" });
     }
 
-    const result = await prisma.$transaction(async (tx) => {
-      let lembaga;
+    // Update Profil Lembaga jika ada
+    if (profil) {
+      await ProfilLembaga.upsert({
+        where: { lembagaId: updatedLembaga.id },
+        create: { lembagaId: updatedLembaga.id, content: profil },
+        update: { content: profil },
+      });
+    }
 
-      if (uuid) {
-        lembaga = await tx.lembaga.update({
-          where: { uuid },
-          data: {
-            nama,
-            singkatan,
-            dasar_hukum,
-            alamat_kantor,
-            anggota: {
-              set: [],
-              connect: anggotaIds.map((id) => ({ id })),
-            },
-            visi_misi: {
-              deleteMany: {},
-              create: visiMisi.map((item) => ({
-                title: item.title,
-                content: item.content,
-                createdbyId: administrator.id,
-              })),
-            },
-            tugas_pokok: {
-              deleteMany: {},
-              create: tugasPokok.map((item) => ({
-                content: item.content,
-                file_url: item.file_url,
-                createdbyId: administrator.id,
-              })),
-            },
-            updated_at: new Date(),
-          },
-        });
-      } else {
-        lembaga = await tx.lembaga.create({
-          data: {
-            nama,
-            singkatan,
-            dasar_hukum,
-            alamat_kantor,
-            anggota: {
-              connect: anggotaIds.map((id) => ({ id })),
-            },
-            visi_misi: {
-              create: visiMisi.map((item) => ({
-                title: item.title,
-                content: item.content,
-                createdbyId: administrator.id,
-              })),
-            },
-            tugas_pokok: {
-              create: tugasPokok.map((item) => ({
-                content: item.content,
-                file_url: item.file_url,
-                createdbyId: administrator.id,
-              })),
-            },
-            createdbyId: administrator.id,
-          },
-        });
-      }
+    // Update Visi Misi jika ada
+    if (visimisi) {
+      await VisiMisi.upsert({
+        where: { lembagaId: updatedLembaga.id },
+        create: { lembagaId: updatedLembaga.id, content: visimisi },
+        update: { content: visimisi },
+      });
+    }
 
-      return lembaga;
-    });
+    // Update Tugas Pokok jika ada
+    if (tugaspokok) {
+      await TugasPokok.upsert({
+        where: { lembagaId: updatedLembaga.id },
+        create: { lembagaId: updatedLembaga.id, content: tugaspokok },
+        update: { content: tugaspokok },
+      });
+    }
 
-    res.status(uuid ? 200 : 201).json({
-      msg: uuid ? "Lembaga diperbarui" : "Lembaga berhasil dibuat",
-      lembaga: result,
-    });
+    res
+      .status(200)
+      .json({ message: "Lembaga updated successfully", data: updatedLembaga });
   } catch (error) {
-    console.error("Error:", error.message);
-    res.status(500).json({ msg: error.message });
+    console.error(error); // Tambahkan log error untuk debugging
+    res.status(500).json({ message: "Error updating lembaga", error });
   }
 };
 
@@ -2062,5 +2108,39 @@ export const getLembagapengunjung = async (req, res) => {
   } catch (error) {
     console.error("Error saat mengambil data lembaga untuk pengunjung:", error);
     res.status(500).json({ msg: "Terjadi kesalahan pada server" });
+  }
+};
+
+//tambah anggota
+export const addAnggotaToLembaga = async (req, res) => {
+  const { lembagaId, anggota } = req.body; // anggota di sini adalah array { demografiId, jabatan }
+  const refreshToken = req.cookies.refreshToken;
+
+  try {
+    // Verifikasi administrator yang sedang login
+    const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+    const administrator = await prisma.administrator.findUnique({
+      where: { id: decoded.administratorId },
+    });
+
+    if (!administrator) {
+      return res.status(403).json({ msg: "Akses ditolak" });
+    }
+
+    const result = await prisma.anggota.createMany({
+      data: anggota.map((item) => ({
+        lembagaId,
+        demografiId: item.demografiId,
+        jabatan: item.jabatan,
+        createdById: administrator.id, // menyimpan administrator yang membuat
+        createdAt: new Date(), // waktu pembuatan
+        updatedAt: new Date(), // waktu pembaruan
+      })),
+    });
+
+    res.status(201).json({ msg: "Anggota berhasil ditambahkan", result });
+  } catch (error) {
+    console.error("Error:", error.message);
+    res.status(500).json({ msg: "Terjadi kesalahan server" });
   }
 };
