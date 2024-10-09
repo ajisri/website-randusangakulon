@@ -18,11 +18,11 @@ import "./Lembaga.css"; // Custom CSS for styling
 
 const Lembaga = () => {
   const [formData, setFormData] = useState({
-    uuid: "",
     nama: "",
     singkatan: "",
     dasar_hukum: "",
-    alamat: "",
+    alamat_kantor: "",
+    file_url: null,
     profil: "",
     visimisi: "",
     tugaspokok: "",
@@ -36,6 +36,7 @@ const Lembaga = () => {
   const [filters, setFilters] = useState({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
   });
+  const [imagePreview, setImagePreview] = useState(null); // State untuk menyimpan URL gambar
 
   const navigate = useNavigate();
   const toast = useRef(null);
@@ -55,8 +56,25 @@ const Lembaga = () => {
   );
 
   useEffect(() => {
+    console.log(data); // Cek apakah data terdefinisi
     if (data?.lembaga) {
       setDataList(data.lembaga);
+    }
+  }, [data]);
+
+  useEffect(() => {
+    if (data?.lembaga) {
+      const lembagaData = data.lembaga;
+      setFormData({
+        uuid: lembagaData.uuid,
+        nama: lembagaData.nama,
+        singkatan: lembagaData.singkatan,
+        dasar_hukum: lembagaData.dasar_hukum,
+        alamat_kantor: lembagaData.alamat_kantor,
+        profil: lembagaData.profil || "", // Pastikan ini adalah string HTML
+        visimisi: lembagaData.visimisi || "", // Pastikan ini adalah string HTML
+        tugaspokok: lembagaData.tugaspokok || "", // Pastikan ini adalah string HTML
+      });
     }
   }, [data]);
 
@@ -71,20 +89,50 @@ const Lembaga = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData({ ...formData, [name]: value });
   };
 
-  const handleQuillChange = (value, name) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  const handleQuillChange = (value, field) => {
+    setFormData({ ...formData, [field]: value });
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setFormData({ ...formData, file_url: file });
+
+    // Buat URL untuk menampilkan gambar
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setImagePreview(url);
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Buat data payload untuk dikirim
+    const data = new FormData();
+    data.append("nama", formData.nama);
+    data.append("singkatan", formData.singkatan);
+    data.append("dasar_hukum", formData.dasar_hukum);
+    data.append("alamat_kantor", formData.alamat_kantor);
+    if (formData.file) {
+      data.append("file", formData.file); // Upload file
+    }
+    data.append("profil", formData.profil);
+    data.append("visimisi", formData.visimisi);
+    data.append("tugaspokok", formData.tugaspokok);
+
     try {
       if (isEditMode) {
-        await axiosJWT.patch(
-          `http://localhost:5000/lembaga/${currentData.uuid}`,
-          formData
+        await axiosJWT.put(
+          `http://localhost:5000/clembaga/${currentData.uuid}`,
+          data,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
         );
         toast.current.show({
           severity: "success",
@@ -93,7 +141,11 @@ const Lembaga = () => {
           life: 3000,
         });
       } else {
-        await axiosJWT.post("http://localhost:5000/lembaga", formData);
+        await axiosJWT.post("http://localhost:5000/clembaga", data, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
         toast.current.show({
           severity: "success",
           summary: "Success",
@@ -122,15 +174,16 @@ const Lembaga = () => {
 
   const resetForm = () => {
     setFormData({
-      uuid: "",
       nama: "",
       singkatan: "",
       dasar_hukum: "",
-      alamat: "",
+      alamat_kantor: "",
+      file_url: null,
       profil: "",
       visimisi: "",
       tugaspokok: "",
     });
+    setImagePreview(null);
     setEditMode(false);
     setCurrentData(null);
   };
@@ -201,7 +254,7 @@ const Lembaga = () => {
       <h1 className="demografi-header">Lembaga</h1>
       <Toast ref={toast} />
       <DataTable
-        value={dataList}
+        value={dataList || []}
         paginator
         rows={5}
         rowsPerPageOptions={[5, 10, 25, 50]}
@@ -212,7 +265,7 @@ const Lembaga = () => {
         <Column field="nama" header="Nama Lembaga" />
         <Column field="singkatan" header="Singkatan" />
         <Column field="dasar_hukum" header="Dasar Hukum" />
-        <Column field="alamat" header="Alamat" />
+        <Column field="alamat_kantor" header="alamat_kantor" />
         <Column
           body={(rowData) => (
             <div
@@ -286,11 +339,11 @@ const Lembaga = () => {
                 />
               </div>
               <div className="form-group">
-                <label htmlFor="alamat">Alamat</label>
+                <label htmlFor="alamat_kantor">alamat_kantor</label>
                 <InputText
-                  id="alamat"
-                  name="alamat"
-                  value={formData.alamat}
+                  id="alamat_kantor"
+                  name="alamat_kantor"
+                  value={formData.alamat_kantor}
                   onChange={handleChange}
                   className="input-field"
                   required
@@ -319,6 +372,24 @@ const Lembaga = () => {
                   onChange={(value) => handleQuillChange(value, "tugaspokok")}
                   className="quill-editor"
                 />
+              </div>
+              <div className="form-group">
+                <label>Upload File</label>
+                <input type="file" onChange={handleFileChange} />
+                {imagePreview && (
+                  <div style={{ marginTop: "10px" }}>
+                    <img
+                      src={imagePreview}
+                      alt="Preview"
+                      style={{
+                        width: "100px",
+                        height: "100px",
+                        objectFit: "cover",
+                        marginTop: "10px",
+                      }}
+                    />
+                  </div>
+                )}
               </div>
               <Button
                 type="submit"
