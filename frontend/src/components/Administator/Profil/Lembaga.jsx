@@ -56,25 +56,21 @@ const Lembaga = () => {
   );
 
   useEffect(() => {
-    console.log(data); // Cek apakah data terdefinisi
-    if (data?.lembaga) {
+    if (data?.lembaga && data.lembaga.length > 0) {
       setDataList(data.lembaga);
-    }
-  }, [data]);
-
-  useEffect(() => {
-    if (data?.lembaga) {
-      const lembagaData = data.lembaga;
+      const lembagaData = data.lembaga[0]; // Ambil lembaga pertama jika ada
       setFormData({
         uuid: lembagaData.uuid,
         nama: lembagaData.nama,
         singkatan: lembagaData.singkatan,
         dasar_hukum: lembagaData.dasar_hukum,
         alamat_kantor: lembagaData.alamat_kantor,
-        profil: lembagaData.profilLembaga?.content || "", // Ambil konten dari relasi profilLembaga
-        visimisi: lembagaData.visiMisi?.content || "", // Ambil konten dari relasi visiMisi
-        tugaspokok: lembagaData.tugasPokok?.content || "", // Ambil konten dari relasi tugasPokok
+        profil: lembagaData.profil_lembaga.map((p) => p.content).join(""),
+        visimisi: lembagaData.visi_misi.map((v) => v.content).join(""),
+        tugaspokok: lembagaData.tugas_pokok.map((t) => t.content).join(""),
       });
+    } else {
+      console.error("Data lembaga tidak tersedia atau kosong");
     }
   }, [data]);
 
@@ -92,9 +88,9 @@ const Lembaga = () => {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleQuillChange = (value, field) => {
-    setFormData({ ...formData, [field]: value });
-  };
+  const handleQuillChange = useCallback((value, field) => {
+    setFormData((prevData) => ({ ...prevData, [field]: value }));
+  }, []);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -116,8 +112,8 @@ const Lembaga = () => {
     data.append("singkatan", formData.singkatan);
     data.append("dasar_hukum", formData.dasar_hukum);
     data.append("alamat_kantor", formData.alamat_kantor);
-    if (formData.file) {
-      data.append("file", formData.file); // Upload file
+    if (formData.file_url) {
+      data.append("file", formData.file_url); // Upload file
     }
     data.append("profil", formData.profil);
     data.append("visimisi", formData.visimisi);
@@ -125,8 +121,9 @@ const Lembaga = () => {
 
     try {
       if (isEditMode) {
+        console.log("currentData.uuid:", currentData.uuid);
         await axiosJWT.put(
-          `http://localhost:5000/clembaga/${currentData.uuid}`,
+          `http://localhost:5000/ulembaga/${currentData.uuid}`,
           data,
           {
             headers: {
@@ -188,12 +185,12 @@ const Lembaga = () => {
     setCurrentData(null);
   };
 
-  const editData = (data) => {
-    setFormData(data);
-    setCurrentData(data);
-    setEditMode(true);
-    setDialogVisible(true);
-  };
+  // const editData = (data) => {
+  //   setFormData(data);
+  //   setCurrentData(data);
+  //   setEditMode(true);
+  //   setDialogVisible(true);
+  // };
 
   const deleteData = async (uuid) => {
     if (window.confirm("Are you sure you want to delete this data?")) {
@@ -210,6 +207,22 @@ const Lembaga = () => {
         handleError(error);
       }
     }
+  };
+
+  const openEditDialog = (rowData) => {
+    setFormData({
+      uuid: rowData.uuid,
+      nama: rowData.nama,
+      singkatan: rowData.singkatan,
+      dasar_hukum: rowData.dasar_hukum,
+      alamat_kantor: rowData.alamat_kantor,
+      profil: rowData.profil_lembaga.map((p) => p.content).join(""),
+      visimisi: rowData.visi_misi.map((v) => v.content).join(""),
+      tugaspokok: rowData.tugas_pokok.map((t) => t.content).join(""),
+    });
+    setCurrentData(rowData);
+    setEditMode(true);
+    setDialogVisible(true);
   };
 
   const openDialog = () => {
@@ -275,7 +288,7 @@ const Lembaga = () => {
               <Button
                 icon="pi pi-pencil"
                 className="edit-button coastal-button p-button-rounded"
-                onClick={() => editData(rowData)}
+                onClick={() => openEditDialog(rowData)}
               />
               <Button
                 icon="pi pi-trash"
@@ -339,7 +352,7 @@ const Lembaga = () => {
                 />
               </div>
               <div className="form-group">
-                <label htmlFor="alamat_kantor">alamat_kantor</label>
+                <label htmlFor="alamat_kantor">Alamat Kantor</label>
                 <InputText
                   id="alamat_kantor"
                   name="alamat_kantor"
