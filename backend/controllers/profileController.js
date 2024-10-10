@@ -1995,7 +1995,7 @@ export const createLembaga = async (req, res) => {
     // Simpan profil lembaga
     await prisma.profilLembaga.create({
       data: {
-        lembagaId: lembaga.id,
+        lembagaId: lembaga.uuid,
         content: profil,
       },
     });
@@ -2003,7 +2003,7 @@ export const createLembaga = async (req, res) => {
     // Simpan visi misi
     await prisma.visiMisi.create({
       data: {
-        lembagaId: lembaga.id,
+        lembagaId: lembaga.uuid,
         content: visimisi,
       },
     });
@@ -2011,7 +2011,7 @@ export const createLembaga = async (req, res) => {
     // Simpan tugas pokok
     await prisma.tugasPokok.create({
       data: {
-        lembagaId: lembaga.id,
+        lembagaId: lembaga.uuid,
         content: tugaspokok,
       },
     });
@@ -2033,64 +2033,92 @@ export const updateLembaga = async (req, res) => {
     singkatan,
     dasar_hukum,
     alamat_kantor,
-    file_url,
     profil,
     visimisi,
     tugaspokok,
   } = req.body;
+  const file = req.file;
 
   try {
-    // Update lembaga
-    const updatedLembaga = await Lembaga.update({
-      where: { uuid },
-      data: {
-        nama,
-        singkatan,
-        dasar_hukum,
-        alamat_kantor,
-        file_url,
-        // Anda juga bisa menambahkan properti lain di sini sesuai dengan schema
-      },
+    const result = await prisma.$transaction(async (tx) => {
+      const existingLembaga = await tx.Lembaga.findUnique({
+        where: { uuid },
+      });
+
+      if (!existingLembaga) {
+        res.status(404).json({ message: "Lembaga not found" });
+        throw new Error("Lembaga not found"); // Untuk menghentikan transaksi
+      }
+
+      let filePathToDelete = null;
+      if (file && existingLembaga.file_url) {
+        filePathToDelete = path.join(
+          __dirname,
+          "..",
+          "uploads/lembaga",
+          path.basename(existingLembaga.file_url)
+        );
+      }
+
+      const updatedLembaga = await tx.Lembaga.update({
+        where: { uuid },
+        data: {
+          nama,
+          singkatan,
+          dasar_hukum,
+          alamat_kantor,
+          file_url: file
+            ? `/uploads/lembaga/${file.filename}`
+            : existingLembaga.file_url,
+        },
+      });
+
+      await Promise.all([
+        profil &&
+          tx.ProfilLembaga.upsert({
+            where: { lembagaId: updatedLembaga.uuid },
+            update: { content: profil },
+            create: { lembagaId: updatedLembaga.uuid, content: profil },
+          }),
+        visimisi &&
+          tx.VisiMisi.upsert({
+            where: { lembagaId: updatedLembaga.uuid },
+            update: { content: visimisi },
+            create: { lembagaId: updatedLembaga.uuid, content: visimisi },
+          }),
+        tugaspokok &&
+          tx.TugasPokok.upsert({
+            where: { lembagaId: updatedLembaga.uuid },
+            update: { content: tugaspokok },
+            create: { lembagaId: updatedLembaga.uuid, content: tugaspokok },
+          }),
+      ]);
+
+      // Operasi penghapusan file lama secara asinkron
+      if (filePathToDelete) {
+        try {
+          await fs.promises.access(filePathToDelete);
+          await fs.promises.unlink(filePathToDelete);
+          console.log(`Successfully deleted old file: ${filePathToDelete}`);
+        } catch (fileError) {
+          console.error(
+            `Failed to delete old file: ${filePathToDelete}`,
+            fileError
+          );
+        }
+      }
+
+      return updatedLembaga;
     });
-
-    // Jika lembaga tidak ditemukan
-    if (!updatedLembaga) {
-      return res.status(404).json({ message: "Lembaga not found" });
-    }
-
-    // Update Profil Lembaga jika ada
-    if (profil) {
-      await ProfilLembaga.upsert({
-        where: { lembagaId: updatedLembaga.id },
-        create: { lembagaId: updatedLembaga.id, content: profil },
-        update: { content: profil },
-      });
-    }
-
-    // Update Visi Misi jika ada
-    if (visimisi) {
-      await VisiMisi.upsert({
-        where: { lembagaId: updatedLembaga.id },
-        create: { lembagaId: updatedLembaga.id, content: visimisi },
-        update: { content: visimisi },
-      });
-    }
-
-    // Update Tugas Pokok jika ada
-    if (tugaspokok) {
-      await TugasPokok.upsert({
-        where: { lembagaId: updatedLembaga.id },
-        create: { lembagaId: updatedLembaga.id, content: tugaspokok },
-        update: { content: tugaspokok },
-      });
-    }
 
     res
       .status(200)
-      .json({ message: "Lembaga updated successfully", data: updatedLembaga });
+      .json({ message: "Lembaga updated successfully", data: result });
   } catch (error) {
-    console.error(error); // Tambahkan log error untuk debugging
-    res.status(500).json({ message: "Error updating lembaga", error });
+    console.error("Error updating lembaga:", error.message, error.stack);
+    res
+      .status(500)
+      .json({ message: "Error updating lembaga", error: error.message });
   }
 };
 

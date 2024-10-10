@@ -111,7 +111,7 @@ router.post(
   createLembaga
 );
 router.put(
-  "/clembaga:uuid",
+  "/ulembaga/:uuid",
   verifyToken,
   superOnly,
   uploadLembaga.single("file"),
