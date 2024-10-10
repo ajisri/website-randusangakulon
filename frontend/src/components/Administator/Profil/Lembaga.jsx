@@ -71,9 +71,9 @@ const Lembaga = () => {
         singkatan: lembagaData.singkatan,
         dasar_hukum: lembagaData.dasar_hukum,
         alamat_kantor: lembagaData.alamat_kantor,
-        profil: lembagaData.profil || "", // Pastikan ini adalah string HTML
-        visimisi: lembagaData.visimisi || "", // Pastikan ini adalah string HTML
-        tugaspokok: lembagaData.tugaspokok || "", // Pastikan ini adalah string HTML
+        profil: lembagaData.profilLembaga?.content || "", // Ambil konten dari relasi profilLembaga
+        visimisi: lembagaData.visiMisi?.content || "", // Ambil konten dari relasi visiMisi
+        tugaspokok: lembagaData.tugasPokok?.content || "", // Ambil konten dari relasi tugasPokok
       });
     }
   }, [data]);
