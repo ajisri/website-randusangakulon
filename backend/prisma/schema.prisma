@@ -153,10 +153,11 @@ model TugasPokok {
 
 model Anggota {
   id          Int        @id @default(autoincrement())
-  lembagaId   Int
-  lembaga     Lembaga    @relation(fields: [lembagaId], references: [id])
-  demografiId Int
-  demografi   Demographics  @relation(fields: [demografiId], references: [id])
+  uuid        String     @default(uuid()) @unique
+  lembagaId   String     @unique
+  lembaga     Lembaga    @relation(fields: [lembagaId], references: [uuid])
+  demografiId String     @unique
+  demografi   Demographics  @relation(fields: [demografiId], references: [uuid])
   jabatan     String
   createdAt   DateTime   @default(now()) // otomatis menyimpan waktu pembuatan
   updatedAt   DateTime   @updatedAt      // otomatis meng-update waktu perubahan
