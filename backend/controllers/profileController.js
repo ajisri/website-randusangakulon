@@ -1934,6 +1934,7 @@ export const getLembaga = async (req, res) => {
     const lembagaList = await prisma.lembaga.findMany({
       include: {
         anggota: { select: { uuid: true, nik: true, name: true } },
+        profil_lembaga: true,
         visi_misi: true,
         tugas_pokok: true,
         createdBy: true,
