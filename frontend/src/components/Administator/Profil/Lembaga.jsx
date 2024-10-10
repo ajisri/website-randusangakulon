@@ -28,6 +28,10 @@ const Lembaga = () => {
     tugaspokok: "",
   });
 
+  const [jabatans, setJabatans] = useState([
+    { namaJabatan: "", namaPemegangJabatan: "", demografiId: "" },
+  ]);
+
   const [isDialogVisible, setDialogVisible] = useState(false);
   const [isEditMode, setEditMode] = useState(false);
   const [currentData, setCurrentData] = useState(null);
@@ -65,6 +69,7 @@ const Lembaga = () => {
         singkatan: lembagaData.singkatan,
         dasar_hukum: lembagaData.dasar_hukum,
         alamat_kantor: lembagaData.alamat_kantor,
+        file_url: lembagaData.file_url,
         profil: lembagaData.profil_lembaga.map((p) => p.content).join(""),
         visimisi: lembagaData.visi_misi.map((v) => v.content).join(""),
         tugaspokok: lembagaData.tugas_pokok.map((t) => t.content).join(""),
@@ -103,6 +108,29 @@ const Lembaga = () => {
     }
   };
 
+  // Fungsi untuk menambah jabatan baru
+  const handleAddJabatan = () => {
+    setJabatans([
+      ...jabatans,
+      { namaJabatan: "", namaPemegangJabatan: "", demografiId: "" },
+    ]);
+  };
+
+  // Fungsi untuk menghapus jabatan
+  const handleRemoveJabatan = (index) => {
+    const newJabatans = [...jabatans];
+    newJabatans.splice(index, 1); // Hapus jabatan berdasarkan index
+    setJabatans(newJabatans);
+  };
+
+  // Fungsi untuk mengubah value jabatan
+  const handleJabatanChange = (index, e) => {
+    const { name, value } = e.target;
+    const newJabatans = [...jabatans];
+    newJabatans[index][name] = value; // Update value berdasarkan index
+    setJabatans(newJabatans);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -118,6 +146,8 @@ const Lembaga = () => {
     data.append("profil", formData.profil);
     data.append("visimisi", formData.visimisi);
     data.append("tugaspokok", formData.tugaspokok);
+
+    data.append("jabatans", JSON.stringify(jabatans));
 
     try {
       if (isEditMode) {
@@ -183,6 +213,9 @@ const Lembaga = () => {
     setImagePreview(null);
     setEditMode(false);
     setCurrentData(null);
+    setJabatans([
+      { namaJabatan: "", namaPemegangJabatan: "", demografiId: "" },
+    ]); // Reset jabatan
   };
 
   // const editData = (data) => {
@@ -216,11 +249,23 @@ const Lembaga = () => {
       singkatan: rowData.singkatan,
       dasar_hukum: rowData.dasar_hukum,
       alamat_kantor: rowData.alamat_kantor,
+      file_url: rowData.file_url,
       profil: rowData.profil_lembaga.map((p) => p.content).join(""),
       visimisi: rowData.visi_misi.map((v) => v.content).join(""),
       tugaspokok: rowData.tugas_pokok.map((t) => t.content).join(""),
     });
     setCurrentData(rowData);
+    console.log("URL gambar dari server:", rowData.file_url); // Debug: pastikan URL dari server benar
+
+    // Pastikan URL gambar absolut
+    if (typeof rowData.file_url === "string") {
+      const fullUrl = `http://localhost:5000${rowData.file_url}`;
+      console.log("Full URL gambar:", fullUrl); // Debug URL absolut
+      setImagePreview(fullUrl);
+    } else if (rowData.file_url instanceof File) {
+      const url = URL.createObjectURL(rowData.file_url);
+      setImagePreview(url); // Buat preview jika file baru di-upload
+    }
     setEditMode(true);
     setDialogVisible(true);
   };
@@ -278,7 +323,7 @@ const Lembaga = () => {
         <Column field="nama" header="Nama Lembaga" />
         <Column field="singkatan" header="Singkatan" />
         <Column field="dasar_hukum" header="Dasar Hukum" />
-        <Column field="alamat_kantor" header="alamat_kantor" />
+        <Column field="alamat_kantor" header="Alamat Kantor" />
         <Column
           body={(rowData) => (
             <div
@@ -362,6 +407,52 @@ const Lembaga = () => {
                   required
                 />
               </div>
+              <h3 className="section-title">Jabatan dalam Lembaga</h3>
+              {jabatans.map((jabatan, index) => (
+                <div key={index} className="jabatan-form-group">
+                  <label htmlFor={`namaJabatan-${index}`}>Nama Jabatan</label>
+                  <InputText
+                    id={`namaJabatan-${index}`}
+                    name="namaJabatan"
+                    value={jabatan.namaJabatan}
+                    onChange={(e) => handleJabatanChange(index, e)}
+                    required
+                  />
+                  <label htmlFor={`namaPemegangJabatan-${index}`}>
+                    Nama Pemegang Jabatan
+                  </label>
+                  <InputText
+                    id={`namaPemegangJabatan-${index}`}
+                    name="namaPemegangJabatan"
+                    value={jabatan.namaPemegangJabatan}
+                    onChange={(e) => handleJabatanChange(index, e)}
+                    required
+                  />
+                  <label htmlFor={`demografiId-${index}`}>Demografi ID</label>
+                  <InputText
+                    id={`demografiId-${index}`}
+                    name="demografiId"
+                    value={jabatan.demografiId}
+                    onChange={(e) => handleJabatanChange(index, e)}
+                  />
+                  <Button
+                    type="button"
+                    label="Remove"
+                    icon="pi pi-minus"
+                    className="p-button-danger"
+                    onClick={() => handleRemoveJabatan(index)}
+                    style={{ marginTop: "10px" }}
+                  />
+                </div>
+              ))}
+              <Button
+                type="button"
+                label="Add Jabatan"
+                icon="pi pi-plus"
+                className="p-button-primary"
+                onClick={handleAddJabatan}
+                style={{ marginTop: "20px" }}
+              />
               <div className="form-group">
                 <label>Profil Lembaga</label>
                 <ReactQuill
