@@ -1933,7 +1933,20 @@ export const getLembaga = async (req, res) => {
 
     const lembagaList = await prisma.lembaga.findMany({
       include: {
-        anggota: { select: { uuid: true, nik: true, name: true } },
+        Anggota: {
+          // Gunakan nama relasi yang benar yaitu 'Anggota'
+          select: {
+            demografi: {
+              // Mengakses data dari 'Demographics' melalui relasi 'demografi' di dalam 'Anggota'
+              select: {
+                uuid: true,
+                nik: true,
+                name: true,
+              },
+            },
+            jabatan: true, // Termasuk jabatan jika diperlukan
+          },
+        },
         profil_lembaga: true,
         visi_misi: true,
         tugas_pokok: true,
@@ -1958,13 +1971,17 @@ export const createLembaga = async (req, res) => {
     profil,
     visimisi,
     tugaspokok,
+    jabatans,
   } = req.body;
+
+  // Parsing data jabatans dari JSON string
+  const parsedJabatans = JSON.parse(jabatans);
+  console.log("Jabatans yang diterima di server:", parsedJabatans);
 
   let file_url = null;
 
   // Proses upload file jika ada
   if (req.file) {
-    // Simpan file dan dapatkan URL (atau nama file)
     file_url = `uploads/lembaga/${req.file.filename}`;
   }
 
@@ -1979,50 +1996,90 @@ export const createLembaga = async (req, res) => {
     return res.status(403).json({ msg: "Access denied" });
   }
 
-  const transaction = await prisma.$transaction(async (prisma) => {
-    // Simpan lembaga
-    const lembaga = await prisma.lembaga.create({
-      data: {
-        nama,
-        singkatan,
-        dasar_hukum,
-        alamat_kantor,
-        file_url,
-        createdbyId: administrator.id, // Mengaitkan lembaga dengan pengguna yang membuat
-      },
+  try {
+    const transaction = await prisma.$transaction(async (prisma) => {
+      // Simpan lembaga
+      const lembaga = await prisma.lembaga.create({
+        data: {
+          nama,
+          singkatan,
+          dasar_hukum,
+          alamat_kantor,
+          file_url,
+          createdbyId: administrator.id,
+        },
+      });
+
+      // Simpan profil lembaga
+      await prisma.profilLembaga.create({
+        data: {
+          lembagaId: lembaga.uuid,
+          content: profil,
+        },
+      });
+
+      // Simpan visi misi
+      await prisma.visiMisi.create({
+        data: {
+          lembagaId: lembaga.uuid,
+          content: visimisi,
+        },
+      });
+
+      // Simpan tugas pokok
+      await prisma.tugasPokok.create({
+        data: {
+          lembagaId: lembaga.uuid,
+          content: tugaspokok,
+        },
+      });
+
+      // Simpan jabatans dalam lembaga
+      for (const jabatan of parsedJabatans) {
+        try {
+          await prisma.anggota.create({
+            data: {
+              lembagaId: lembaga.uuid, // Pastikan lembagaId diisi dengan benar
+              jabatan: jabatan.namaJabatan,
+              demografiId: jabatan.demografiId,
+              createdById: administrator.id,
+              lembaga: {
+                connect: {
+                  uuid: lembaga.uuid, // Menghubungkan anggota dengan lembaga yang baru saja dibuat
+                },
+              },
+              demografi: {
+                connect: {
+                  uuid: jabatan.demografiId, // Menghubungkan dengan demografi yang sudah ada
+                },
+              },
+            },
+          });
+          console.log(
+            `Berhasil menyimpan jabatan: ${jabatan.namaJabatan} dengan demografiId: ${jabatan.demografiId}`
+          );
+        } catch (error) {
+          console.error(
+            `Error saat menyimpan jabatan: ${jabatan.namaJabatan}`,
+            error
+          );
+          // Anda bisa mengabaikan kesalahan ini dan melanjutkan
+        }
+      }
+
+      return lembaga;
     });
 
-    // Simpan profil lembaga
-    await prisma.profilLembaga.create({
-      data: {
-        lembagaId: lembaga.uuid,
-        content: profil,
-      },
+    return res.status(201).json({
+      message: "Lembaga created successfully!",
+      lembaga: transaction,
     });
-
-    // Simpan visi misi
-    await prisma.visiMisi.create({
-      data: {
-        lembagaId: lembaga.uuid,
-        content: visimisi,
-      },
-    });
-
-    // Simpan tugas pokok
-    await prisma.tugasPokok.create({
-      data: {
-        lembagaId: lembaga.uuid,
-        content: tugaspokok,
-      },
-    });
-
-    return lembaga; // Mengembalikan lembaga yang baru dibuat
-  });
-
-  return res.status(201).json({
-    message: "Lembaga created successfully!",
-    lembaga: transaction,
-  });
+  } catch (error) {
+    console.error("Error saat membuat lembaga:", error);
+    return res
+      .status(500)
+      .json({ msg: "Internal Server Error", error: error.message });
+  }
 };
 
 //update lembaga
@@ -2036,6 +2093,7 @@ export const updateLembaga = async (req, res) => {
     profil,
     visimisi,
     tugaspokok,
+    jabatans,
   } = req.body;
   const file = req.file;
 
@@ -2093,6 +2151,28 @@ export const updateLembaga = async (req, res) => {
             create: { lembagaId: updatedLembaga.uuid, content: tugaspokok },
           }),
       ]);
+
+      const parsedJabatans = JSON.parse(jabatans); // Parsing data jabatan
+      const jabatanPromises = parsedJabatans.map(async (jabatan) => {
+        return tx.anggota.upsert({
+          where: {
+            lembagaId_namaJabatan: {
+              lembagaId: updatedLembaga.uuid, // Pastikan ini sesuai dengan UUID lembaga yang diperbarui
+              jabatan: jabatan.namaJabatan,
+            },
+          },
+          update: {
+            demografiId: jabatan.demografiId, // Mengupdate demografiId
+          },
+          create: {
+            lembagaId: updatedLembaga.uuid, // Pastikan ini mengacu pada UUID lembaga yang sudah diperbarui
+            jabatan: jabatan.namaJabatan,
+            demografiId: jabatan.demografiId,
+          },
+        });
+      });
+
+      await Promise.all(jabatanPromises);
 
       // Operasi penghapusan file lama secara asinkron
       if (filePathToDelete) {

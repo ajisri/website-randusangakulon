@@ -97,12 +97,9 @@ model Lembaga {
   // Always refer to an Administrator
   createdbyId   Int
   createdBy     Administrator  @relation(fields: [createdbyId], references: [id])
-  
-  anggota       Demographics[]  @relation("LembagaAnggota")
   visi_misi     VisiMisi[]
   profil_lembaga     ProfilLembaga[]
   tugas_pokok   TugasPokok[]
-
   Anggota Anggota[]
 }
 
@@ -154,9 +151,9 @@ model TugasPokok {
 model Anggota {
   id          Int        @id @default(autoincrement())
   uuid        String     @default(uuid()) @unique
-  lembagaId   String     @unique
-  lembaga     Lembaga    @relation(fields: [lembagaId], references: [uuid])
-  demografiId String     @unique
+  lembagaDesaid   String     
+  lembaga     Lembaga    @relation(fields: [lembagaDesaid], references: [uuid])
+  demografiId String     
   demografi   Demographics  @relation(fields: [demografiId], references: [uuid])
   jabatan     String
   createdAt   DateTime   @default(now()) // otomatis menyimpan waktu pembuatan
@@ -231,7 +228,6 @@ model Demographics {
   updated_by     String?
 
   @@index([nik])
-  Lembaga Lembaga[] @relation("LembagaAnggota")
   Anggota Anggota[]
 }
 
