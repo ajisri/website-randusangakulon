@@ -7,6 +7,7 @@ import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
 import { DataTable } from "primereact/datatable";
+import { Dropdown } from "primereact/dropdown";
 import { Column } from "primereact/column";
 import { FilterMatchMode } from "primereact/api";
 import { Dialog } from "primereact/dialog";
@@ -29,9 +30,10 @@ const Lembaga = () => {
   });
 
   const [jabatans, setJabatans] = useState([
-    { namaJabatan: "", namaPemegangJabatan: "", demografiId: "" },
+    { namaJabatan: "", demografiId: "" },
   ]);
 
+  const [demografiOptions, setDemografiOptions] = useState([]); // State untuk menyimpan data demografi dari API
   const [isDialogVisible, setDialogVisible] = useState(false);
   const [isEditMode, setEditMode] = useState(false);
   const [currentData, setCurrentData] = useState(null);
@@ -79,6 +81,43 @@ const Lembaga = () => {
     }
   }, [data]);
 
+  const {
+    data: demografiData,
+    error: demografiError,
+    isLoading: demografiLoading,
+  } = useSWR(
+    "http://localhost:5000/demografi", // Endpoint API demografi
+    fetcher
+  );
+
+  useEffect(() => {
+    if (demografiData && demografiData.demographics) {
+      console.log("Data Demografi:", demografiData.demographics); // Logging untuk cek isi data
+
+      const formattedDemografi = demografiData.demographics.map((item) => ({
+        label: item.name, // Ubah ini sesuai properti yang benar, dalam kasus ini `name`
+        value: item.uuid, // Gunakan `id` sebagai value
+      }));
+      setDemografiOptions(formattedDemografi); // Update dropdown options dengan data yang sudah di-format
+    }
+  }, [demografiData]);
+
+  useEffect(() => {
+    if (demografiLoading) {
+      // Jika sedang loading, tampilkan teks atau spinner
+      console.log("Sedang memuat data demografi...");
+    }
+  }, [demografiLoading]);
+
+  useEffect(() => {
+    if (demografiError) {
+      console.error(
+        "Terjadi kesalahan saat memuat data demografi:",
+        demografiError
+      );
+    }
+  }, [demografiError]);
+
   const onGlobalFilterChange = (e) => {
     const value = e.target.value;
     let _filters = { ...filters };
@@ -109,11 +148,13 @@ const Lembaga = () => {
   };
 
   // Fungsi untuk menambah jabatan baru
-  const handleAddJabatan = () => {
-    setJabatans([
-      ...jabatans,
-      { namaJabatan: "", namaPemegangJabatan: "", demografiId: "" },
-    ]);
+  const handleJabatanChange = (index, e) => {
+    const { name, value } = e.target;
+    console.log(`Mengubah ${name} untuk jabatan ke-${index} menjadi ${value}`); // Log untuk memeriksa perubahan
+    const newJabatans = [...jabatans];
+    newJabatans[index][name] = value; // Update state jabatan sesuai name
+    console.log("State jabatans setelah perubahan:", newJabatans); // Log state setelah perubahan
+    setJabatans(newJabatans); // Set state baru
   };
 
   // Fungsi untuk menghapus jabatan
@@ -123,17 +164,13 @@ const Lembaga = () => {
     setJabatans(newJabatans);
   };
 
-  // Fungsi untuk mengubah value jabatan
-  const handleJabatanChange = (index, e) => {
-    const { name, value } = e.target;
-    const newJabatans = [...jabatans];
-    newJabatans[index][name] = value; // Update value berdasarkan index
-    setJabatans(newJabatans);
+  const handleAddJabatan = () => {
+    setJabatans([...jabatans, { namaJabatan: "", demografiId: "" }]);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    console.log("Jabatans yang akan dikirim:", jabatans);
     // Buat data payload untuk dikirim
     const data = new FormData();
     data.append("nama", formData.nama);
@@ -213,9 +250,7 @@ const Lembaga = () => {
     setImagePreview(null);
     setEditMode(false);
     setCurrentData(null);
-    setJabatans([
-      { namaJabatan: "", namaPemegangJabatan: "", demografiId: "" },
-    ]); // Reset jabatan
+    setJabatans([{ namaJabatan: "", demografiId: "" }]); // Reset jabatan
   };
 
   // const editData = (data) => {
@@ -386,17 +421,6 @@ const Lembaga = () => {
                 />
               </div>
               <div className="form-group">
-                <label htmlFor="dasar_hukum">Dasar Hukum</label>
-                <InputText
-                  id="dasar_hukum"
-                  name="dasar_hukum"
-                  value={formData.dasar_hukum}
-                  onChange={handleChange}
-                  className="input-field"
-                  required
-                />
-              </div>
-              <div className="form-group">
                 <label htmlFor="alamat_kantor">Alamat Kantor</label>
                 <InputText
                   id="alamat_kantor"
@@ -407,52 +431,67 @@ const Lembaga = () => {
                   required
                 />
               </div>
+              <div className="form-group">
+                <label htmlFor="dasar_hukum">Dasar Hukum</label>
+                <InputText
+                  id="dasar_hukum"
+                  name="dasar_hukum"
+                  value={formData.dasar_hukum}
+                  onChange={handleChange}
+                  className="input-field"
+                  required
+                />
+              </div>
               <h3 className="section-title">Jabatan dalam Lembaga</h3>
               {jabatans.map((jabatan, index) => (
-                <div key={index} className="jabatan-form-group">
+                <div key={index} className="jabatan-container">
                   <label htmlFor={`namaJabatan-${index}`}>Nama Jabatan</label>
                   <InputText
                     id={`namaJabatan-${index}`}
                     name="namaJabatan"
+                    className="jabatan-input"
                     value={jabatan.namaJabatan}
                     onChange={(e) => handleJabatanChange(index, e)}
                     required
                   />
-                  <label htmlFor={`namaPemegangJabatan-${index}`}>
-                    Nama Pemegang Jabatan
-                  </label>
-                  <InputText
-                    id={`namaPemegangJabatan-${index}`}
-                    name="namaPemegangJabatan"
-                    value={jabatan.namaPemegangJabatan}
-                    onChange={(e) => handleJabatanChange(index, e)}
-                    required
-                  />
-                  <label htmlFor={`demografiId-${index}`}>Demografi ID</label>
-                  <InputText
-                    id={`demografiId-${index}`}
-                    name="demografiId"
-                    value={jabatan.demografiId}
-                    onChange={(e) => handleJabatanChange(index, e)}
-                  />
+                  <label htmlFor={`demografiId-${index}`}>Nama Anggota</label>
+                  {demografiLoading ? (
+                    <p>Loading data demografi...</p> // Loading state
+                  ) : demografiError ? (
+                    <p>Terjadi kesalahan: {demografiError.message}</p> // Tampilkan error jika ada
+                  ) : (
+                    <Dropdown
+                      id={`demografiId-${index}`}
+                      name="demografiId"
+                      value={jabatan.demografiId}
+                      className="jabatan-input dropdown-input"
+                      options={demografiOptions}
+                      onChange={(e) => handleJabatanChange(index, e)}
+                      required
+                    />
+                  )}
                   <Button
                     type="button"
-                    label="Remove"
+                    label="Hapus"
                     icon="pi pi-minus"
-                    className="p-button-danger"
+                    className="remove-button"
                     onClick={() => handleRemoveJabatan(index)}
                     style={{ marginTop: "10px" }}
                   />
                 </div>
               ))}
-              <Button
-                type="button"
-                label="Add Jabatan"
-                icon="pi pi-plus"
-                className="p-button-primary"
-                onClick={handleAddJabatan}
-                style={{ marginTop: "20px" }}
-              />
+              <div className="add-jabatan-container">
+                {" "}
+                {/* Tambahkan container untuk tombol Add Jabatan */}
+                <Button
+                  type="button"
+                  label="Tambah"
+                  raised
+                  rounded
+                  icon="pi pi-plus"
+                  onClick={handleAddJabatan}
+                />
+              </div>
               <div className="form-group">
                 <label>Profil Lembaga</label>
                 <ReactQuill

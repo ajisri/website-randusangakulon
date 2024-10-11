@@ -63,6 +63,7 @@
 .input-field {
   border: 1px solid #ccc; /* Default border color */
   transition: border-color 0.3s ease; /* Smooth transition for border color */
+  padding: 8px;
 }
 
 .input-field:hover {
@@ -83,6 +84,51 @@
 .ha-field {
   width: 150px;
   border-radius: 0.5rem;
+}
+
+.jabatan-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.jabatan-input {
+  flex: 1;
+  margin-right: 10px;
+  width: 45%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+  height: 40px; /* Tinggi yang seragam */
+}
+
+.remove-button {
+  background-color: red;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+.remove-button:hover {
+  background-color: darkred;
+}
+
+.add-jabatan-container {
+  display: flex;
+  justify-content: flex-end; /* Posisikan tombol ke kanan */
+  margin-top: 20px;
+}
+
+.dropdown-input {
+  width: 45%;
+  padding: 8px;
+  border-radius: 8px;
+  height: 40px; /* Sama dengan form lainnya */
 }
 
 .detail-container {
@@ -178,4 +224,20 @@
   display: flex;
   justify-content: flex-end; /* Aligns buttons to the right */
   margin-top: 20px;
+}
+
+@media (max-width: 768px) {
+  .jabatan-container {
+    flex-direction: column; /* Ubah ke kolom pada layar kecil */
+  }
+
+  .jabatan-input {
+    width: 100%; /* Buat input full width pada layar kecil */
+    margin-right: 0;
+    margin-bottom: 10px;
+  }
+
+  .remove-button {
+    width: 100%; /* Buat tombol full width pada layar kecil */
+  }
 }
