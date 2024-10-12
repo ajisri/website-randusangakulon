@@ -86,21 +86,34 @@
   border-radius: 0.5rem;
 }
 
-.jabatan-container {
+.jabatan-row {
   display: flex;
-  align-items: center;
-  margin-bottom: 10px;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
-.jabatan-input {
+.form-group {
   flex: 1;
-  margin-right: 10px;
-  width: 45%;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 14px;
-  height: 40px; /* Tinggi yang seragam */
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+}
+
+.jabatan-input,
+.dropdown-field {
+  width: 100%;
+  padding: 0.5rem;
+  box-sizing: border-box;
+}
+
+.remove-button {
+  align-self: flex-start; /* Posisi tombol hapus di bagian atas */
+  margin-top: 1.5rem;
 }
 
 .remove-button {
@@ -110,6 +123,7 @@
   padding: 8px 12px;
   cursor: pointer;
   border-radius: 8px;
+  margin-top: 1.5rem;
   font-size: 14px;
   transition: background-color 0.3s ease;
 }

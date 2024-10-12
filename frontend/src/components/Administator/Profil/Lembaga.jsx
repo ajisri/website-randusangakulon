@@ -30,7 +30,7 @@ const Lembaga = () => {
   });
 
   const [jabatans, setJabatans] = useState([
-    { namaJabatan: "", demografiId: "" },
+    { uuid: "", namaJabatan: "", demografiId: "" },
   ]);
 
   const [demografiOptions, setDemografiOptions] = useState([]); // State untuk menyimpan data demografi dari API
@@ -60,6 +60,12 @@ const Lembaga = () => {
     "http://localhost:5000/lembaga",
     fetcher
   );
+
+  useEffect(() => {
+    if (data?.lembaga && data.lembaga.length > 0) {
+      setDataList(data.lembaga);
+    }
+  }, [data]);
 
   useEffect(() => {
     if (data?.lembaga && data.lembaga.length > 0) {
@@ -150,11 +156,22 @@ const Lembaga = () => {
   // Fungsi untuk menambah jabatan baru
   const handleJabatanChange = (index, e) => {
     const { name, value } = e.target;
-    console.log(`Mengubah ${name} untuk jabatan ke-${index} menjadi ${value}`); // Log untuk memeriksa perubahan
-    const newJabatans = [...jabatans];
-    newJabatans[index][name] = value; // Update state jabatan sesuai name
-    console.log("State jabatans setelah perubahan:", newJabatans); // Log state setelah perubahan
-    setJabatans(newJabatans); // Set state baru
+
+    setJabatans((prevJabatans) => {
+      const updatedJabatans = [...prevJabatans];
+      if (name === "namaJabatan") {
+        updatedJabatans[index].namaJabatan = value; // Update nama jabatan
+      } else if (name === "demografiId") {
+        updatedJabatans[index].demografiId = value; // Update demografiId
+        const selectedDemografi = demografiOptions.find(
+          (option) => option.value === value
+        );
+        updatedJabatans[index].uuid = selectedDemografi
+          ? selectedDemografi.uuid
+          : null; // Ambil UUID dari demografi
+      }
+      return updatedJabatans;
+    });
   };
 
   // Fungsi untuk menghapus jabatan
@@ -183,6 +200,7 @@ const Lembaga = () => {
     data.append("profil", formData.profil);
     data.append("visimisi", formData.visimisi);
     data.append("tugaspokok", formData.tugaspokok);
+    console.log("Jabatans yang disimpan:", jabatans);
 
     data.append("jabatans", JSON.stringify(jabatans));
 
@@ -278,6 +296,11 @@ const Lembaga = () => {
   };
 
   const openEditDialog = (rowData) => {
+    console.log("Row Data yang diterima:", rowData);
+    if (!rowData) {
+      console.error("rowData tidak terdefinisi");
+      return;
+    }
     setFormData({
       uuid: rowData.uuid,
       nama: rowData.nama,
@@ -290,9 +313,26 @@ const Lembaga = () => {
       tugaspokok: rowData.tugas_pokok.map((t) => t.content).join(""),
     });
     setCurrentData(rowData);
-    console.log("URL gambar dari server:", rowData.file_url); // Debug: pastikan URL dari server benar
 
-    // Pastikan URL gambar absolut
+    if (rowData.Anggota) {
+      // Sesuaikan dengan struktur data dari controller
+      console.log("Data Anggota:", rowData.Anggota);
+      if (rowData.Anggota.length > 0) {
+        const formattedJabatans = rowData.Anggota.map((anggota) => ({
+          uuid: anggota.uuid || null,
+          namaJabatan: anggota.jabatan,
+          demografiId: anggota.demografi.uuid,
+        }));
+        setJabatans(formattedJabatans);
+      } else {
+        console.warn("Tidak ada data Anggota yang ditemukan");
+        setJabatans([{ namaJabatan: "", demografiId: "" }]);
+      }
+    } else {
+      console.error("rowData.Anggota tidak ada");
+      setJabatans([{ namaJabatan: "", demografiId: "" }]);
+    }
+    console.log("Data Jabatan saat dibuka:", rowData.jabatans);
     if (typeof rowData.file_url === "string") {
       const fullUrl = `http://localhost:5000${rowData.file_url}`;
       console.log("Full URL gambar:", fullUrl); // Debug URL absolut
@@ -444,40 +484,45 @@ const Lembaga = () => {
               </div>
               <h3 className="section-title">Jabatan dalam Lembaga</h3>
               {jabatans.map((jabatan, index) => (
-                <div key={index} className="jabatan-container">
-                  <label htmlFor={`namaJabatan-${index}`}>Nama Jabatan</label>
-                  <InputText
-                    id={`namaJabatan-${index}`}
-                    name="namaJabatan"
-                    className="jabatan-input"
-                    value={jabatan.namaJabatan}
-                    onChange={(e) => handleJabatanChange(index, e)}
-                    required
-                  />
-                  <label htmlFor={`demografiId-${index}`}>Nama Anggota</label>
-                  {demografiLoading ? (
-                    <p>Loading data demografi...</p> // Loading state
-                  ) : demografiError ? (
-                    <p>Terjadi kesalahan: {demografiError.message}</p> // Tampilkan error jika ada
-                  ) : (
-                    <Dropdown
-                      id={`demografiId-${index}`}
-                      name="demografiId"
-                      value={jabatan.demografiId}
-                      className="jabatan-input dropdown-input"
-                      options={demografiOptions}
+                <div key={index} className="jabatan-row">
+                  <div className="form-group">
+                    <label htmlFor={`namaJabatan-${index}`}>Nama Jabatan</label>
+                    <InputText
+                      id={`namaJabatan-${index}`}
+                      name="namaJabatan"
+                      className="jabatan-input"
+                      value={jabatan.namaJabatan}
                       onChange={(e) => handleJabatanChange(index, e)}
                       required
                     />
-                  )}
-                  <Button
-                    type="button"
-                    label="Hapus"
-                    icon="pi pi-minus"
-                    className="remove-button"
-                    onClick={() => handleRemoveJabatan(index)}
-                    style={{ marginTop: "10px" }}
-                  />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor={`demografiId-${index}`}>Nama Anggota</label>
+                    {demografiLoading ? (
+                      <p>Loading data demografi...</p>
+                    ) : demografiError ? (
+                      <p>Terjadi kesalahan: {demografiError.message}</p>
+                    ) : (
+                      <Dropdown
+                        id={`demografiId-${index}`}
+                        name="demografiId"
+                        value={jabatan.demografiId}
+                        className="dropdown-field"
+                        options={demografiOptions}
+                        onChange={(e) => handleJabatanChange(index, e)}
+                        required
+                      />
+                    )}
+                  </div>
+                  <div className="remove-button-container">
+                    <Button
+                      type="button"
+                      label="Hapus"
+                      icon="pi pi-minus"
+                      className="remove-button"
+                      onClick={() => handleRemoveJabatan(index)}
+                    />
+                  </div>
                 </div>
               ))}
               <div className="add-jabatan-container">
