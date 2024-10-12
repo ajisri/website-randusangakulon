@@ -1934,17 +1934,16 @@ export const getLembaga = async (req, res) => {
     const lembagaList = await prisma.lembaga.findMany({
       include: {
         Anggota: {
-          // Gunakan nama relasi yang benar yaitu 'Anggota'
           select: {
+            uuid: true, // Sertakan uuid anggota
+            jabatan: true, // Sertakan jabatan anggota
             demografi: {
-              // Mengakses data dari 'Demographics' melalui relasi 'demografi' di dalam 'Anggota'
               select: {
                 uuid: true,
                 nik: true,
                 name: true,
               },
             },
-            jabatan: true, // Termasuk jabatan jika diperlukan
           },
         },
         profil_lembaga: true,
@@ -1953,6 +1952,11 @@ export const getLembaga = async (req, res) => {
         createdBy: true,
       },
     });
+
+    // Logika untuk mengembalikan array lembagaList jika ada data, atau objek kosong jika lembagaList kosong
+    if (lembagaList.length === 0) {
+      return res.status(200).json({ lembaga: {} });
+    }
 
     res.status(200).json({ lembaga: lembagaList });
   } catch (error) {
@@ -2039,20 +2043,10 @@ export const createLembaga = async (req, res) => {
         try {
           await prisma.anggota.create({
             data: {
-              lembagaId: lembaga.uuid, // Pastikan lembagaId diisi dengan benar
+              lembagaDesaid: lembaga.uuid, // Menghubungkan langsung dengan UUID lembaga
               jabatan: jabatan.namaJabatan,
-              demografiId: jabatan.demografiId,
+              demografiDesaid: jabatan.demografiId, // Menghubungkan langsung dengan UUID demografi
               createdById: administrator.id,
-              lembaga: {
-                connect: {
-                  uuid: lembaga.uuid, // Menghubungkan anggota dengan lembaga yang baru saja dibuat
-                },
-              },
-              demografi: {
-                connect: {
-                  uuid: jabatan.demografiId, // Menghubungkan dengan demografi yang sudah ada
-                },
-              },
             },
           });
           console.log(
@@ -2063,7 +2057,6 @@ export const createLembaga = async (req, res) => {
             `Error saat menyimpan jabatan: ${jabatan.namaJabatan}`,
             error
           );
-          // Anda bisa mengabaikan kesalahan ini dan melanjutkan
         }
       }
 
@@ -2096,6 +2089,7 @@ export const updateLembaga = async (req, res) => {
     jabatans,
   } = req.body;
   const file = req.file;
+  console.log("Request body:", req.body);
 
   try {
     const result = await prisma.$transaction(async (tx) => {
@@ -2153,25 +2147,59 @@ export const updateLembaga = async (req, res) => {
       ]);
 
       const parsedJabatans = JSON.parse(jabatans); // Parsing data jabatan
-      const jabatanPromises = parsedJabatans.map(async (jabatan) => {
-        return tx.anggota.upsert({
-          where: {
-            lembagaId_namaJabatan: {
-              lembagaId: updatedLembaga.uuid, // Pastikan ini sesuai dengan UUID lembaga yang diperbarui
-              jabatan: jabatan.namaJabatan,
-            },
-          },
-          update: {
-            demografiId: jabatan.demografiId, // Mengupdate demografiId
-          },
-          create: {
-            lembagaId: updatedLembaga.uuid, // Pastikan ini mengacu pada UUID lembaga yang sudah diperbarui
-            jabatan: jabatan.namaJabatan,
-            demografiId: jabatan.demografiId,
-          },
-        });
+      // Dapatkan semua UUID anggota yang ada di database
+      const existingAnggota = await tx.Anggota.findMany({
+        where: { lembagaDesaid: updatedLembaga.uuid },
       });
 
+      const existingAnggotaUuids = existingAnggota.map(
+        (anggota) => anggota.uuid
+      );
+
+      // Proses untuk menghapus anggota yang tidak ada dalam parsedJabatans
+      for (const anggota of existingAnggota) {
+        const isStillPresent = parsedJabatans.some(
+          (jabatanData) => jabatanData.uuid === anggota.uuid
+        );
+        if (!isStillPresent) {
+          await tx.Anggota.delete({
+            where: { uuid: anggota.uuid },
+          });
+        }
+      }
+
+      // Meng-update atau menambah anggota yang ada dalam parsedJabatans
+      const jabatanPromises = parsedJabatans.map(async (jabatanData) => {
+        if (jabatanData.uuid) {
+          // Jika UUID tersedia, gunakan UUID untuk upsert
+          return tx.Anggota.upsert({
+            where: { uuid: jabatanData.uuid },
+            update: {
+              lembagaDesaid: updatedLembaga.uuid,
+              jabatan: jabatanData.namaJabatan,
+              demografiDesaid: jabatanData.demografiId,
+            },
+            create: {
+              lembagaDesaid: updatedLembaga.uuid,
+              jabatan: jabatanData.namaJabatan,
+              demografiDesaid: jabatanData.demografiId,
+              createdById: existingLembaga.createdbyId,
+            },
+          });
+        } else {
+          // Jika UUID tidak ada, maka buat anggota baru
+          return tx.Anggota.create({
+            data: {
+              lembagaDesaid: updatedLembaga.uuid,
+              jabatan: jabatanData.namaJabatan,
+              demografiDesaid: jabatanData.demografiId,
+              createdById: existingLembaga.createdbyId,
+            },
+          });
+        }
+      });
+
+      // Ganti Promise.all(jabatanPromises) dengan
       await Promise.all(jabatanPromises);
 
       // Operasi penghapusan file lama secara asinkron

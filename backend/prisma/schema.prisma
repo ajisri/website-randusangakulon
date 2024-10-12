@@ -153,8 +153,8 @@ model Anggota {
   uuid        String     @default(uuid()) @unique
   lembagaDesaid   String     
   lembaga     Lembaga    @relation(fields: [lembagaDesaid], references: [uuid])
-  demografiId String     
-  demografi   Demographics  @relation(fields: [demografiId], references: [uuid])
+  demografiDesaid String     
+  demografi   Demographics  @relation(fields: [demografiDesaid], references: [uuid])
   jabatan     String
   createdAt   DateTime   @default(now()) // otomatis menyimpan waktu pembuatan
   updatedAt   DateTime   @updatedAt      // otomatis meng-update waktu perubahan
