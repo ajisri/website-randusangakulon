@@ -482,61 +482,6 @@ const Lembaga = () => {
                   required
                 />
               </div>
-              <h3 className="section-title">Jabatan dalam Lembaga</h3>
-              {jabatans.map((jabatan, index) => (
-                <div key={index} className="jabatan-row">
-                  <div className="form-group">
-                    <label htmlFor={`namaJabatan-${index}`}>Nama Jabatan</label>
-                    <InputText
-                      id={`namaJabatan-${index}`}
-                      name="namaJabatan"
-                      className="jabatan-input"
-                      value={jabatan.namaJabatan}
-                      onChange={(e) => handleJabatanChange(index, e)}
-                      required
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor={`demografiId-${index}`}>Nama Anggota</label>
-                    {demografiLoading ? (
-                      <p>Loading data demografi...</p>
-                    ) : demografiError ? (
-                      <p>Terjadi kesalahan: {demografiError.message}</p>
-                    ) : (
-                      <Dropdown
-                        id={`demografiId-${index}`}
-                        name="demografiId"
-                        value={jabatan.demografiId}
-                        className="dropdown-field"
-                        options={demografiOptions}
-                        onChange={(e) => handleJabatanChange(index, e)}
-                        required
-                      />
-                    )}
-                  </div>
-                  <div className="remove-button-container">
-                    <Button
-                      type="button"
-                      label="Hapus"
-                      icon="pi pi-minus"
-                      className="remove-button"
-                      onClick={() => handleRemoveJabatan(index)}
-                    />
-                  </div>
-                </div>
-              ))}
-              <div className="add-jabatan-container">
-                {" "}
-                {/* Tambahkan container untuk tombol Add Jabatan */}
-                <Button
-                  type="button"
-                  label="Tambah"
-                  raised
-                  rounded
-                  icon="pi pi-plus"
-                  onClick={handleAddJabatan}
-                />
-              </div>
               <div className="form-group">
                 <label>Profil Lembaga</label>
                 <ReactQuill
@@ -579,9 +524,63 @@ const Lembaga = () => {
                   </div>
                 )}
               </div>
+              <h3 className="section-title">Jabatan dalam Lembaga</h3>
+              {jabatans.map((jabatan, index) => (
+                <div key={index} className="jabatan-row">
+                  <div className="form-group">
+                    <label htmlFor={`namaJabatan-${index}`}>Nama Jabatan</label>
+                    <InputText
+                      id={`namaJabatan-${index}`}
+                      name="namaJabatan"
+                      className="jabatan-input input-field"
+                      value={jabatan.namaJabatan}
+                      onChange={(e) => handleJabatanChange(index, e)}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor={`demografiId-${index}`}>Nama Anggota</label>
+                    {demografiLoading ? (
+                      <p>Loading data demografi...</p>
+                    ) : demografiError ? (
+                      <p>Terjadi kesalahan: {demografiError.message}</p>
+                    ) : (
+                      <Dropdown
+                        id={`demografiId-${index}`}
+                        name="demografiId"
+                        value={jabatan.demografiId}
+                        className="input-field"
+                        options={demografiOptions}
+                        onChange={(e) => handleJabatanChange(index, e)}
+                        required
+                      />
+                    )}
+                  </div>
+                  <div className="remove-button-container">
+                    <Button
+                      type="button"
+                      label="Hapus"
+                      className="remove-button"
+                      onClick={() => handleRemoveJabatan(index)}
+                    />
+                  </div>
+                </div>
+              ))}
+              <div className="add-jabatan-container">
+                {" "}
+                {/* Tambahkan container untuk tombol Add Jabatan */}
+                <Button
+                  type="button"
+                  label="Tambah"
+                  raised
+                  rounded
+                  icon="pi pi-plus"
+                  onClick={handleAddJabatan}
+                />
+              </div>
               <Button
                 type="submit"
-                label={isEditMode ? "Update Data" : "Add Data"}
+                label={isEditMode ? "Simpan Data" : "Simpan Data"}
                 icon="pi pi-check"
                 className="p-button-rounded p-button-success submit-button"
                 style={{ width: "100%" }}
