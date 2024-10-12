@@ -22,7 +22,7 @@ import {
   getLembaga,
   createLembaga,
   updateLembaga,
-  addAnggotaToLembaga,
+  deleteLembaga,
   getDemografipengunjung,
   getDemografiadmin,
   createDemografi,
@@ -117,7 +117,7 @@ router.put(
   uploadLembaga.single("file"),
   updateLembaga
 );
-router.post("/canggota", verifyToken, superOnly, addAnggotaToLembaga);
+router.delete("/lembaga/:uuid", verifyToken, superOnly, deleteLembaga);
 
 router.get("/demografipengunjung", getDemografipengunjung);
 router.get("/demografi", verifyToken, superOnly, getDemografiadmin);

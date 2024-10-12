@@ -2248,36 +2248,57 @@ export const getLembagapengunjung = async (req, res) => {
   }
 };
 
-//tambah anggota
-export const addAnggotaToLembaga = async (req, res) => {
-  const { lembagaId, anggota } = req.body; // anggota di sini adalah array { demografiId, jabatan }
-  const refreshToken = req.cookies.refreshToken;
+export const deleteLembaga = async (req, res) => {
+  const { uuid } = req.params;
 
   try {
-    // Verifikasi administrator yang sedang login
-    const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
-    const administrator = await prisma.administrator.findUnique({
-      where: { id: decoded.administratorId },
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) {
+      return res.status(401).json({ msg: "Token tidak ditemukan" });
+    }
+
+    const admin = await prisma.administrator.findUnique({
+      where: { refresh_token: refreshToken },
     });
 
-    if (!administrator) {
+    if (!admin || admin.role !== "administrator") {
       return res.status(403).json({ msg: "Akses ditolak" });
     }
 
-    const result = await prisma.anggota.createMany({
-      data: anggota.map((item) => ({
-        lembagaId,
-        demografiId: item.demografiId,
-        jabatan: item.jabatan,
-        createdById: administrator.id, // menyimpan administrator yang membuat
-        createdAt: new Date(), // waktu pembuatan
-        updatedAt: new Date(), // waktu pembaruan
-      })),
+    const existingLembaga = await prisma.Lembaga.findUnique({
+      where: { uuid },
     });
 
-    res.status(201).json({ msg: "Anggota berhasil ditambahkan", result });
+    if (!existingLembaga) {
+      return res.status(404).json({ msg: "Lembaga tidak ditemukan" });
+    }
+
+    // Define the path of the file to be deleted
+    const filePathToDelete = path.join(
+      __dirname,
+      "..",
+      "uploads/lembaga",
+      path.basename(existingLembaga.file_url)
+    );
+
+    // Check if the file exists and delete it
+    if (fs.existsSync(filePathToDelete)) {
+      fs.unlinkSync(filePathToDelete);
+      console.log(`Successfully deleted file: ${filePathToDelete}`);
+    }
+
+    // Perform deletion of related records and Lembaga in a transaction
+    await prisma.$transaction(async (tx) => {
+      await tx.ProfilLembaga.deleteMany({ where: { lembagaId: uuid } });
+      await tx.VisiMisi.deleteMany({ where: { lembagaId: uuid } });
+      await tx.TugasPokok.deleteMany({ where: { lembagaId: uuid } });
+      await tx.Anggota.deleteMany({ where: { lembagaDesaid: uuid } });
+      await tx.Lembaga.delete({ where: { uuid } });
+    });
+
+    res.status(200).json({ msg: "Lembaga dan data terkait berhasil dihapus" });
   } catch (error) {
-    console.error("Error:", error.message);
-    res.status(500).json({ msg: "Terjadi kesalahan server" });
+    console.error("Error saat menghapus Lembaga:", error);
+    res.status(500).json({ msg: "Terjadi kesalahan pada server" });
   }
 };
