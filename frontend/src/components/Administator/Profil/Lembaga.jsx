@@ -507,7 +507,7 @@ const Lembaga = () => {
                 />
               </div>
               <div className="form-group">
-                <label>Upload File</label>
+                <label>Upload Lambang</label>
                 <input type="file" onChange={handleFileChange} />
                 {imagePreview && (
                   <div style={{ marginTop: "10px" }}>

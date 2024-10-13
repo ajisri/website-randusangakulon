@@ -4,6 +4,8 @@ import useSWR from "swr"; // Import SWR
 import { Chart } from "primereact/chart";
 import { Button, Row, Col } from "reactstrap";
 import { Dialog } from "primereact/dialog";
+import { DataTable } from "primereact/datatable";
+import { Column } from "primereact/column";
 import Geografix from "../../components/Administator/Profil/Geografix";
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
@@ -54,6 +56,16 @@ const Modals = () => {
     "http://localhost:5000/demografipengunjung",
     fetcher
   );
+
+  //lembaga
+  const { data: lembagaData, error: lembagaError } = useSWR(
+    "http://localhost:5000/lembagapengunjung",
+    fetcher
+  );
+  const loadingLembaga = !lembagaData && !lembagaError;
+
+  const lembagaList = lembagaData?.lembagap || [];
+  const baseLURL = "http://localhost:5000";
 
   const [genderChartData, setGenderChartData] = useState(null);
   const [educationChartData, setEducationChartData] = useState(null);
@@ -437,7 +449,42 @@ const Modals = () => {
               footer={dialogFooterTemplate(() => setDialogVisiblele(false))}
             >
               <div className="modal-body col-lg">
-                <p>Far far away, behind the word mountains...</p>
+                {loadingLembaga ? (
+                  <p>Loading...</p>
+                ) : lembagaError ? (
+                  <p>Error loading data: {lembagaError.message}</p>
+                ) : lembagaList.length === 0 ? (
+                  <p>No data available.</p>
+                ) : (
+                  <DataTable
+                    value={lembagaList}
+                    paginator
+                    rows={5}
+                    rowsPerPageOptions={[5, 10, 25, 50]}
+                    tableStyle={{ minWidth: "50rem" }}
+                  >
+                    <Column
+                      field="file_url"
+                      header="Lambang"
+                      body={(rowData) => {
+                        const imageLUrl = rowData.file_url
+                          ? `${baseLURL}${rowData.file_url}`
+                          : "https://via.placeholder.com/150";
+                        console.log("Image URL:", imageLUrl);
+                        return (
+                          <img
+                            src={imageLUrl}
+                            alt={`Visual representation of ${rowData.nama}`} // Descriptive alt text without redundancy
+                            style={{ width: "100px", height: "auto" }}
+                          />
+                        );
+                      }}
+                    />
+                    <Column field="nama" header="Nama" />
+                    <Column field="dasar_hukum" header="Dasar Hukum" />
+                    <Column field="alamat_kantor" header="Alamat Kantor" />
+                  </DataTable>
+                )}
               </div>
             </Dialog>
           </div>
