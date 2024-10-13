@@ -1910,6 +1910,43 @@ export const deletePotensiWisata = async (req, res) => {
 };
 
 //lembaga
+// Mendapatkan data lembaga untuk pengunjung
+export const getLembagapengunjung = async (req, res) => {
+  try {
+    const lembagaList = await prisma.lembaga.findMany({
+      include: {
+        Anggota: {
+          select: {
+            uuid: true, // Sertakan uuid anggota
+            jabatan: true, // Sertakan jabatan anggota
+            demografi: {
+              select: {
+                uuid: true,
+                nik: true,
+                name: true,
+              },
+            },
+          },
+        },
+        profil_lembaga: true,
+        visi_misi: true,
+        tugas_pokok: true,
+        createdBy: true,
+      },
+    });
+
+    // Logika untuk mengembalikan array lembagaList jika ada data, atau objek kosong jika lembagaList kosong
+    if (lembagaList.length === 0) {
+      return res.status(200).json({ lembagap: {} });
+    }
+
+    res.status(200).json({ lembagap: lembagaList });
+  } catch (error) {
+    console.error("Error saat mengambil data lembaga:", error);
+    res.status(500).json({ msg: "Terjadi kesalahan pada server" });
+  }
+};
+
 // Mendapatkan data lembaga lengkap dengan anggota
 export const getLembaga = async (req, res) => {
   try {
@@ -2227,24 +2264,6 @@ export const updateLembaga = async (req, res) => {
     res
       .status(500)
       .json({ message: "Error updating lembaga", error: error.message });
-  }
-};
-
-// Mendapatkan data lembaga untuk pengunjung
-export const getLembagapengunjung = async (req, res) => {
-  try {
-    const lembagaList = await prisma.lembaga.findMany({
-      where: { visi_misi: { some: { status: "PUBLISH" } } },
-      include: {
-        visi_misi: true,
-        anggota: { select: { uuid: true, nik: true, name: true } },
-      },
-    });
-
-    res.status(200).json({ lembaga: lembagaList });
-  } catch (error) {
-    console.error("Error saat mengambil data lembaga untuk pengunjung:", error);
-    res.status(500).json({ msg: "Terjadi kesalahan pada server" });
   }
 };
 
