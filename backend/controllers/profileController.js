@@ -1088,7 +1088,7 @@ export const updateDemografi = async (req, res) => {
       where: { nik },
     });
     if (!existingDemographic) {
-      return res.status(404).json({ msg: "Demographic not found" });
+      return res.status(404).json({ msg: "Demografi tidak ditemukan" });
     }
 
     let filePathToDelete = null;
@@ -1099,6 +1099,15 @@ export const updateDemografi = async (req, res) => {
         "uploads/demografi",
         path.basename(existingDemographic.file_url)
       );
+    }
+
+    // Logika untuk menentukan tmt_status_aktif dan keterangan_status
+    let newTmtStatusAktif = tmt_status_aktif;
+    let newKeteranganStatus = keterangan_status;
+
+    if (status_aktif === "aktif") {
+      newTmtStatusAktif = new Date(birth_date); // Mengisi tmt_status_aktif dengan tanggal lahir
+      newKeteranganStatus = "lahir"; // Mengisi keterangan_status dengan "lahir"
     }
 
     const updatedDemographic = await prisma.demographics.update({
@@ -1114,8 +1123,8 @@ export const updateDemografi = async (req, res) => {
         rw,
         hamlet,
         status_aktif,
-        tmt_status_aktif,
-        keterangan_status,
+        tmt_status_aktif: newTmtStatusAktif,
+        keterangan_status: newKeteranganStatus,
         religion_id: parseInt(religion_id, 10),
         file_url: file
           ? `/uploads/demografi/${file.filename}`
@@ -1127,15 +1136,15 @@ export const updateDemografi = async (req, res) => {
 
     if (filePathToDelete && fs.existsSync(filePathToDelete)) {
       fs.unlinkSync(filePathToDelete);
-      console.log(`Successfully deleted old file: ${filePathToDelete}`);
+      console.log(`Berhasil menghapus file lama: ${filePathToDelete}`);
     }
 
     return res.status(200).json({
-      msg: "Demographic updated successfully",
+      msg: "Demografi berhasil diperbarui",
       demographic: updatedDemographic,
     });
   } catch (error) {
-    console.error("Error creating or updating demographic:", error);
+    console.error("Error memperbarui demografi:", error);
     res.status(500).json({ msg: "Terjadi kesalahan pada server" });
   }
 };
@@ -1937,7 +1946,7 @@ export const getLembagapengunjung = async (req, res) => {
 
     // Logika untuk mengembalikan array lembagaList jika ada data, atau objek kosong jika lembagaList kosong
     if (lembagaList.length === 0) {
-      return res.status(200).json({ lembagap: {} });
+      return res.status(200).json({ lembaga: {} });
     }
 
     res.status(200).json({ lembagap: lembagaList });
@@ -2015,9 +2024,15 @@ export const createLembaga = async (req, res) => {
     jabatans,
   } = req.body;
 
-  // Parsing data jabatans dari JSON string
-  const parsedJabatans = JSON.parse(jabatans);
-  console.log("Jabatans yang diterima di server:", parsedJabatans);
+  // Parsing data jabatans dari JSON string, cek dulu apakah jabatans ada
+  let parsedJabatans = [];
+  if (jabatans) {
+    try {
+      parsedJabatans = JSON.parse(jabatans);
+    } catch (error) {
+      return res.status(400).json({ msg: "Data jabatans tidak valid" });
+    }
+  }
 
   let file_url = null;
 
@@ -2028,7 +2043,13 @@ export const createLembaga = async (req, res) => {
 
   // Cek administrator dari token
   const refreshToken = req.cookies.refreshToken;
-  const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+  let decoded;
+  try {
+    decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+  } catch (error) {
+    return res.status(401).json({ msg: "Token tidak valid" });
+  }
+
   const administrator = await prisma.administrator.findUnique({
     where: { id: decoded.administratorId },
   });
@@ -2094,6 +2115,8 @@ export const createLembaga = async (req, res) => {
             `Error saat menyimpan jabatan: ${jabatan.namaJabatan}`,
             error
           );
+          // Kamu bisa menambahkan rollback jika salah satu penyimpanan jabatan gagal
+          throw new Error(`Error menyimpan jabatan: ${jabatan.namaJabatan}`);
         }
       }
 
