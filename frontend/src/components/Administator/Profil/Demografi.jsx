@@ -365,24 +365,25 @@ const Demografi = () => {
         <Column
           field="nik"
           header="NIK"
-          style={{ width: "150px", minWidth: "120px" }} // Lebar tetap dengan batas minimum
+          style={{ width: "15%", minWidth: "12%" }} // Lebar tetap dengan batas minimum
           bodyStyle={{ overflow: "hidden", textOverflow: "ellipsis" }} // Potong teks panjang
         />
         <Column
           field="name"
           header="Nama"
-          style={{ width: "200px", minWidth: "150px" }} // Lebar tetap dengan batas minimum
+          style={{ width: "15%", minWidth: "15%" }} // Lebar tetap dengan batas minimum
           bodyStyle={{ overflow: "hidden", textOverflow: "ellipsis" }} // Potong teks panjang
         />
         <Column
           field="hamlet"
           header="Dusun"
-          style={{ width: "200px", minWidth: "150px" }} // Lebar tetap dengan batas minimum
+          style={{ width: "25%", minWidth: "15%" }} // Lebar tetap dengan batas minimum
           bodyStyle={{ overflow: "hidden", textOverflow: "ellipsis" }}
         />
         <Column
           field="education_id"
           header="Pendidikan"
+          style={{ width: "20%", minWidth: "15%" }}
           body={(rowData) =>
             educationData.find((ed) => ed.id === rowData.education_id)?.level
           }
@@ -390,6 +391,7 @@ const Demografi = () => {
         <Column
           field="religion_id"
           header="Agama"
+          style={{ width: "20%", minWidth: "15%" }}
           body={(rowData) =>
             religionData.find((rel) => rel.id === rowData.religion_id)?.name
           }
@@ -637,6 +639,24 @@ const Demografi = () => {
               </div>
 
               <div className="form-group">
+                <label htmlFor="religion_id">
+                  Agama <span className="required">*</span>
+                </label>
+                <Dropdown
+                  id="religion_id"
+                  name="religion_id"
+                  value={formData.religion_id}
+                  options={religionData}
+                  onChange={handleChange}
+                  optionLabel="name"
+                  optionValue="id"
+                  placeholder="Select Religion"
+                  className="dropdown-field"
+                  required
+                />
+              </div>
+
+              <div className="form-group">
                 <label htmlFor="Status Kawin">Status Kawin</label>
                 <Dropdown
                   id="marital_status"
@@ -787,24 +807,6 @@ const Demografi = () => {
                   </div>
                 </>
               )}
-
-              <div className="form-group">
-                <label htmlFor="religion_id">
-                  Agama <span className="required">*</span>
-                </label>
-                <Dropdown
-                  id="religion_id"
-                  name="religion_id"
-                  value={formData.religion_id}
-                  options={religionData}
-                  onChange={handleChange}
-                  optionLabel="name"
-                  optionValue="id"
-                  placeholder="Select Religion"
-                  className="dropdown-field"
-                  required
-                />
-              </div>
 
               <div className="form-group">
                 <label htmlFor="file">Upload File</label>

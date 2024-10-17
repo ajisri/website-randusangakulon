@@ -5,3 +5,24 @@
 .p-orderlist .p-orderlist-controls {
   display: none;
 }
+
+@media (min-width: 1024px) {
+  .agenda-detail {
+    left: 70%;
+    transform: translateX(-50%);
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .agenda-detail {
+    left: 60%;
+  }
+}
+
+@media (max-width: 767px) {
+  .agenda-detail {
+    left: 0;
+    width: 100%;
+    transform: none;
+  }
+}

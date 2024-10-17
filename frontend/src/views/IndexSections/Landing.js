@@ -550,17 +550,17 @@ const Landing = () => {
                           left: selectedAgenda
                             ? window.innerWidth < 480
                               ? "0"
-                              : "76%" // If screen width is small, set left to 0, otherwise use 76%
+                              : "67%"
                             : "auto",
                           transform:
                             selectedAgenda && window.innerWidth >= 480
                               ? "translateX(-50%)"
-                              : "none", // Only translate if the screen is not small
+                              : "none",
                           width: selectedAgenda
                             ? window.innerWidth < 480
                               ? "100%"
                               : "90%"
-                            : "100%", // Use full width on small screens
+                            : "100%",
                           maxWidth: "550px",
                           transition: "width 0.3s ease",
                         }}
@@ -572,6 +572,9 @@ const Landing = () => {
                               backgroundColor: "#ffffff",
                               color: "#333",
                               position: "relative",
+                              minHeight: "514px",
+                              display: "flex",
+                              flexDirection: "column",
                             }}
                           >
                             <div
@@ -586,8 +589,8 @@ const Landing = () => {
                                 rounded
                                 text
                                 severity="danger"
-                                className="p-button-text custom-button"
-                                onClick={() => setSelectedAgenda(false)} // Menutup detail
+                                className="p-button-text"
+                                onClick={() => setSelectedAgenda(false)}
                                 aria-label="Cancel"
                                 style={{
                                   transition:
@@ -601,7 +604,7 @@ const Landing = () => {
                                 onMouseLeave={(e) => {
                                   e.target.style.backgroundColor =
                                     "transparent";
-                                  e.target.style.borderRadius = "10px"; // Kembali ke bentuk awal
+                                  e.target.style.borderRadius = "10px";
                                 }}
                               />
                             </div>
@@ -614,27 +617,41 @@ const Landing = () => {
                                 margin: "10px 0",
                               }}
                             />
-                            <p>
-                              <strong>Nama:</strong>{" "}
-                              {selectedAgenda.nama_agenda}
-                            </p>
-                            <p>
-                              <strong>Tempat:</strong>{" "}
-                              {selectedAgenda.tempat_pelaksanaan}
-                            </p>
-                            <p>
-                              <strong>Tanggal:</strong>{" "}
-                              {new Date(
-                                selectedAgenda.tanggal_agenda
-                              ).toLocaleDateString("id-ID", {
-                                day: "numeric",
-                                month: "long",
-                                year: "numeric",
-                              })}
-                            </p>
-                            <p>
-                              <strong>{selectedAgenda.deskripsi}</strong>
-                            </p>
+                            <div style={{ flexGrow: 1 }}>
+                              <p>
+                                <strong>Nama:</strong>{" "}
+                                {selectedAgenda.nama_agenda}
+                              </p>
+                              <p>
+                                <strong>Tempat:</strong>{" "}
+                                {selectedAgenda.tempat_pelaksanaan}
+                              </p>
+                              <p>
+                                <strong>Tanggal:</strong>{" "}
+                                {new Date(
+                                  selectedAgenda.tanggal_agenda
+                                ).toLocaleDateString("id-ID", {
+                                  day: "numeric",
+                                  month: "long",
+                                  year: "numeric",
+                                })}
+                              </p>
+                              <div
+                                style={{
+                                  flexGrow: 1,
+                                  overflowY: "auto",
+                                  overflowX: "hidden",
+                                  wordBreak: "break-word",
+                                  paddingRight: "10px",
+                                  marginTop: "15px", // Menambahkan margin atas untuk jarak
+                                }}
+                              >
+                                <p>
+                                  <strong>Deskripsi:</strong>{" "}
+                                  {selectedAgenda.deskripsi}
+                                </p>
+                              </div>
+                            </div>
                           </div>
                         )}
                       </div>

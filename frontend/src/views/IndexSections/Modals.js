@@ -65,7 +65,7 @@ const Modals = () => {
   const loadingLembaga = !lembagaData && !lembagaError;
 
   const lembagaList = lembagaData?.lembagap || [];
-  const baseLURL = "http://localhost:5000";
+  const baseLURL = "http://localhost:5000/";
 
   const [genderChartData, setGenderChartData] = useState(null);
   const [educationChartData, setEducationChartData] = useState(null);

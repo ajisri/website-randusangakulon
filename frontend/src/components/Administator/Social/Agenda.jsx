@@ -242,13 +242,37 @@ const Agenda = () => {
         filters={filters}
         header={header}
         filterDisplay="menu"
+        tableStyle={{ tableLayout: "fixed", width: "100%", minWidth: "50rem" }} // Atur tata letak tabel agar tetap
       >
-        <Column field="nama_agenda" header="Nama Agenda" />
-        <Column field="deskripsi" header="Deskripsi" />
-        <Column field="tempat_pelaksanaan" header="Tempat Pelaksanaan" />
+        <Column
+          field="nama_agenda"
+          header="Nama Agenda"
+          style={{ width: "15%", minWidth: "12%" }}
+        />
+        <Column
+          field="deskripsi"
+          header="Deskripsi"
+          style={{ width: "35%", minWidth: "12%" }}
+          bodyStyle={{
+            whiteSpace: "normal",
+            wordWrap: "break-word",
+            overflowWrap: "break-word",
+          }}
+        />
+        <Column
+          field="tempat_pelaksanaan"
+          header="Tempat Pelaksanaan"
+          style={{ width: "25%", minWidth: "12%" }}
+          bodyStyle={{
+            whiteSpace: "normal",
+            wordWrap: "break-word",
+            overflowWrap: "break-word",
+          }}
+        />
         <Column
           field="tanggal_agenda"
           header="Tanggal"
+          style={{ width: "15%", minWidth: "12%" }}
           body={(rowData) =>
             new Date(rowData.tanggal_agenda).toLocaleDateString("id-ID", {
               day: "numeric",

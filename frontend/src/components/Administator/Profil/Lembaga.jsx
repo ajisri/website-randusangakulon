@@ -68,7 +68,7 @@ const Lembaga = () => {
   }, [data]);
 
   useEffect(() => {
-    if (data?.lembaga && data.lembaga.length > 0) {
+    if (data && data.lembaga && data.lembaga.length > 0) {
       setDataList(data.lembaga);
       const lembagaData = data.lembaga[0]; // Ambil lembaga pertama jika ada
       setFormData({
@@ -78,11 +78,13 @@ const Lembaga = () => {
         dasar_hukum: lembagaData.dasar_hukum,
         alamat_kantor: lembagaData.alamat_kantor,
         file_url: lembagaData.file_url,
-        profil: lembagaData.profil_lembaga.map((p) => p.content).join(""),
-        visimisi: lembagaData.visi_misi.map((v) => v.content).join(""),
-        tugaspokok: lembagaData.tugas_pokok.map((t) => t.content).join(""),
+        profil:
+          lembagaData.profil_lembaga?.map((p) => p.content).join("") || "",
+        visimisi: lembagaData.visi_misi?.map((v) => v.content).join("") || "",
+        tugaspokok:
+          lembagaData.tugas_pokok?.map((t) => t.content).join("") || "",
       });
-    } else {
+    } else if (data && (!data.lembaga || data.lembaga.length === 0)) {
       console.error("Data lembaga tidak tersedia atau kosong");
     }
   }, [data]);
@@ -188,21 +190,32 @@ const Lembaga = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("Jabatans yang akan dikirim:", jabatans);
+
+    // Pastikan semua jabatans memiliki uuid yang valid sebelum dikirim
+    const updatedJabatans = jabatans.map((jabatan) => {
+      return {
+        ...jabatan,
+        uuid: jabatan.uuid || null, // Set uuid ke null jika tidak ada
+      };
+    });
+
     // Buat data payload untuk dikirim
     const data = new FormData();
     data.append("nama", formData.nama);
     data.append("singkatan", formData.singkatan);
     data.append("dasar_hukum", formData.dasar_hukum);
     data.append("alamat_kantor", formData.alamat_kantor);
+
     if (formData.file_url) {
       data.append("file", formData.file_url); // Upload file
     }
+
     data.append("profil", formData.profil);
     data.append("visimisi", formData.visimisi);
     data.append("tugaspokok", formData.tugaspokok);
-    console.log("Jabatans yang disimpan:", jabatans);
+    console.log("Jabatans yang disimpan:", updatedJabatans);
 
-    data.append("jabatans", JSON.stringify(jabatans));
+    data.append("jabatans", JSON.stringify(updatedJabatans)); // Simpan jabatans yang sudah di-update
 
     try {
       if (isEditMode) {
@@ -334,7 +347,7 @@ const Lembaga = () => {
     }
     console.log("Data Jabatan saat dibuka:", rowData.jabatans);
     if (typeof rowData.file_url === "string") {
-      const fullUrl = `http://localhost:5000${rowData.file_url}`;
+      const fullUrl = `http://localhost:5000/${rowData.file_url}`;
       console.log("Full URL gambar:", fullUrl); // Debug URL absolut
       setImagePreview(fullUrl);
     } else if (rowData.file_url instanceof File) {
