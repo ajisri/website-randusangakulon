@@ -1,0 +1,88 @@
+.newsContainer {
+  display: flex;
+  gap: 50px; /* Gap antar item lebih lebar */
+  overflow: hidden; /* Sembunyikan scrollbar */
+  padding: 30px 20px 10px;
+  white-space: nowrap;
+
+  /* Gunakan background putih */
+  background-color: white; /* Warna latar belakang putih */
+
+  /* Membuat container selebar layar */
+  width: 100vw; /* Mengatur lebar container selebar tampilan layar */
+  position: relative; /* Memastikan ini di atas video */
+  z-index: 3; /* Pastikan ini berada di atas video */
+  border-radius: 8px; /* Jika ingin membulatkan sudut */
+  margin-left: calc(
+    -50vw + 50%
+  ); /* Menghapus margin samping agar pas dengan layar */
+}
+
+.newsItem {
+  display: inline-block;
+  width: 500px; /* Lebar konten lebih besar */
+  padding: 10px;
+  padding-bottom: 5px; /* Mengurangi padding bawah jika diperlukan */
+  border-radius: 8px;
+  background-color: rgba(
+    255,
+    255,
+    255,
+    0.8
+  ); /* Latar belakang item dengan transparansi */
+  opacity: 1; /* Mulai dengan opasitas penuh */
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Transisi untuk efek pop-up */
+}
+
+.newsItem:hover {
+  transform: scale(1) translateY(-15px); /* Membesarkan item dan mengangkatnya saat hover */
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4); /* Bayangan lebih dalam untuk efek pop-up */
+}
+@keyframes scrollNews {
+  0% {
+    transform: translateX(100%); /* Mulai dari kanan */
+    opacity: 1; /* Item muncul */
+  }
+  90% {
+    opacity: 1; /* Item tetap terlihat hampir sampai kiri */
+  }
+  100% {
+    transform: translateX(-100%); /* Bergerak ke kiri */
+    opacity: 0; /* Menghilang saat keluar dari layar */
+  }
+}
+
+.imageContainer {
+  margin-bottom: 10px;
+}
+
+.newsImage {
+  width: 100%;
+  height: 200px; /* Lebar dan tinggi gambar lebih besar */
+  object-fit: cover;
+  object-position: center;
+}
+
+.newsContent {
+  text-align: left;
+}
+
+.newsHeader {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
+
+.newsDate {
+  color: #888;
+}
+
+.newsTitle {
+  font-weight: bold;
+  font-size: 1.4rem;
+  margin: 5px 0;
+}
+
+.newsDescription {
+  color: #666;
+}

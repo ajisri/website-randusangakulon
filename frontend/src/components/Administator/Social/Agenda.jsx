@@ -22,6 +22,7 @@ const Agenda = () => {
     deskripsi: "",
     tempat_pelaksanaan: "",
     tanggal_agenda: null,
+    tanggal_akhir_agenda: null,
   });
 
   const [isDialogVisible, setDialogVisible] = useState(false);
@@ -77,7 +78,22 @@ const Agenda = () => {
     const month = ("0" + (selectedDate.getMonth() + 1)).slice(-2); // Tambahkan padding 0 untuk bulan
     const day = ("0" + selectedDate.getDate()).slice(-2); // Tambahkan padding 0 untuk hari
     const formattedDate = `${year}-${month}-${day}`; // Format yyyy-mm-dd
-    setFormData({ ...formData, tanggal_agenda: formattedDate });
+    setFormData({
+      ...formData,
+      tanggal_agenda: formattedDate,
+    });
+  };
+
+  const handleEndDateChange = (e) => {
+    const selectedDate = e.value;
+    const year = selectedDate.getFullYear();
+    const month = ("0" + (selectedDate.getMonth() + 1)).slice(-2); // Tambahkan padding 0 untuk bulan
+    const day = ("0" + selectedDate.getDate()).slice(-2); // Tambahkan padding 0 untuk hari
+    const formattedakhirDate = `${year}-${month}-${day}`; // Format yyyy-mm-dd
+    setFormData({
+      ...formData,
+      tanggal_akhir_agenda: formattedakhirDate,
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -129,6 +145,7 @@ const Agenda = () => {
       deskripsi: "",
       tempat_pelaksanaan: "",
       tanggal_agenda: null,
+      tanggal_akhir_agenda: null,
     });
     setEditMode(false);
     setCurrentAgenda(null);
@@ -262,7 +279,7 @@ const Agenda = () => {
         <Column
           field="tempat_pelaksanaan"
           header="Tempat Pelaksanaan"
-          style={{ width: "25%", minWidth: "12%" }}
+          style={{ width: "20%", minWidth: "12%" }}
           bodyStyle={{
             whiteSpace: "normal",
             wordWrap: "break-word",
@@ -271,10 +288,25 @@ const Agenda = () => {
         />
         <Column
           field="tanggal_agenda"
-          header="Tanggal"
-          style={{ width: "15%", minWidth: "12%" }}
+          header="Tanggal Mulai"
+          style={{ width: "10%", minWidth: "12%" }}
           body={(rowData) =>
             new Date(rowData.tanggal_agenda).toLocaleDateString("id-ID", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            })
+          }
+          filter
+          filterFunction={customFilter} // Menerapkan custom filter
+          showFilterMenu={false} // Hanya akan menggunakan filter custom
+        />
+        <Column
+          field="tanggal_akhir_agenda"
+          header="Tanggal Akhir"
+          style={{ width: "10%", minWidth: "12%" }}
+          body={(rowData) =>
+            new Date(rowData.tanggal_akhir_agenda).toLocaleDateString("id-ID", {
               day: "numeric",
               month: "long",
               year: "numeric",
@@ -379,7 +411,7 @@ const Agenda = () => {
                 />
               </div>
               <div className="form-group">
-                <label htmlFor="tanggal_agenda">Tanggal Agenda</label>
+                <label htmlFor="tanggal_agenda">Tanggal Mulai Agenda</label>
                 <Calendar
                   id="tanggal_agenda"
                   name="tanggal_agenda"
@@ -389,6 +421,24 @@ const Agenda = () => {
                       : null
                   }
                   onChange={handleDateChange}
+                  showIcon
+                  className="input-field"
+                  dateFormat="yy-mm-dd"
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="tanggal_akhir_agenda">
+                  Tanggal Akhir Agenda
+                </label>
+                <Calendar
+                  id="tanggal_akhir_agenda"
+                  name="tanggal_akhir_agenda"
+                  value={
+                    formData.tanggal_akhir_agenda
+                      ? new Date(formData.tanggal_akhir_agenda)
+                      : null
+                  }
+                  onChange={handleEndDateChange}
                   showIcon
                   className="input-field"
                   dateFormat="yy-mm-dd"

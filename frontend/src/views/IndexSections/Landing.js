@@ -9,6 +9,7 @@ import { Carousel } from "primereact/carousel";
 import { Card } from "primereact/card";
 import { OrderList } from "primereact/orderlist";
 import { PhotoService } from "./service/PhotoService";
+import Pengumuman from "./Pengumuman";
 import Galeri from "./Galeri";
 import Berita from "./Berita";
 
@@ -142,6 +143,14 @@ const Landing = () => {
     <>
       <DemoNavbar />
       <main>
+        {/* Pengumuman */}
+        <section className="section-shaped">
+          <div className="grid">
+            <div className="col-12 md:col-12 lg:col-12">
+              <Pengumuman />
+            </div>
+          </div>
+        </section>
         {/* agenda kegiatan */}
         <section className="section section-lg section-shaped">
           <div style={{ backgroundColor: "#5dade2" }} className="shape"></div>
@@ -284,9 +293,19 @@ const Landing = () => {
                                 {selectedAgenda.tempat_pelaksanaan}
                               </p>
                               <p>
-                                <strong>Tanggal:</strong>{" "}
+                                <strong>Tanggal Mulai:</strong>{" "}
                                 {new Date(
                                   selectedAgenda.tanggal_agenda
+                                ).toLocaleDateString("id-ID", {
+                                  day: "numeric",
+                                  month: "long",
+                                  year: "numeric",
+                                })}
+                              </p>
+                              <p>
+                                <strong>Tanggal Selesai:</strong>{" "}
+                                {new Date(
+                                  selectedAgenda.tanggal_akhir_agenda
                                 ).toLocaleDateString("id-ID", {
                                   day: "numeric",
                                   month: "long",
@@ -702,240 +721,62 @@ const Landing = () => {
             {/* SVG separator */}
           </section>
         </div>
-        {/* Berita */}
+        {/* Galeri dan Berita */}
         <section className="section section-lg section-shaped">
           <Container
             className="container-fluid py-lg-md d-flex"
-            style={{ minHeight: "500px", paddingLeft: "0px" }}
+            style={{
+              minHeight: "500px",
+              paddingLeft: "0", // Hilangkan padding di kiri
+              paddingRight: "0",
+              margin: "0", // Pastikan tidak ada margin
+              width: "100vw", // Buat lebar selebar layar
+              maxWidth: "100%",
+              marginBottom: "0", // Menghilangkan margin bawah
+              paddingBottom: "0", // Menghilangkan padding bawah
+            }}
           >
-            <div className="grid p-3">
+            <div
+              className="grid p-3"
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                flexWrap: "wrap", // Pastikan bisa wrap di layar kecil
+                width: "100%",
+                margin: "0",
+                alignItems: "stretch",
+              }}
+            >
+              {/* Galeri di kiri */}
               <div
-                className="col-12 md:col-9 lg:col-9"
-                style={{ width: "70%", marginLeft: "0px" }}
+                className="col-12 md:col-8 lg:col-9"
+                style={{
+                  flex: "1 1 70%",
+                  width: "70%", // Menyisakan 30% untuk berita
+                  margin: "0", // Hilangkan margin di sekitar
+                  padding: "0", // Hilangkan padding di sekitar
+                  maxWidth: "none",
+                  flexDirection: "column",
+                }}
               >
                 <Galeri />
               </div>
+
+              {/* Berita di kanan */}
               <div
-                className="col-12 md:col-3 lg:col-3"
-                style={{ width: "30%", paddingLeft: "15px" }}
+                className="col-12 md:col-4 lg:col-3"
+                style={{
+                  width: "30%",
+                  paddingLeft: "10px",
+                  minWidth: "300px",
+                  marginBottom: "0", // Menghilangkan margin bawah
+                  paddingBottom: "0", // Menghilangkan padding bawah
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "flex-start",
+                }}
               >
                 <Berita />
-              </div>
-            </div>
-          </Container>
-        </section>
-        {/* Galeri */}
-        <section className="section section-lg section-shaped">
-          <div style={{ backgroundColor: "#5dade2" }} className="shape"></div>
-          <Container
-            className="container-fluid py-lg-md d-flex"
-            style={{ minHeight: "500px" }}
-          >
-            <div className="col px-0">
-              <Row>
-                <Col lg="10">
-                  <h1
-                    style={{
-                      fontFamily: "'Poppins', sans-serif",
-                      fontWeight: "700",
-                      fontSize: "2.5rem",
-                      letterSpacing: "1.5px",
-                      textTransform: "uppercase",
-                      color: "#FFFFFF",
-                      margin: "0",
-                      paddingBottom: "10px",
-                      display: "inline-block",
-                      borderRadius: "8px",
-                      padding: "10px 20px",
-                      textShadow: "0px 10px 32px rgba(0, 0, 0, 0.5)",
-                    }}
-                    className="display-3 text-white"
-                  >
-                    Agenda Kegiatan
-                  </h1>
-                </Col>
-              </Row>
-              <div className="py-5">
-                <div className="container">
-                  <div className="row g-4">
-                    <Row className="justify-content-md-center">
-                      <div className="col-lg-6 col-md-6">
-                        <OrderList
-                          dataKey="id"
-                          value={formattedAgendas}
-                          onChange={(e) => setAgendas(e.value)}
-                          itemTemplate={itemTemplate}
-                          header="Agenda Kegiatan"
-                          filter
-                          filterBy="nama_agenda,tempat_pelaksanaan,formattedDate" // Ganti tanggal_agenda dengan formattedDate
-                          filters={{
-                            formattedDate: {
-                              value: "",
-                              matchMode: customFilter,
-                            },
-                          }} // Custom filter untuk tanggal
-                          style={{
-                            minWidth:
-                              window.innerWidth >= 768 ? "500px" : "auto", // Set minWidth for larger screens
-                            width: "100%", // Full width on smaller screens
-                          }}
-                        />
-                      </div>
-                      <div
-                        className="col-lg-6 col-md-6"
-                        style={{
-                          position: "absolute",
-                          zIndex: 2,
-                          left: selectedAgenda
-                            ? window.innerWidth < 480
-                              ? "0"
-                              : "67%"
-                            : "auto",
-                          transform:
-                            selectedAgenda && window.innerWidth >= 480
-                              ? "translateX(-50%)"
-                              : "none",
-                          width: selectedAgenda
-                            ? window.innerWidth < 480
-                              ? "100%"
-                              : "90%"
-                            : "100%",
-                          maxWidth: "550px",
-                          transition: "width 0.3s ease",
-                        }}
-                      >
-                        {selectedAgenda && (
-                          <div
-                            className="agenda-detail p-3 border rounded shadow-lg"
-                            style={{
-                              backgroundColor: "#ffffff",
-                              color: "#333",
-                              position: "relative",
-                              minHeight: "514px",
-                              display: "flex",
-                              flexDirection: "column",
-                            }}
-                          >
-                            <div
-                              style={{
-                                position: "absolute",
-                                top: "10px",
-                                right: "10px",
-                              }}
-                            >
-                              <Button
-                                icon="pi pi-times"
-                                rounded
-                                text
-                                severity="danger"
-                                className="p-button-text"
-                                onClick={() => setSelectedAgenda(false)}
-                                aria-label="Cancel"
-                                style={{
-                                  transition:
-                                    "background-color 0.3s, border-radius 0.3s",
-                                }}
-                                onMouseEnter={(e) => {
-                                  e.target.style.backgroundColor =
-                                    "rgba(255, 0, 0, 0.2)";
-                                  e.target.style.borderRadius = "50%";
-                                }}
-                                onMouseLeave={(e) => {
-                                  e.target.style.backgroundColor =
-                                    "transparent";
-                                  e.target.style.borderRadius = "10px";
-                                }}
-                              />
-                            </div>
-                            <h5 className="font-weight-bold text-primary">
-                              Informasi
-                            </h5>
-                            <hr
-                              style={{
-                                borderTop: "1px solid #ddd",
-                                margin: "10px 0",
-                              }}
-                            />
-                            <div style={{ flexGrow: 1 }}>
-                              <p>
-                                <strong>Nama:</strong>{" "}
-                                {selectedAgenda.nama_agenda}
-                              </p>
-                              <p>
-                                <strong>Tempat:</strong>{" "}
-                                {selectedAgenda.tempat_pelaksanaan}
-                              </p>
-                              <p>
-                                <strong>Tanggal:</strong>{" "}
-                                {new Date(
-                                  selectedAgenda.tanggal_agenda
-                                ).toLocaleDateString("id-ID", {
-                                  day: "numeric",
-                                  month: "long",
-                                  year: "numeric",
-                                })}
-                              </p>
-                              <div
-                                style={{
-                                  flexGrow: 1,
-                                  overflowY: "auto",
-                                  overflowX: "hidden",
-                                  wordBreak: "break-word",
-                                  paddingRight: "10px",
-                                  marginTop: "15px", // Menambahkan margin atas untuk jarak
-                                }}
-                              >
-                                <p>
-                                  <strong>Deskripsi:</strong>{" "}
-                                  {selectedAgenda.deskripsi}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="col-lg-6 col-md-6">
-                        {!selectedAgenda && (
-                          <div
-                            className="service-item rounded d-flex h-100"
-                            style={{
-                              boxShadow: "0 8px 16px rgba(0, 0, 0, 0.3)",
-                              position: "relative",
-                            }}
-                          >
-                            <div
-                              className="service-img rounded"
-                              style={{
-                                boxShadow: "0 4px 8px rgba(0, 0, 0, 0.3)",
-                              }}
-                            >
-                              <img
-                                className="img-fluid"
-                                src={require("assets/img/theme/petadesa.png")}
-                                alt="Peta Desa"
-                                style={{ borderRadius: "inherit" }}
-                              />
-                            </div>
-                            <div
-                              className="service-text rounded p-2"
-                              style={{
-                                boxShadow: "0 4px 8px rgba(0, 0, 0, 0.3)",
-                                position: "relative",
-                              }}
-                            >
-                              <h4 className="mb-3">Peta Desa</h4>
-                              <p className="mb-4">
-                                Wilayah Desa meliputi wilayah RT, wilayah RW,
-                                Balai RT, Balai RW, Masjid, Lapangan Desa.
-                              </p>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </Row>
-                  </div>
-                </div>
               </div>
             </div>
           </Container>

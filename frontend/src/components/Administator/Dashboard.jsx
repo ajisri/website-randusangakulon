@@ -27,6 +27,7 @@ import Aktifasibpjs from "./Layanan/Aktifasibpjs";
 import Produkhukum from "./Transparansi/ProdukHukum";
 //sosial
 import Agenda from "./Social/Agenda";
+import Pengumuman from "./Social/Pengumuman";
 
 import "primereact/resources/themes/saga-blue/theme.css";
 import "primereact/resources/primereact.min.css";
@@ -140,6 +141,8 @@ const Dashboard = () => {
         return <Produkhukum />;
       case "Agenda":
         return <Agenda />;
+      case "Pengumuman":
+        return <Pengumuman />;
       default:
         return <Tentang />;
     }
@@ -279,12 +282,12 @@ const Dashboard = () => {
                 alignItems: "center",
                 marginBottom: "10px",
                 padding: "10px",
-                paddingLeft: "5px",
+                paddingLeft: "10px",
               }}
             >
               <i
                 className="pi pi-fw pi-globe"
-                style={{ marginRight: "20px" }}
+                style={{ marginRight: "10px" }}
               ></i>
               {isSidebarHovered && <span>Geografi</span>}
               <i
@@ -370,22 +373,6 @@ const Dashboard = () => {
               </div>
             )}
 
-            <div
-              // onClick={() => setActiveMenu("Geografi")}
-              className="menu-item"
-              style={{
-                marginBottom: "10px",
-                cursor: "pointer",
-                padding: "10px",
-              }}
-            >
-              <i
-                className="pi pi-fw pi-globe"
-                style={{ marginRight: "10px" }}
-              ></i>
-              {isSidebarHovered && <span>Geografi</span>}
-              <Ripple />
-            </div>
             <div
               onClick={() => setActiveMenu("Demografi")}
               className="menu-item"
@@ -677,6 +664,7 @@ const Dashboard = () => {
               <Ripple />
             </div>
             <div
+              onClick={() => setActiveMenu("Pengumuman")}
               className="menu-item"
               style={{
                 marginBottom: "10px",
@@ -685,10 +673,10 @@ const Dashboard = () => {
               }}
             >
               <i
-                className="pi pi-fw pi-dollar"
+                className="pi pi-fw pi-bell"
                 style={{ marginRight: "10px" }}
               ></i>
-              {isSidebarHovered && <span>APB Desa</span>}
+              {isSidebarHovered && <span>Pengumuman</span>}
               <Ripple />
             </div>
             <div

@@ -4,6 +4,8 @@ import { PhotoService } from "./service/PhotoServices";
 
 const Galeri = () => {
   const [images, setImages] = useState(null);
+  const [isWideScreen, setIsWideScreen] = useState(window.innerWidth > 1200); // Tambahkan state untuk mengecek layar lebar
+
   const responsiveOptions = [
     {
       breakpoint: "991px",
@@ -21,6 +23,16 @@ const Galeri = () => {
 
   useEffect(() => {
     PhotoService.getImages().then((data) => setImages(data));
+
+    const handleResize = () => {
+      setIsWideScreen(window.innerWidth > 1200);
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
   }, []);
 
   const itemTemplate = (item) => {
@@ -28,7 +40,12 @@ const Galeri = () => {
       <img
         src={item.itemImageSrc}
         alt={item.alt}
-        style={{ width: "100%", display: "block" }}
+        style={{
+          width: "100%", // Lebar penuh
+          height: isWideScreen ? "70vh" : "60vh", // Tinggi disesuaikan dengan ukuran layar
+          objectFit: "cover",
+          display: "block",
+        }}
       />
     );
   };
@@ -53,15 +70,26 @@ const Galeri = () => {
   };
 
   return (
-    <div className="card" style={{ width: "100%", margin: "0" }}>
+    <div
+      className="card"
+      style={{
+        width: "100%",
+        margin: "0",
+        height: "100vh",
+      }}
+    >
       <Galleria
         value={images}
         responsiveOptions={responsiveOptions}
-        numVisible={5}
+        numVisible={8}
         item={itemTemplate}
         thumbnail={thumbnailTemplate}
         caption={caption}
-        style={{ maxWidth: "100%" }}
+        style={{
+          maxWidth: isWideScreen ? "100%" : "100%", // Sesuaikan lebar berdasarkan ukuran layar
+          height: "100vh",
+        }}
+        showItemNavigators
       />
     </div>
   );
