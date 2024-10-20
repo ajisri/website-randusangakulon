@@ -93,7 +93,6 @@ export const getTentang = async (req, res) => {
 };
 
 export const createTentang = async (req, res) => {
-  console.log("Uploaded File:", req.file);
   const { title, visionContent, status, pname } = req.body;
   const file = req.file;
 
@@ -283,7 +282,6 @@ export const getSejarah = async (req, res) => {
 };
 
 export const createSejarah = async (req, res) => {
-  console.log("Uploaded File:", req.file);
   const { title, visionContent, status, pname } = req.body;
   const file = req.file;
 
@@ -406,7 +404,7 @@ export const getSejarahpengunjung = async (req, res) => {
 
     res.status(200).json({ profile: profileData });
   } catch (error) {
-    console.error("Error saat mengambil data tentang:", error);
+    console.error("Error saat mengambil data sejarah:", error);
     res.status(500).json({ msg: "Terjadi kesalahan pada server" });
   }
 };
@@ -505,7 +503,6 @@ export const getVisimisi = async (req, res) => {
 };
 
 export const createVisimisi = async (req, res) => {
-  console.log("Uploaded File:", req.file);
   const { title, visionContent, status, pname } = req.body;
   const file = req.file;
 
@@ -695,7 +692,6 @@ export const getStrukturorganisasi = async (req, res) => {
 };
 
 export const createStrukturorganisasi = async (req, res) => {
-  console.log("Uploaded File:", req.file);
   const { title, visionContent, status, pname } = req.body;
   const file = req.file;
 
@@ -1940,7 +1936,11 @@ export const getLembagapengunjung = async (req, res) => {
         profil_lembaga: true,
         visi_misi: true,
         tugas_pokok: true,
-        createdBy: true,
+        createdBy: {
+          select: {
+            name: true, // Hanya mengambil field nama dari relasi createdBy
+          },
+        },
       },
     });
 
@@ -1995,7 +1995,11 @@ export const getLembaga = async (req, res) => {
         profil_lembaga: true,
         visi_misi: true,
         tugas_pokok: true,
-        createdBy: true,
+        createdBy: {
+          select: {
+            name: true, // Hanya mengambil field nama dari relasi createdBy
+          },
+        },
       },
     });
 

@@ -52,6 +52,7 @@ model Administrator {
   Agenda Agenda[]
   ProfilLembaga ProfilLembaga[]
   Anggota Anggota[]
+  Pengumuman Pengumuman[]
 }
 
 model User{
@@ -284,8 +285,22 @@ model Agenda {
   deskripsi         String   @db.LongText
   tempat_pelaksanaan String
   tanggal_agenda   DateTime
+  tanggal_akhir_agenda   DateTime
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
+  createdbyId Int
+  createdBy     Administrator? @relation(fields: [createdbyId], references: [id])
+}
+
+model Pengumuman {
+  id              Int             @id @default(autoincrement())
+  uuid            String          @default(uuid()) @unique
+  title           String
+  content         String          @db.LongText
+  file_url        String?         // URL file yang di-upload
+  status          Status          @default(DRAFT)
+  created_at      DateTime        @default(now())
+  updated_at      DateTime        @updatedAt
   createdbyId Int
   createdBy     Administrator? @relation(fields: [createdbyId], references: [id])
 }
