@@ -1936,9 +1936,11 @@ export const getLembagapengunjung = async (req, res) => {
         profil_lembaga: true,
         visi_misi: true,
         tugas_pokok: true,
-        createdBy: {
-          select: {
-            name: true, // Hanya mengambil field nama dari relasi createdBy
+        include: {
+          createdBy: {
+            select: {
+              name: true, // Hanya mengambil field 'name' dari relasi 'createdBy'
+            },
           },
         },
       },
@@ -1995,9 +1997,11 @@ export const getLembaga = async (req, res) => {
         profil_lembaga: true,
         visi_misi: true,
         tugas_pokok: true,
-        createdBy: {
-          select: {
-            name: true, // Hanya mengambil field nama dari relasi createdBy
+        include: {
+          createdBy: {
+            select: {
+              name: true, // Hanya mengambil field 'name' dari relasi 'createdBy'
+            },
           },
         },
       },

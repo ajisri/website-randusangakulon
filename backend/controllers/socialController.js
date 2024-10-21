@@ -15,9 +15,11 @@ export const getAgendaPengunjung = async (req, res) => {
   try {
     // Ambil data dari tabel Agenda
     const agenda = await prisma.agenda.findMany({
-      createdBy: {
-        select: {
-          name: true, // Hanya mengambil field nama dari relasi createdBy
+      include: {
+        createdBy: {
+          select: {
+            name: true, // Hanya mengambil field 'name' dari relasi 'createdBy'
+          },
         },
       },
     });
@@ -65,9 +67,11 @@ export const getAgendaAdmin = async (req, res) => {
 
     // Ambil data dari tabel Agenda
     const agenda = await prisma.agenda.findMany({
-      createdBy: {
-        select: {
-          name: true, // Hanya mengambil field nama dari relasi createdBy
+      include: {
+        createdBy: {
+          select: {
+            name: true, // Hanya mengambil field 'name' dari relasi 'createdBy'
+          },
         },
       },
     });
@@ -228,13 +232,15 @@ export const deleteAgenda = async (req, res) => {
 
 //Pengumuman
 //pengumuman pengunjung
-export const getPengumumanpengunjung = async (req, res) => {
+export const getPengumumanPengunjung = async (req, res) => {
   try {
     // Ambil data dari tabel Agenda
     const pengumumans = await prisma.pengumuman.findMany({
-      createdBy: {
-        select: {
-          name: true, // Hanya mengambil field nama dari relasi createdBy
+      include: {
+        createdBy: {
+          select: {
+            name: true, // Hanya mengambil field 'name' dari relasi 'createdBy'
+          },
         },
       },
     });
@@ -256,7 +262,7 @@ export const getPengumumanpengunjung = async (req, res) => {
 };
 
 //pengumuman admin
-export const getPengumumanadmin = async (req, res) => {
+export const getPengumumanAdmin = async (req, res) => {
   try {
     const refreshToken = req.cookies.refreshToken;
 
@@ -279,9 +285,11 @@ export const getPengumumanadmin = async (req, res) => {
     }
 
     const pengumumans = await prisma.pengumuman.findMany({
-      createdBy: {
-        select: {
-          name: true, // Hanya mengambil field nama dari relasi createdBy
+      include: {
+        createdBy: {
+          select: {
+            name: true, // Hanya mengambil field 'name' dari relasi 'createdBy'
+          },
         },
       },
     });

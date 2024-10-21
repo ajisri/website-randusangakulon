@@ -14,9 +14,11 @@ export const getProdukHukumPengunjung = async (req, res) => {
   try {
     // Ambil data dari tabel ProdukHukum
     const produkHukump = await prisma.produkHukum.findMany({
-      createdBy: {
-        select: {
-          name: true, // Hanya mengambil field nama dari relasi createdBy
+      include: {
+        createdBy: {
+          select: {
+            name: true, // Hanya mengambil field 'name' dari relasi 'createdBy'
+          },
         },
       },
     });
@@ -76,9 +78,11 @@ export const getProdukHukumAdmin = async (req, res) => {
 
     // Ambil data dari tabel ProdukHukum
     const produkHukum = await prisma.produkHukum.findMany({
-      createdBy: {
-        select: {
-          name: true, // Hanya mengambil field nama dari relasi createdBy
+      include: {
+        createdBy: {
+          select: {
+            name: true, // Hanya mengambil field 'name' dari relasi 'createdBy'
+          },
         },
       },
     });
