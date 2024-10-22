@@ -18,8 +18,8 @@
 .demografi-card {
   background: #ffffff; /* Latar belakang putih */
   border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  padding: 2rem; /* Jarak yang cukup untuk isi card */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  padding: 20px; /* Jarak yang cukup untuk isi card */
   margin: 1rem 0;
   width: 100%; /* Memastikan card mengambil lebar penuh */
   min-width: 60vw;

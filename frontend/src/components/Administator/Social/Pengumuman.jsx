@@ -4,8 +4,6 @@ import { useNavigate } from "react-router-dom";
 import useAuth from "../../../hooks/useAuth";
 import { Card } from "primereact/card";
 import { InputText } from "primereact/inputtext";
-import { Dropdown } from "primereact/dropdown";
-import { Calendar } from "primereact/calendar";
 import { RadioButton } from "primereact/radiobutton";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
@@ -13,6 +11,8 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { FilterMatchMode } from "primereact/api";
 import { Dialog } from "primereact/dialog";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css"; // Import Quill styles
 import "./Pengumuman.css"; // Custom CSS for styling
 
 const Pengumuman = () => {
@@ -30,8 +30,6 @@ const Pengumuman = () => {
   const [currentPengumuman, setCurrentPengumuman] = useState(null);
   const [globalFilterValue, setGlobalFilterValue] = useState("");
   const [pengumumanList, setPengumumanList] = useState([]);
-  const [detailDialogVisible, setDetailDialogVisible] = useState(false);
-  const [selectedPengumuman, setSelectedPengumuman] = useState(null);
   const [filters, setFilters] = useState({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }, // Use FilterMatchMode
   });
@@ -42,8 +40,13 @@ const Pengumuman = () => {
 
   const fetcher = useCallback(
     async (url) => {
-      const response = await axiosJWT.get(url);
-      return response.data;
+      try {
+        const response = await axiosJWT.get(url);
+        return response.data;
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        throw error;
+      }
     },
     [axiosJWT]
   );
@@ -55,8 +58,8 @@ const Pengumuman = () => {
   } = useSWR("http://localhost:5000/pengumuman", fetcher);
 
   useEffect(() => {
-    if (pengumumanData?.demographics) {
-      setPengumumanList(pengumumanData.demographics);
+    if (pengumumanData?.pengumumans) {
+      setPengumumanList(pengumumanData.pengumumans);
     }
   }, [pengumumanData]);
 
@@ -111,25 +114,12 @@ const Pengumuman = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleDateChange = (e, field) => {
-    const selectedDate = e.value;
-    if (selectedDate) {
-      // Create a new Date object, and ensure it's set to the start of the day in UTC
-      const adjustedDate = new Date(
-        Date.UTC(
-          selectedDate.getFullYear(),
-          selectedDate.getMonth(),
-          selectedDate.getDate()
-        )
-      );
-      setFormData({
-        ...formData,
-        [field]: adjustedDate.toISOString().split("T")[0], // Format to yyyy-mm-dd
-      });
-    } else {
-      setFormData({ ...formData, [field]: null });
-    }
-  };
+  const handleTextChange = useCallback((value) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      content: value, // Mengubah content saat diedit
+    }));
+  }, []);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -229,48 +219,38 @@ const Pengumuman = () => {
     setCurrentPengumuman(null);
   };
 
-  const showDetails = (rowData) => {
-    setSelectedPengumuman(rowData);
-    setDetailDialogVisible(true);
-  };
-
-  const editPengumuman = (demographic) => {
-    setFormData(demographic);
+  const editPengumuman = (pengumuman) => {
+    setFormData(pengumuman);
     setSelectedFile(null);
-    const fileUrl = demographic.file_url
-      ? `http://localhost:5000${demographic.file_url}`
+    const fileUrl = pengumuman.file_url
+      ? `http://localhost:5000${pengumuman.file_url}`
       : null;
     // console.log("File URL:", fileUrl);
     setPreview(fileUrl); // Set preview to the existing file URL
-    setCurrentPengumuman(demographic);
+    setCurrentPengumuman(pengumuman);
     setEditMode(true);
     setDialogVisible(true);
   };
 
-  const deletePengumuman = async (nik) => {
+  const deletePengumuman = async (uuid) => {
     if (window.confirm("Are you sure you want to delete this record?")) {
       try {
-        await axiosJWT.delete(`http://localhost:5000/demografi/${nik}`);
+        await axiosJWT.delete(`http://localhost:5000/pengumuman/${uuid}`);
         toast.current.show({
           severity: "success",
           summary: "Success",
           detail: "Data deleted successfully!",
           life: 3000,
         });
-        await mutate("http://localhost:5000/demografi");
+        await mutate("http://localhost:5000/pengumuman");
       } catch (error) {
         handleError(error);
       }
     }
   };
 
-  useEffect(() => {
-    if (selectedPengumuman?.file_url) {
-      setPreview(`http://localhost:5000${selectedPengumuman.file_url}`);
-    } else {
-      setPreview("");
-    }
-  }, [selectedPengumuman]);
+  if (isLoading) return <p>Loading...</p>;
+  if (error) return <p>Error fetching data</p>;
 
   return (
     <div>
@@ -327,18 +307,6 @@ const Pengumuman = () => {
               style={{ display: "flex", gap: "0.5rem" }}
             >
               <Button
-                label="Detail"
-                onClick={() => showDetails(rowData)}
-                className="detail-button coastal-button p-button-rounded"
-                tooltip="View Details"
-                tooltipOptions={{ position: "bottom" }}
-                style={{
-                  backgroundColor: "#009688",
-                  border: "none",
-                  color: "white",
-                }}
-              />
-              <Button
                 icon="pi pi-pencil"
                 onClick={() => editPengumuman(rowData)}
                 className="edit-button coastal-button p-button-rounded"
@@ -371,86 +339,6 @@ const Pengumuman = () => {
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          height: "100%",
-        }}
-      >
-        <Dialog
-          header="Detail Pengumuman"
-          visible={detailDialogVisible}
-          onHide={() => setDetailDialogVisible(false)}
-          style={{
-            width: "60vw",
-            border: "none",
-            boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)",
-          }}
-        >
-          {selectedPengumuman && (
-            <div className="detail-container">
-              <h3 className="detail-title">Informasi Warga</h3>
-              <div className="detail-content">
-                {[
-                  { label: "NIK:", value: selectedPengumuman.nik },
-                  { label: "Nama:", value: selectedPengumuman.name },
-                  {
-                    label: "Jenis Kelamin:",
-                    value: selectedPengumuman.gender,
-                  },
-                  {
-                    label: "Tanggal Lahir:",
-                    value: new Date(
-                      selectedPengumuman.birth_date
-                    ).toLocaleDateString(),
-                  },
-
-                  { label: "Pekerjaan:", value: selectedPengumuman.job },
-                  { label: "RT:", value: selectedPengumuman.rt },
-                  { label: "RW:", value: selectedPengumuman.rw },
-                  { label: "Dusun:", value: selectedPengumuman.hamlet },
-                  {
-                    label: "Status Warga:",
-                    value: selectedPengumuman.status_aktif,
-                  },
-                  {
-                    label: "TMT Status Warga:",
-                    value:
-                      selectedPengumuman.tmt_status_aktif || "Tidak ada data",
-                  },
-                  {
-                    label: "Keterangan Status Warga:",
-                    value:
-                      selectedPengumuman.keterangan_status || "Tidak ada data",
-                  },
-                ].map((item, index) => (
-                  <div className="detail-row" key={index}>
-                    <span className="detail-label">{item.label}</span>
-                    <span className="detail-value">{item.value}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {selectedPengumuman?.file_url && (
-            <div className="file-preview">
-              <h4>File:</h4>
-              <img
-                src={preview} // Menggunakan preview yang sudah di-set
-                alt="File Preview"
-                style={{
-                  width: "100%",
-                  maxHeight: "300px",
-                  objectFit: "contain",
-                }}
-              />
-            </div>
-          )}
-        </Dialog>
-      </div>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
           height: "100vh", // Full screen height
           top: 0,
           left: 0,
@@ -459,23 +347,23 @@ const Pengumuman = () => {
         }}
       >
         <Dialog
-          header={isEditMode ? "Edit Demographic Data" : "Add Demographic Data"}
+          header={isEditMode ? "Edit Pengumuman Data" : "Add Pengumuman Data"}
           visible={isDialogVisible}
           onHide={closeDialog}
           style={{ width: "65vw" }}
         >
           <form onSubmit={handleSubmit} encType="multipart/form-data">
             <Card className="demografi-card">
-              <h3 className="section-title">Informasi Demografi</h3>
+              <h3 className="section-title">Pengumuman</h3>
 
               <div className="form-group">
-                <label htmlFor="nik">
-                  NIK <span className="required">*</span>
+                <label htmlFor="title">
+                  Judul Pengumuman <span className="required">*</span>
                 </label>
                 <InputText
-                  id="nik"
-                  name="nik"
-                  value={formData.nik}
+                  id="title"
+                  name="title"
+                  value={formData.title}
                   onChange={handleChange}
                   className="input-field"
                   required
@@ -483,203 +371,67 @@ const Pengumuman = () => {
                 />
               </div>
 
-              <div className="form-group">
-                <label htmlFor="name">
-                  Nama <span className="required">*</span>
+              {/* <div className="form-group">
+                <label htmlFor="content">
+                  Deskripsi <span className="required">*</span>
                 </label>
                 <InputText
-                  id="name"
-                  name="name"
-                  value={formData.name}
+                  id="content"
+                  name="content"
+                  value={formData.content}
                   onChange={handleChange}
                   className="input-field"
                   required
                 />
-              </div>
+              </div> */}
 
               <div className="form-group">
-                <label htmlFor="gender">
-                  Jenis Kelamin <span className="required">*</span>
+                <label htmlFor="content">
+                  Deskripsi <span className="required">*</span>
                 </label>
-                <div className="radio-group">
-                  <div className="radio-item">
-                    <RadioButton
-                      inputId="Laki-Laki"
-                      name="gender"
-                      value="Laki-Laki"
-                      onChange={handleChange}
-                      checked={formData.gender === "Laki-Laki"}
-                    />
-                    <label htmlFor="Laki-Laki" className="radio-label">
-                      Laki-Laki
-                    </label>
-                  </div>
-                  <div className="radio-item">
-                    <RadioButton
-                      inputId="Perempuan"
-                      name="gender"
-                      value="Perempuan"
-                      onChange={handleChange}
-                      checked={formData.gender === "Perempuan"}
-                    />
-                    <label htmlFor="Perempuan" className="radio-label">
-                      Perempuan
-                    </label>
-                  </div>
+                <div className="quill-wrapper">
+                  <ReactQuill
+                    id="content"
+                    name="content"
+                    value={formData.content}
+                    onChange={handleTextChange}
+                    className="input-field"
+                    required
+                  />
                 </div>
               </div>
 
               <div className="form-group">
-                <label htmlFor="birth_date">
-                  Tanggal Lahir <span className="required">*</span>
+                <label htmlFor="status">
+                  Status Pengumuman <span className="required">*</span>
                 </label>
-                <Calendar
-                  id="birth_date"
-                  name="birth_date"
-                  value={
-                    formData.birth_date ? new Date(formData.birth_date) : null
-                  }
-                  onChange={(e) => handleDateChange(e, "birth_date")}
-                  dateFormat="yy-mm-dd"
-                  showIcon
-                  placeholder="Select Tanggal"
-                  className="input-field"
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="Status Kawin">Status Kawin</label>
-                <Dropdown
-                  id="marital_status"
-                  name="marital_status"
-                  value={formData.marital_status}
-                  onChange={handleChange}
-                  options={[
-                    { label: "Kawin Tercatat", value: "Kawin Tercatat" },
-                    {
-                      label: "Kawin Tidak Tercatat",
-                      value: "Kawin Tidak Tercatat",
-                    },
-                    { label: "Cerai Hidup", value: "Cerai Hidup" },
-                    { label: "Cerai Mati", value: "Cerai Mati" },
-                    { label: "Belum Kawin", value: "Belum Kawin" },
-                  ]}
-                  placeholder="Pilih Status Kawin"
-                  className="dropdown-field"
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="job">Pekerjaan</label>
-                <InputText
-                  id="job"
-                  name="job"
-                  value={formData.job}
-                  onChange={handleChange}
-                  className="input-field"
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="rt">RT</label>
-                <InputText
-                  id="rt"
-                  name="rt"
-                  value={formData.rt}
-                  onChange={handleChange}
-                  className="input-field"
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="rw">RW</label>
-                <InputText
-                  id="rw"
-                  name="rw"
-                  value={formData.rw}
-                  onChange={handleChange}
-                  className="input-field"
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="hamlet">Dusun</label>
-                <InputText
-                  id="hamlet"
-                  name="hamlet"
-                  value={formData.hamlet}
-                  onChange={handleChange}
-                  className="input-field"
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="status_aktif">Status Warga</label>
                 <div className="radio-group">
                   <div className="radio-item">
                     <RadioButton
-                      inputId="aktif"
-                      name="status_aktif"
-                      value="aktif"
+                      inputId="DRAFT"
+                      name="status"
+                      value="DRAFT"
                       onChange={handleChange}
-                      checked={formData.status_aktif === "aktif"}
+                      checked={formData.status === "DRAFT"}
                     />
-                    <label htmlFor="aktif" className="radio-label">
-                      Aktif
+                    <label htmlFor="DRAFT" className="radio-label">
+                      Draft
                     </label>
                   </div>
                   <div className="radio-item">
                     <RadioButton
-                      inputId="tidak_aktif"
-                      name="status_aktif"
-                      value="tidak_aktif"
+                      inputId="Publish"
+                      name="status"
+                      value="PUBLISH"
                       onChange={handleChange}
-                      checked={formData.status_aktif === "tidak_aktif"}
+                      checked={formData.status === "PUBLISH"}
                     />
-                    <label htmlFor="tidak_aktif" className="radio-label">
-                      Tidak Aktif
+                    <label htmlFor="PUBLISH" className="radio-label">
+                      Publish
                     </label>
                   </div>
                 </div>
               </div>
-
-              {formData.status_aktif === "tidak_aktif" && (
-                <>
-                  <div className="form-group">
-                    <label htmlFor="status">
-                      TMT Status <span className="required">*</span>
-                    </label>
-                    <Calendar
-                      id="tmt_status_aktif"
-                      name="tmt_status_aktif"
-                      value={
-                        formData.tmt_status_aktif
-                          ? new Date(formData.tmt_status_aktif)
-                          : null
-                      }
-                      onChange={(e) => handleDateChange(e, "tmt_status_aktif")}
-                      dateFormat="yy-mm-dd"
-                      showIcon
-                      placeholder="Pilih Tanggal"
-                      className="input-field"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="keterangan_status">
-                      Keterangan Status Warga
-                    </label>
-                    <InputText
-                      id="keterangan_status"
-                      name="keterangan_status"
-                      value={formData.keterangan_status}
-                      onChange={handleChange}
-                      className="input-field"
-                    />
-                  </div>
-                </>
-              )}
 
               <div className="form-group">
                 <label htmlFor="file">Upload File</label>

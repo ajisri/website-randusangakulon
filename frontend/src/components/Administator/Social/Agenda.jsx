@@ -366,13 +366,7 @@ const Agenda = () => {
           }}
         >
           <form onSubmit={handleSubmit}>
-            <Card
-              className="demografi-card"
-              style={{
-                boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)",
-                padding: "20px",
-              }}
-            >
+            <Card className="demografi-card">
               <h3 className="section-title" style={{ color: "#00796B" }}>
                 Agenda Information
               </h3>
