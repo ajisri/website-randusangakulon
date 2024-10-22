@@ -301,6 +301,6 @@ model Pengumuman {
   status          Status          @default(DRAFT)
   created_at      DateTime        @default(now())
   updated_at      DateTime        @updatedAt
-  createdbyId Int
-  createdBy     Administrator? @relation(fields: [createdbyId], references: [id])
+  createdbyId String
+  createdBy     Administrator? @relation(fields: [createdbyId], references: [uuid])
 }

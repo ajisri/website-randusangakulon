@@ -337,7 +337,7 @@ export const createPengumuman = async (req, res) => {
         content,
         status,
         file_url: file ? `/uploads/demografi/${file.filename}` : null,
-        created_by: administrator.name,
+        createdbyId: administrator.uuid,
       },
     });
 
