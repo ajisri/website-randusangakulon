@@ -251,7 +251,7 @@ export const getPengumumanPengunjung = async (req, res) => {
     }
 
     // Kirimkan data pengumuman
-    res.status(200).json({ pengumuman });
+    res.status(200).json({ pengumumans });
   } catch (error) {
     console.error(
       "Error saat mengambil data pengumuman untuk pengunjung:",
