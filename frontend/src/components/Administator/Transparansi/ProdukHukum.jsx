@@ -311,6 +311,7 @@ const Produkhukum = () => {
         filters={filters}
         globalFilterFields={["name", "deskripsi", "waktu"]}
         header={header}
+        footer={`Total data: ${produkhukumList.length}`}
         // tableStyle={{
         //   width: "100%",
         //   minWidth: "70rem",
@@ -332,6 +333,15 @@ const Produkhukum = () => {
         // }}
         // className="datagrid"
       >
+        <Column
+          header="No"
+          body={(options) => {
+            const rowIndex = options.rowIndex ?? 0;
+            const first = options.first ?? 0;
+            return rowIndex + 1 + first; // Menggabungkan nomor urut dengan offset dari pagination
+          }}
+          style={{ width: "5%", minWidth: "5%" }}
+        />
         <Column field="name" header="Name" />
         <Column field="deskripsi" header="Deskripsi" />
         <Column field="waktu" header="Tanggal" />

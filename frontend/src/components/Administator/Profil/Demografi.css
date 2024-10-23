@@ -158,6 +158,12 @@
   color: red;
 }
 
+.datagrid .p-datatable-footer {
+  display: flex;
+  justify-content: flex-start;
+  padding-right: 1rem;
+}
+
 .radio-group {
   display: flex; /* Untuk menampilkan radio buttons dan label dalam satu baris */
   gap: 2rem; /* Mengatur jarak antar radio button */

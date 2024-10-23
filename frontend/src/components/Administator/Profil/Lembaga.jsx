@@ -11,6 +11,7 @@ import { Dropdown } from "primereact/dropdown";
 import { Column } from "primereact/column";
 import { FilterMatchMode } from "primereact/api";
 import { Dialog } from "primereact/dialog";
+import { Image } from "primereact/image";
 // import { Dropdown } from "primereact/dropdown";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
@@ -406,8 +407,18 @@ const Lembaga = () => {
         rowsPerPageOptions={[5, 10, 25, 50]}
         filters={filters}
         header={header}
+        footer={`Total data: ${dataList.length}`}
         filterDisplay="menu"
       >
+        <Column
+          header="No"
+          body={(options) => {
+            const rowIndex = options.rowIndex ?? 0;
+            const first = options.first ?? 0;
+            return rowIndex + 1 + first; // Menggabungkan nomor urut dengan offset dari pagination
+          }}
+          style={{ width: "5%", minWidth: "5%" }}
+        />
         <Column field="nama" header="Nama Lembaga" />
         <Column field="singkatan" header="Singkatan" />
         <Column field="dasar_hukum" header="Dasar Hukum" />
@@ -524,12 +535,13 @@ const Lembaga = () => {
                 <input type="file" onChange={handleFileChange} />
                 {imagePreview && (
                   <div style={{ marginTop: "10px" }}>
-                    <img
+                    <Image
                       src={imagePreview}
                       alt="Preview"
+                      width="150"
+                      height="150"
+                      preview
                       style={{
-                        width: "100px",
-                        height: "100px",
                         objectFit: "cover",
                         marginTop: "10px",
                       }}

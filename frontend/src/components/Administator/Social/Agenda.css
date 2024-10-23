@@ -121,6 +121,12 @@
   text-align: right; /* Align values to the right */
 }
 
+.datagrid .p-datatable-footer {
+  display: flex;
+  justify-content: flex-start;
+  padding-right: 1rem;
+}
+
 .required {
   color: red;
 }

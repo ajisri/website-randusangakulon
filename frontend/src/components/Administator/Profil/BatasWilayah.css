@@ -166,3 +166,9 @@
   justify-content: flex-end; /* Aligns buttons to the right */
   margin-top: 20px;
 }
+
+.datagrid .p-datatable-footer {
+  display: flex;
+  justify-content: flex-start;
+  padding-right: 1rem;
+}

@@ -11,6 +11,7 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { FilterMatchMode } from "primereact/api";
 import { Dialog } from "primereact/dialog";
+import { Image } from "primereact/image";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css"; // Import Quill styles
 import "./Pengumuman.css"; // Custom CSS for styling
@@ -265,6 +266,7 @@ const Pengumuman = () => {
         globalFilterFields={["title", "content", "status"]}
         header={header}
         tableStyle={{ minWidth: "50rem" }}
+        footer={`Total data: ${pengumumanList.length}`}
         breakpoints={{
           "960px": {
             columns: [
@@ -282,15 +284,18 @@ const Pengumuman = () => {
         className="datagrid"
       >
         <Column
-          field="uuid"
-          header="UUID"
-          style={{ width: "15%", minWidth: "12%" }} // Lebar tetap dengan batas minimum
-          bodyStyle={{ overflow: "hidden", textOverflow: "ellipsis" }} // Potong teks panjang
+          header="No"
+          body={(options) => {
+            const rowIndex = options.rowIndex ?? 0;
+            const first = options.first ?? 0;
+            return rowIndex + 1 + first; // Menggabungkan nomor urut dengan offset dari pagination
+          }}
+          style={{ width: "5%", minWidth: "5%" }}
         />
         <Column
           field="title"
           header="Judul Pengumuman"
-          style={{ width: "15%", minWidth: "15%" }} // Lebar tetap dengan batas minimum
+          style={{ width: "50%", minWidth: "15%" }} // Lebar tetap dengan batas minimum
           bodyStyle={{ overflow: "hidden", textOverflow: "ellipsis" }} // Potong teks panjang
         />
         <Column
@@ -367,23 +372,8 @@ const Pengumuman = () => {
                   onChange={handleChange}
                   className="input-field"
                   required
-                  disabled={isEditMode}
                 />
               </div>
-
-              {/* <div className="form-group">
-                <label htmlFor="content">
-                  Deskripsi <span className="required">*</span>
-                </label>
-                <InputText
-                  id="content"
-                  name="content"
-                  value={formData.content}
-                  onChange={handleChange}
-                  className="input-field"
-                  required
-                />
-              </div> */}
 
               <div className="form-group">
                 <label htmlFor="content">
@@ -443,14 +433,13 @@ const Pengumuman = () => {
                 />
                 {preview && (
                   <div className="file-preview">
-                    <img
+                    <Image
                       src={preview}
                       alt="Preview"
+                      width="250"
                       className="preview-image"
+                      preview
                     />
-                    <span className="preview-text">
-                      Preview of uploaded file
-                    </span>
                   </div>
                 )}
               </div>

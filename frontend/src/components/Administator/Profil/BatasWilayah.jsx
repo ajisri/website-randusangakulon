@@ -190,8 +190,18 @@ const BatasWilayah = () => {
         rowsPerPageOptions={[5, 10, 25, 50]}
         filters={filters}
         header={header}
+        footer={`Total data: ${dataList.length}`}
         filterDisplay="menu"
       >
+        <Column
+          header="No"
+          body={(options) => {
+            const rowIndex = options.rowIndex ?? 0;
+            const first = options.first ?? 0;
+            return rowIndex + 1 + first; // Menggabungkan nomor urut dengan offset dari pagination
+          }}
+          style={{ width: "5%", minWidth: "5%" }}
+        />
         <Column field="kategori" header="Jenis Batas" />
         <Column field="nilai" header="Berbatasan Dengan" />
         <Column

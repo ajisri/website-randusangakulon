@@ -13,6 +13,7 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { FilterMatchMode } from "primereact/api";
 import { Dialog } from "primereact/dialog";
+import { Image } from "primereact/image";
 import "./Demografi.css"; // Custom CSS for styling
 
 const Demografi = () => {
@@ -330,6 +331,7 @@ const Demografi = () => {
         rows={5}
         rowsPerPageOptions={[5, 10, 25, 50]}
         filters={filters}
+        footer={`Total data: ${demografiList.length}`}
         globalFilterFields={[
           "nik",
           "name",
@@ -363,6 +365,15 @@ const Demografi = () => {
         className="datagrid"
       >
         <Column
+          header="No"
+          body={(options) => {
+            const rowIndex = options.rowIndex ?? 0;
+            const first = options.first ?? 0;
+            return rowIndex + 1 + first; // Menggabungkan nomor urut dengan offset dari pagination
+          }}
+          style={{ width: "5%", minWidth: "5%" }}
+        />
+        <Column
           field="nik"
           header="NIK"
           style={{ width: "15%", minWidth: "12%" }} // Lebar tetap dengan batas minimum
@@ -383,7 +394,7 @@ const Demografi = () => {
         <Column
           field="education_id"
           header="Pendidikan"
-          style={{ width: "20%", minWidth: "15%" }}
+          style={{ width: "12%", minWidth: "10%" }}
           body={(rowData) =>
             educationData.find((ed) => ed.id === rowData.education_id)?.level
           }
@@ -391,12 +402,16 @@ const Demografi = () => {
         <Column
           field="religion_id"
           header="Agama"
-          style={{ width: "20%", minWidth: "15%" }}
+          style={{ width: "12%", minWidth: "10%" }}
           body={(rowData) =>
             religionData.find((rel) => rel.id === rowData.religion_id)?.name
           }
         />
-        <Column field="status_aktif" header="Status" />
+        <Column
+          field="status_aktif"
+          header="Status"
+          style={{ width: "12%", minWidth: "10%" }}
+        />
         <Column
           header="Actions"
           body={(rowData) => (
@@ -818,14 +833,13 @@ const Demografi = () => {
                 />
                 {preview && (
                   <div className="file-preview">
-                    <img
+                    <Image
                       src={preview}
                       alt="Preview"
                       className="preview-image"
+                      width="250"
+                      preview
                     />
-                    <span className="preview-text">
-                      Preview of uploaded file
-                    </span>
                   </div>
                 )}
               </div>
