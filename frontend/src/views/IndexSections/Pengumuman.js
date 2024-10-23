@@ -1,71 +1,51 @@
-import React, { useEffect, useRef } from "react";
+import React, { useRef, useEffect } from "react";
+import useSWR from "swr";
 import styles from "../../assets/css/Pengumuman.module.css";
+
+// Fungsi fetcher untuk mengambil data dari API
+const fetcher = (url) => fetch(url).then((res) => res.json());
 
 const Pengumuman = () => {
   const containerRef = useRef(null);
-
-  const newsItems = [
-    {
-      imgSrc: "https://via.placeholder.com/150",
-      title: "1",
-      date: "October 7",
-      description: "Quisque sagittis purus sit amet volutpat consequat mauris.",
-    },
-    {
-      imgSrc: "https://via.placeholder.com/150",
-      title: "2",
-      date: "October 10",
-      description: "Bibendum enim facilisis gravida neque convallis a cras.",
-    },
-    {
-      imgSrc: "https://via.placeholder.com/150",
-      title: "3",
-      date: "October 7",
-      description: "Quisque sagittis purus sit amet volutpat consequat mauris.",
-    },
-    {
-      imgSrc: "https://via.placeholder.com/150",
-      title: "4",
-      date: "October 10",
-      description: "Bibendum enim facilisis gravida neque convallis a cras.",
-    },
-    {
-      imgSrc: "https://via.placeholder.com/150",
-      title: "5",
-      date: "October 7",
-      description: "Quisque sagittis purus sit amet volutpat consequat mauris.",
-    },
-    {
-      imgSrc: "https://via.placeholder.com/150",
-      title: "6",
-      date: "October 10",
-      description: "Bibendum enim facilisis gravida neque convallis a cras.",
-    },
-  ];
-
-  // Gandakan item berita untuk infinite scrolling
-  const doubledNewsItems = [...newsItems, ...newsItems];
+  const { data: pengumumanData, error: pengumumanError } = useSWR(
+    "http://localhost:5000/pengumumanpengunjung",
+    fetcher
+  );
 
   useEffect(() => {
     const container = containerRef.current;
     let scrollAmount = 0;
-    const scrollSpeed = 1; // Ubah sesuai kebutuhan
+    const scrollSpeed = 1;
 
     const scroll = () => {
       scrollAmount += scrollSpeed;
-      container.scrollLeft = scrollAmount;
+      if (container) {
+        container.scrollLeft = scrollAmount;
 
-      // Reset scroll jika sudah mencapai setengah dari total konten
-      if (scrollAmount >= container.scrollWidth / 2) {
-        scrollAmount = 0; // Reset untuk scroll kembali
+        // Reset scroll if it reaches half of the total content
+        if (scrollAmount >= container.scrollWidth / 2) {
+          scrollAmount = 0;
+        }
       }
 
       requestAnimationFrame(scroll);
     };
 
-    scroll(); // Mulai fungsi scroll
+    scroll(); // Start the scroll
     return () => cancelAnimationFrame(scroll);
   }, []);
+
+  // Handle loading and error states
+  if (pengumumanError) {
+    return <div>Error loading data</div>;
+  }
+
+  if (!pengumumanData) {
+    return <div>Loading...</div>;
+  }
+
+  const pengumumanItems = pengumumanData.pengumumans || [];
+  const doubledNewsItems = [...pengumumanItems, ...pengumumanItems];
 
   return (
     <div ref={containerRef} className={styles.newsContainer}>
@@ -73,17 +53,24 @@ const Pengumuman = () => {
         <div className={styles.newsItem} key={index}>
           <div className={styles.imageContainer}>
             <img
-              src={item.imgSrc}
+              src={`http://localhost:5000${item.file_url}`}
               alt={item.title}
               className={styles.newsImage}
             />
           </div>
           <div className={styles.newsContent}>
             <div className={styles.newsHeader}>
-              <span className={styles.newsDate}>{item.date}</span>
+              <span className={styles.newsDate}>
+                {new Date(item.created_at).toLocaleDateString()}
+              </span>
             </div>
             <h4 className={styles.newsTitle}>{item.title}</h4>
-            <p className={styles.newsDescription}>{item.description}</p>
+
+            {/* Gunakan dangerouslySetInnerHTML untuk menampilkan HTML dari API */}
+            <div
+              className={styles.newsDescription}
+              dangerouslySetInnerHTML={{ __html: item.content }}
+            />
           </div>
         </div>
       ))}
