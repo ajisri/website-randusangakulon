@@ -288,6 +288,7 @@ export const getPengumumanAdmin = async (req, res) => {
       include: {
         createdBy: {
           select: {
+            uuid: true,
             name: true, // Hanya mengambil field 'name' dari relasi 'createdBy'
           },
         },
@@ -357,7 +358,7 @@ export const updatePengumuman = async (req, res) => {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const { title, content, status } = req.body;
+  const { uuid, title, content, status } = req.body;
   const file = req.file;
 
   try {
@@ -401,7 +402,6 @@ export const updatePengumuman = async (req, res) => {
         file_url: file
           ? `/uploads/pengumuman/${file.filename}`
           : existingPengumuman.file_url,
-        updated_by: administrator.name,
         updated_at: new Date(),
       },
     });

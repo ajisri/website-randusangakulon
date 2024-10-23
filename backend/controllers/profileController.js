@@ -1983,8 +1983,8 @@ export const getLembaga = async (req, res) => {
       include: {
         Anggota: {
           select: {
-            uuid: true, // Sertakan uuid anggota
-            jabatan: true, // Sertakan jabatan anggota
+            uuid: true,
+            jabatan: true,
             demografi: {
               select: {
                 uuid: true,
@@ -1997,11 +1997,10 @@ export const getLembaga = async (req, res) => {
         profil_lembaga: true,
         visi_misi: true,
         tugas_pokok: true,
-        include: {
-          createdBy: {
-            select: {
-              name: true, // Hanya mengambil field 'name' dari relasi 'createdBy'
-            },
+        createdBy: {
+          // Pindahkan relasi createdBy ke tingkat yang sama
+          select: {
+            name: true, // Hanya mengambil field 'name' dari relasi 'createdBy'
           },
         },
       },
