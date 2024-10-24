@@ -40,6 +40,7 @@ const Demografi = () => {
   const [isDialogVisible, setDialogVisible] = useState(false);
   const [isEditMode, setEditMode] = useState(false);
   const [currentDemographic, setCurrentDemographic] = useState(null);
+  const [first, setFirst] = useState(0);
   const [globalFilterValue, setGlobalFilterValue] = useState("");
   const [filters, setFilters] = useState({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }, // Use FilterMatchMode
@@ -329,6 +330,8 @@ const Demografi = () => {
         value={demografiList}
         paginator
         rows={5}
+        first={first}
+        onPage={(e) => setFirst(e.first)}
         rowsPerPageOptions={[5, 10, 25, 50]}
         filters={filters}
         footer={`Total data: ${demografiList.length}`}
@@ -366,10 +369,9 @@ const Demografi = () => {
       >
         <Column
           header="No"
-          body={(options) => {
+          body={(rowData, options) => {
             const rowIndex = options.rowIndex ?? 0;
-            const first = options.first ?? 0;
-            return rowIndex + 1 + first; // Menggabungkan nomor urut dengan offset dari pagination
+            return rowIndex + 1 + first; // Menghitung nomor urut dengan offset
           }}
           style={{ width: "5%", minWidth: "5%" }}
         />

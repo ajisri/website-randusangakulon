@@ -28,6 +28,7 @@ const Pengumuman = () => {
   const [preview, setPreview] = useState(null);
   const [isDialogVisible, setDialogVisible] = useState(false);
   const [isEditMode, setEditMode] = useState(false);
+  const [first, setFirst] = useState(0);
   const [currentPengumuman, setCurrentPengumuman] = useState(null);
   const [globalFilterValue, setGlobalFilterValue] = useState("");
   const [pengumumanList, setPengumumanList] = useState([]);
@@ -261,6 +262,8 @@ const Pengumuman = () => {
         value={pengumumanList}
         paginator
         rows={5}
+        first={first}
+        onPage={(e) => setFirst(e.first)}
         rowsPerPageOptions={[5, 10, 25, 50]}
         filters={filters}
         globalFilterFields={["title", "content", "status"]}
@@ -285,10 +288,9 @@ const Pengumuman = () => {
       >
         <Column
           header="No"
-          body={(options) => {
+          body={(rowData, options) => {
             const rowIndex = options.rowIndex ?? 0;
-            const first = options.first ?? 0;
-            return rowIndex + 1 + first; // Menggabungkan nomor urut dengan offset dari pagination
+            return rowIndex + 1 + first; // Menghitung nomor urut dengan offset
           }}
           style={{ width: "5%", minWidth: "5%" }}
         />

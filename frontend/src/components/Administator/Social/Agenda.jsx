@@ -28,6 +28,7 @@ const Agenda = () => {
   const [isDialogVisible, setDialogVisible] = useState(false);
   const [isEditMode, setEditMode] = useState(false);
   const [currentAgenda, setCurrentAgenda] = useState(null);
+  const [first, setFirst] = useState(0);
   const [agendaList, setAgendaList] = useState([]);
   const [globalFilterValue, setGlobalFilterValue] = useState("");
   const [filters, setFilters] = useState({
@@ -255,6 +256,8 @@ const Agenda = () => {
         value={agendaList}
         paginator
         rows={5}
+        first={first}
+        onPage={(e) => setFirst(e.first)}
         rowsPerPageOptions={[5, 10, 25, 50]}
         filters={filters}
         header={header}
@@ -264,10 +267,9 @@ const Agenda = () => {
       >
         <Column
           header="No"
-          body={(options) => {
+          body={(rowData, options) => {
             const rowIndex = options.rowIndex ?? 0;
-            const first = options.first ?? 0;
-            return rowIndex + 1 + first; // Menggabungkan nomor urut dengan offset dari pagination
+            return rowIndex + 1 + first; // Menghitung nomor urut dengan offset
           }}
           style={{ width: "5%", minWidth: "5%" }}
         />
@@ -289,7 +291,7 @@ const Agenda = () => {
         <Column
           field="tempat_pelaksanaan"
           header="Tempat Pelaksanaan"
-          style={{ width: "20%", minWidth: "12%" }}
+          style={{ width: "15%", minWidth: "12%" }}
           bodyStyle={{
             whiteSpace: "normal",
             wordWrap: "break-word",

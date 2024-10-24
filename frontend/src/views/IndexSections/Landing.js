@@ -239,6 +239,7 @@ const Landing = () => {
                               color: "#333",
                               position: "relative",
                               minHeight: "514px",
+                              height: "514px",
                               display: "flex",
                               flexDirection: "column",
                             }}
@@ -331,7 +332,6 @@ const Landing = () => {
                           </div>
                         )}
                       </div>
-
                       <div className="col-lg-6 col-md-6">
                         {!selectedAgenda && (
                           <div

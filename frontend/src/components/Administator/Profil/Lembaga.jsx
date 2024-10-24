@@ -37,6 +37,7 @@ const Lembaga = () => {
   const [demografiOptions, setDemografiOptions] = useState([]); // State untuk menyimpan data demografi dari API
   const [isDialogVisible, setDialogVisible] = useState(false);
   const [isEditMode, setEditMode] = useState(false);
+  const [first, setFirst] = useState(0);
   const [currentData, setCurrentData] = useState(null);
   const [dataList, setDataList] = useState([]);
   const [globalFilterValue, setGlobalFilterValue] = useState("");
@@ -404,6 +405,8 @@ const Lembaga = () => {
         value={dataList || []}
         paginator
         rows={5}
+        first={first}
+        onPage={(e) => setFirst(e.first)}
         rowsPerPageOptions={[5, 10, 25, 50]}
         filters={filters}
         header={header}
@@ -412,10 +415,9 @@ const Lembaga = () => {
       >
         <Column
           header="No"
-          body={(options) => {
+          body={(rowData, options) => {
             const rowIndex = options.rowIndex ?? 0;
-            const first = options.first ?? 0;
-            return rowIndex + 1 + first; // Menggabungkan nomor urut dengan offset dari pagination
+            return rowIndex + 1 + first; // Menghitung nomor urut dengan offset
           }}
           style={{ width: "5%", minWidth: "5%" }}
         />
