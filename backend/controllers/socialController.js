@@ -337,7 +337,7 @@ export const createPengumuman = async (req, res) => {
         title,
         content,
         status,
-        file_url: file ? `/uploads/demografi/${file.filename}` : null,
+        file_url: file ? `/uploads/pengumuman/${file.filename}` : null,
         createdbyId: administrator.uuid,
       },
     });
@@ -380,7 +380,7 @@ export const updatePengumuman = async (req, res) => {
       where: { uuid },
     });
     if (!existingPengumuman) {
-      return res.status(404).json({ msg: "Demografi tidak ditemukan" });
+      return res.status(404).json({ msg: "Pengumuman tidak ditemukan" });
     }
 
     let filePathToDelete = null;
