@@ -91,8 +91,7 @@ const Pengumuman = () => {
                 <div className={styles.newsDescriptionWrapper}>
                   <Button
                     label="Lihat Deskripsi"
-                    icon="pi pi-info-circle"
-                    className="p-button-text"
+                    className={`p-button-text ${styles.customButton}`}
                     onClick={() => handleDescriptionClick(item.content, item)}
                   />
                 </div>

@@ -86,11 +86,12 @@
   font-size: 0.9rem; /* Ukuran font lebih kecil untuk tanggal */
   margin-left: auto; /* Memindahkan tanggal ke sisi kanan */
   align-self: center; /* Menjaga tanggal sejajar dengan deskripsi */
+  margin-top: 16px;
 }
 
 .newsTitle {
   font-weight: bold;
-  font-size: 1.2rem;
+  font-size: 1rem;
   margin: 0;
   width: 100%;
 }
@@ -102,6 +103,27 @@
   100% {
     transform: translateX(-50%);
   }
+}
+
+.customButton {
+  color: black; /* Warna teks */
+  border: 1px solid black; /* Border */
+  border-radius: 8px;
+  transition: all 0.3s ease; /* Animasi transisi */
+  margin-top: 16px;
+}
+
+.customButton:hover {
+  background-color: #1a73e8;
+  color: #ffffff;
+  transform: scale(1.05); /* Perbesar sedikit saat hover */
+}
+
+.customButton:active {
+  font-weight: bold;
+  color: white; /* Warna teks */
+  transform: scale(0.98); /* Animasi saat diklik */
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2); /* Reduksi shadow saat diklik */
 }
 
 .imageContainer {
