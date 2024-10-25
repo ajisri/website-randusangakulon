@@ -1936,11 +1936,10 @@ export const getLembagapengunjung = async (req, res) => {
         profil_lembaga: true,
         visi_misi: true,
         tugas_pokok: true,
-        include: {
-          createdBy: {
-            select: {
-              name: true, // Hanya mengambil field 'name' dari relasi 'createdBy'
-            },
+        createdBy: {
+          // Hapus include di sini
+          select: {
+            name: true, // Hanya mengambil field 'name' dari relasi 'createdBy'
           },
         },
       },
@@ -2187,7 +2186,7 @@ export const updateLembaga = async (req, res) => {
           dasar_hukum,
           alamat_kantor,
           file_url: file
-            ? `/uploads/lembaga/${file.filename}`
+            ? `uploads/lembaga/${file.filename}`
             : existingLembaga.file_url,
         },
       });
