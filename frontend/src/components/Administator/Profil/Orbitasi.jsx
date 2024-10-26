@@ -25,6 +25,7 @@ const OrbitasiDesa = () => {
   const [isDialogVisible, setDialogVisible] = useState(false);
   const [isEditMode, setEditMode] = useState(false);
   const [first, setFirst] = useState(0);
+  const [rows, setRows] = useState(5);
   const [currentData, setCurrentData] = useState(null);
   const [dataList, setDataList] = useState([]);
   const [globalFilterValue, setGlobalFilterValue] = useState("");
@@ -180,6 +181,11 @@ const OrbitasiDesa = () => {
 
   const header = renderHeader();
 
+  const handlePageChange = (e) => {
+    setFirst(e.first);
+    setRows(e.rows);
+  };
+
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>{error.message}</p>;
 
@@ -190,9 +196,9 @@ const OrbitasiDesa = () => {
       <DataTable
         value={dataList}
         paginator
-        rows={5}
+        rows={rows} // Gunakan nilai rows dari state
         first={first}
-        onPage={(e) => setFirst(e.first)}
+        onPage={handlePageChange}
         rowsPerPageOptions={[5, 10, 25, 50]}
         filters={filters}
         header={header}
@@ -202,8 +208,11 @@ const OrbitasiDesa = () => {
         <Column
           header="No"
           body={(rowData, options) => {
-            const rowIndex = options.rowIndex ?? 0;
-            return rowIndex + 1 + first; // Menghitung nomor urut dengan offset
+            const rowIndex = options.rowIndex % rows; // Reset rowIndex setiap halaman
+            const nomorUrut = first + rowIndex + 1; // Hitung nomor urut berdasarkan halaman
+            console.log("Row Index:", rowIndex, "Nomor Urut:", nomorUrut); // Log nomor urut pada setiap baris
+
+            return nomorUrut;
           }}
           style={{ width: "5%", minWidth: "5%" }}
         />

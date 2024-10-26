@@ -38,6 +38,7 @@ const Lembaga = () => {
   const [isDialogVisible, setDialogVisible] = useState(false);
   const [isEditMode, setEditMode] = useState(false);
   const [first, setFirst] = useState(0);
+  const [rows, setRows] = useState(5);
   const [currentData, setCurrentData] = useState(null);
   const [dataList, setDataList] = useState([]);
   const [globalFilterValue, setGlobalFilterValue] = useState("");
@@ -394,6 +395,19 @@ const Lembaga = () => {
 
   const header = renderHeader();
 
+  const handlePageChange = (e) => {
+    console.log("Page Change Event:", e); // Log event untuk melihat properti yang tersedia
+    console.log("First sebelum di-update:", first);
+    console.log("Rows sebelum di-update:", rows);
+    console.log("Data index pertama dari halaman saat ini:", e.first);
+
+    setFirst(e.first);
+    setRows(e.rows);
+
+    console.log("First setelah di-update:", e.first);
+    console.log("Rows setelah di-update:", e.rows);
+  };
+
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>{error.message}</p>;
 
@@ -404,20 +418,25 @@ const Lembaga = () => {
       <DataTable
         value={dataList || []}
         paginator
-        rows={5}
+        rows={rows} // Gunakan nilai rows dari state
         first={first}
-        onPage={(e) => setFirst(e.first)}
+        onPage={handlePageChange}
         rowsPerPageOptions={[5, 10, 25, 50]}
         filters={filters}
         header={header}
-        footer={`Total data: ${dataList.length}`}
+        footer={`Total data: ${dataList ? dataList.length : 0} | Halaman ${
+          Math.floor(first / rows) + 1
+        } dari ${Math.ceil((dataList ? dataList.length : 0) / rows)}`}
         filterDisplay="menu"
       >
         <Column
           header="No"
           body={(rowData, options) => {
-            const rowIndex = options.rowIndex ?? 0;
-            return rowIndex + 1 + first; // Menghitung nomor urut dengan offset
+            const rowIndex = options.rowIndex % rows; // Reset rowIndex setiap halaman
+            const nomorUrut = first + rowIndex + 1; // Hitung nomor urut berdasarkan halaman
+            console.log("Row Index:", rowIndex, "Nomor Urut:", nomorUrut); // Log nomor urut pada setiap baris
+
+            return nomorUrut;
           }}
           style={{ width: "5%", minWidth: "5%" }}
         />

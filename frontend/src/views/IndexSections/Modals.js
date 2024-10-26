@@ -13,11 +13,14 @@ const fetcher = (url) => fetch(url).then((res) => res.json());
 const Modals = () => {
   const [dialogVisiblevm, setDialogVisiblevm] = useState(false);
   const [dialogVisible, setDialogVisible] = useState(false);
+  const [selectedLembaga, setSelectedLembaga] = useState(null);
+  const [detailDialogVisible, setDetailDialogVisible] = useState(false);
   const [dialogVisiblettg, setDialogVisiblettg] = useState(false);
   const [dialogVisiblesd, setDialogVisiblesd] = useState(false);
   const [dialogVisibleso, setDialogVisibleso] = useState(false);
   const [dialogVisiblele, setDialogVisiblele] = useState(false);
   const [dialogVisiblege, setDialogVisiblege] = useState(false);
+
   // const [customers, setCustomers] = useState([]);
   // const [chartData, setChartData] = useState({});
   // const [chartOptions, setChartOptions] = useState({});
@@ -66,6 +69,22 @@ const Modals = () => {
 
   const lembagaList = lembagaData?.lembagap || [];
   const baseLURL = "http://localhost:5000/";
+
+  const expandableRowContent = (rowData) => (
+    <div>
+      {rowData.Anggota?.map((member, index) => (
+        <p key={index}>
+          <strong>{member.jabatan}:</strong> {member.demografi?.name} - NIK:{" "}
+          {member.demografi?.nik}
+        </p>
+      ))}
+    </div>
+  );
+
+  const openDetailDialog = (lembaga) => {
+    setSelectedLembaga(lembaga); // Set lembaga yang dipilih untuk ditampilkan di dialog detail
+    setDetailDialogVisible(true);
+  };
 
   const [genderChartData, setGenderChartData] = useState(null);
   const [educationChartData, setEducationChartData] = useState(null);
@@ -427,6 +446,7 @@ const Modals = () => {
 
       <Row>
         <Col className="mt-1" md="3" xs="6">
+          4ev6ftb gjn c hny0mvgycrme432
           <Button
             block
             className="btn-white btn-icon mb-3 mb-sm-0 video-button"
@@ -462,7 +482,11 @@ const Modals = () => {
                     rows={5}
                     rowsPerPageOptions={[5, 10, 25, 50]}
                     tableStyle={{ minWidth: "50rem" }}
+                    expandedRows={selectedLembaga ? [selectedLembaga] : []}
+                    onRowToggle={(e) => setSelectedLembaga(e.data)}
+                    rowExpansionTemplate={expandableRowContent}
                   >
+                    <Column expander style={{ width: "3em" }} />
                     <Column
                       field="file_url"
                       header="Lambang"
@@ -482,11 +506,60 @@ const Modals = () => {
                     />
                     <Column field="nama" header="Nama" />
                     <Column field="dasar_hukum" header="Dasar Hukum" />
-                    <Column field="alamat_kantor" header="Alamat Kantor" />
+                    <Column
+                      field="alamat_kantor"
+                      header="Alamat Kantor"
+                      body={(rowData) => (
+                        <Button
+                          label="Detail"
+                          icon="pi pi-eye"
+                          onClick={() => openDetailDialog(rowData)}
+                        />
+                      )}
+                    />
                   </DataTable>
                 )}
               </div>
             </Dialog>
+            {selectedLembaga && (
+              <Dialog
+                header={`Detail Lembaga: ${selectedLembaga.nama}`}
+                visible={detailDialogVisible}
+                style={{ width: "70vw" }}
+                maximizable
+                modal
+                onHide={() => setDetailDialogVisible(false)}
+                footer={dialogFooterTemplate(() =>
+                  setDetailDialogVisible(false)
+                )}
+              >
+                <div>
+                  <h4>Profil Lembaga</h4>
+                  {selectedLembaga.profil_lembaga?.map((profil, index) => (
+                    <p
+                      key={index}
+                      dangerouslySetInnerHTML={{ __html: profil.content }}
+                    ></p>
+                  ))}
+
+                  <h4>Tugas Pokok</h4>
+                  {selectedLembaga.tugas_pokok?.map((tugas, index) => (
+                    <p
+                      key={index}
+                      dangerouslySetInnerHTML={{ __html: tugas.content }}
+                    ></p>
+                  ))}
+
+                  <h4>Visi Misi</h4>
+                  {selectedLembaga.visi_misi?.map((visi, index) => (
+                    <p
+                      key={index}
+                      dangerouslySetInnerHTML={{ __html: visi.content }}
+                    ></p>
+                  ))}
+                </div>
+              </Dialog>
+            )}
           </div>
         </Col>
 
