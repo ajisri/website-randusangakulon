@@ -16,6 +16,9 @@ import { Image } from "primereact/image";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 
+import { CKEditor } from "@ckeditor/ckeditor5-react";
+import DecoupledEditor from "@ckeditor/ckeditor5-build-decoupled-document";
+
 import "./Lembaga.css"; // Custom CSS for styling
 
 const Lembaga = () => {
@@ -535,13 +538,69 @@ const Lembaga = () => {
                   className="quill-editor"
                 />
               </div>
+
               <div className="form-group">
                 <label>Tugas Pokok</label>
-                <ReactQuill
-                  value={formData.tugaspokok}
-                  onChange={(value) => handleQuillChange(value, "tugaspokok")}
-                  className="quill-editor"
+                <CKEditor
+                  editor={DecoupledEditor}
+                  data={formData.tugaspokok}
+                  onReady={(editor) => {
+                    // Menyimpan referensi editor untuk pengaturan lebih lanjut
+                    console.log("Editor is ready to use!", editor);
+                    // Menempatkan toolbar di atas editor
+                    const toolbarContainer =
+                      document.querySelector(".toolbar-container");
+                    toolbarContainer.appendChild(
+                      editor.ui.view.toolbar.element
+                    );
+
+                    // Menambahkan custom command untuk indentasi tabel
+                    editor.addCommand("indentTable", {
+                      exec: function (editor) {
+                        const selectedTable = editor
+                          .getSelection()
+                          .getStartElement();
+
+                        if (selectedTable.is("table")) {
+                          selectedTable.setStyle("margin-left", "20px"); // Mengatur margin kiri
+                        }
+                      },
+                    });
+
+                    // Menambahkan tombol ke toolbar untuk indentasi
+                    editor.ui.addButton("IndentTable", {
+                      label: "Indent Table",
+                      command: "indentTable",
+                      toolbar: "insert",
+                    });
+                  }}
+                  onChange={(event, editor) => {
+                    const data = editor.getData();
+                    handleQuillChange(data, "tugaspokok");
+                  }}
+                  onBlur={(event, editor) => {
+                    console.log("Blur.", editor);
+                  }}
+                  onFocus={(event, editor) => {
+                    console.log("Focus.", editor);
+                  }}
                 />
+                <div className="toolbar-container" />
+
+                <style jsx>
+                  {`
+                    .custom-dialog-content table {
+                      margin-left: 20px; /* Mengatur margin kiri tabel */
+                      border-collapse: collapse; /* Menghindari jarak antar sel */
+                    }
+
+                    .custom-dialog-content table td,
+                    .custom-dialog-content table th {
+                      padding: 10px; /* Menambahkan padding di dalam sel */
+                      border: none; /* Menghilangkan border */
+                    }
+                  `}
+                </style>
               </div>
               <div className="form-group">
                 <label>Upload Lambang</label>

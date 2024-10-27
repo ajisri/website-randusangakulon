@@ -47,6 +47,8 @@
     "not op_mini all"
   ],
   "dependencies": {
+    "@ckeditor/ckeditor5-build-decoupled-document": "^43.2.0",
+    "@ckeditor/ckeditor5-react": "^9.3.1",
     "ajv": "^8.16.0",
     "axios": "^1.7.5",
     "bootstrap": "4.6.2",

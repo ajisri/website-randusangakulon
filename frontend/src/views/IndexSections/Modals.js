@@ -538,6 +538,20 @@ const Modals = () => {
                 )}
               </div>
             </Dialog>
+            <style jsx>
+              {`
+                .custom-dialog-content table {
+                  border: none;
+                  border-color: transparent;
+                }
+                .custom-dialog-content table td,
+                .custom-dialog-content table th {
+                  border: none !important;
+                  height: 20px; /* Pengaturan tinggi cell */
+                  padding: 4px; /* Mengurangi padding agar cell lebih kecil */
+                }
+              `}
+            </style>
             {selectedLembaga && (
               <Dialog
                 header={`Detail Lembaga: ${selectedLembaga.nama}`}
@@ -549,6 +563,7 @@ const Modals = () => {
                 footer={dialogFooterTemplate(() =>
                   setDetailDialogVisible(false)
                 )}
+                className="custom-dialog-content"
               >
                 <div>
                   <h4>Profil Lembaga</h4>
