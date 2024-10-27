@@ -1929,6 +1929,11 @@ export const getLembagapengunjung = async (req, res) => {
                 uuid: true,
                 nik: true,
                 name: true,
+                education: {
+                  select: {
+                    level: true, // Menambahkan level pendidikan dari education
+                  },
+                },
               },
             },
           },
