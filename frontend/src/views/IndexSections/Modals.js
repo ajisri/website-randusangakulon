@@ -7,6 +7,7 @@ import { Dialog } from "primereact/dialog";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import Geografix from "../../components/Administator/Profil/Geografix";
+import "primeicons/primeicons.css";
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
@@ -15,6 +16,7 @@ const Modals = () => {
   const [dialogVisible, setDialogVisible] = useState(false);
   const [selectedLembaga, setSelectedLembaga] = useState(null);
   const [detailDialogVisible, setDetailDialogVisible] = useState(false);
+  const [expandedRows, setExpandedRows] = useState([]);
   const [dialogVisiblettg, setDialogVisiblettg] = useState(false);
   const [dialogVisiblesd, setDialogVisiblesd] = useState(false);
   const [dialogVisibleso, setDialogVisibleso] = useState(false);
@@ -70,13 +72,27 @@ const Modals = () => {
   const lembagaList = lembagaData?.lembagap || [];
   const baseLURL = "http://localhost:5000/";
 
-  const expandableRowContent = (rowData) => (
-    <div>
-      {rowData.Anggota?.map((member, index) => (
-        <p key={index}>
-          <strong>{member.jabatan}:</strong> {member.demografi?.name} - NIK:{" "}
-          {member.demografi?.nik}
-        </p>
+  const renderAnggota = (anggotaList) => (
+    <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
+      {anggotaList.map((member, index) => (
+        <div
+          key={index}
+          style={{
+            flex: "1 0 45%",
+            padding: "5px",
+            border: "1px solid #ddd",
+            borderRadius: "5px",
+          }}
+        >
+          <p>
+            <strong>{member.jabatan}</strong>
+          </p>
+          <p>{member.demografi?.name}</p>
+          <p>NIK: {member.demografi?.nik}</p>
+          <p>
+            Pendidikan: {member.demografi?.education?.level || "Tidak ada data"}
+          </p>
+        </div>
       ))}
     </div>
   );
@@ -84,6 +100,10 @@ const Modals = () => {
   const openDetailDialog = (lembaga) => {
     setSelectedLembaga(lembaga); // Set lembaga yang dipilih untuk ditampilkan di dialog detail
     setDetailDialogVisible(true);
+  };
+
+  const handleRowToggle = (event) => {
+    setExpandedRows(event.data); // Menyimpan status baris yang diperluas
   };
 
   const [genderChartData, setGenderChartData] = useState(null);
@@ -446,7 +466,6 @@ const Modals = () => {
 
       <Row>
         <Col className="mt-1" md="3" xs="6">
-          4ev6ftb gjn c hny0mvgycrme432
           <Button
             block
             className="btn-white btn-icon mb-3 mb-sm-0 video-button"
@@ -466,7 +485,7 @@ const Modals = () => {
               modal
               contentStyle={{ height: "300px" }}
               onHide={() => setDialogVisiblele(false)}
-              footer={dialogFooterTemplate(() => setDialogVisiblele(false))}
+              // footer={dialogFooterTemplate(() => setDialogVisiblele(false))}
             >
               <div className="modal-body col-lg">
                 {loadingLembaga ? (
@@ -482,11 +501,9 @@ const Modals = () => {
                     rows={5}
                     rowsPerPageOptions={[5, 10, 25, 50]}
                     tableStyle={{ minWidth: "50rem" }}
-                    expandedRows={selectedLembaga ? [selectedLembaga] : []}
-                    onRowToggle={(e) => setSelectedLembaga(e.data)}
-                    rowExpansionTemplate={expandableRowContent}
+                    expandedRows={expandedRows} // Status baris yang diperluas
+                    onRowToggle={handleRowToggle} // Menangani perubahan status baris
                   >
-                    <Column expander style={{ width: "3em" }} />
                     <Column
                       field="file_url"
                       header="Lambang"
@@ -506,13 +523,13 @@ const Modals = () => {
                     />
                     <Column field="nama" header="Nama" />
                     <Column field="dasar_hukum" header="Dasar Hukum" />
+                    <Column field="alamat_kantor" header="Alamat Kantor" />
                     <Column
-                      field="alamat_kantor"
-                      header="Alamat Kantor"
+                      header=""
                       body={(rowData) => (
                         <Button
                           label="Detail"
-                          icon="pi pi-eye"
+                          className="pi pi-search"
                           onClick={() => openDetailDialog(rowData)}
                         />
                       )}
@@ -557,6 +574,9 @@ const Modals = () => {
                       dangerouslySetInnerHTML={{ __html: visi.content }}
                     ></p>
                   ))}
+
+                  <h4>Anggota</h4>
+                  {renderAnggota(selectedLembaga.Anggota)}
                 </div>
               </Dialog>
             )}

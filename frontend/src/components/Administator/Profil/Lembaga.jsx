@@ -396,16 +396,8 @@ const Lembaga = () => {
   const header = renderHeader();
 
   const handlePageChange = (e) => {
-    console.log("Page Change Event:", e); // Log event untuk melihat properti yang tersedia
-    console.log("First sebelum di-update:", first);
-    console.log("Rows sebelum di-update:", rows);
-    console.log("Data index pertama dari halaman saat ini:", e.first);
-
     setFirst(e.first);
     setRows(e.rows);
-
-    console.log("First setelah di-update:", e.first);
-    console.log("Rows setelah di-update:", e.rows);
   };
 
   if (isLoading) return <p>Loading...</p>;
