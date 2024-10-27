@@ -4,7 +4,7 @@ import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { Checkbox } from "primereact/checkbox";
 import { useNavigate } from "react-router-dom";
-import "primereact/resources/themes/saga-blue/theme.css"; // Atau pilih tema lainnya
+import "primereact/resources/themes/saga-blue/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
 
@@ -18,7 +18,7 @@ const Login = () => {
   const Auth = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:5000/login", {
+      await axios.post("http://localhost:5000/login", {
         username: username,
         password: password,
       });
@@ -44,15 +44,6 @@ const Login = () => {
           <div className="text-900 text-3xl font-medium mb-3">
             Selamat Datang
           </div>
-          {/* <span className="text-600 font-medium line-height-3">
-            Don't have an account?
-          </span> */}
-          {/* <a
-            href="/landing-page"
-            className="font-medium no-underline ml-2 text-blue-500 cursor-pointer"
-          >
-            Create today!
-          </a> */}
         </div>
 
         <div>
@@ -62,12 +53,12 @@ const Login = () => {
               htmlFor="username"
               className="block text-900 font-medium mb-2"
             >
-              username
+              Username
             </label>
             <InputText
               id="username"
               type="text"
-              placeholder="username address"
+              placeholder="Username address"
               className="w-full mb-3"
               value={username}
               onChange={(e) => setUsername(e.target.value)}

@@ -545,48 +545,21 @@ const Lembaga = () => {
                   editor={DecoupledEditor}
                   data={formData.tugaspokok}
                   onReady={(editor) => {
-                    // Menyimpan referensi editor untuk pengaturan lebih lanjut
                     console.log("Editor is ready to use!", editor);
-                    // Menempatkan toolbar di atas editor
                     const toolbarContainer =
                       document.querySelector(".toolbar-container");
                     toolbarContainer.appendChild(
                       editor.ui.view.toolbar.element
                     );
-
-                    // Menambahkan custom command untuk indentasi tabel
-                    editor.addCommand("indentTable", {
-                      exec: function (editor) {
-                        const selectedTable = editor
-                          .getSelection()
-                          .getStartElement();
-
-                        if (selectedTable.is("table")) {
-                          selectedTable.setStyle("margin-left", "20px"); // Mengatur margin kiri
-                        }
-                      },
-                    });
-
-                    // Menambahkan tombol ke toolbar untuk indentasi
-                    editor.ui.addButton("IndentTable", {
-                      label: "Indent Table",
-                      command: "indentTable",
-                      toolbar: "insert",
-                    });
                   }}
                   onChange={(event, editor) => {
                     const data = editor.getData();
+                    console.log("Editor data changed:", data);
                     handleQuillChange(data, "tugaspokok");
                   }}
-                  onBlur={(event, editor) => {
-                    console.log("Blur.", editor);
-                  }}
-                  onFocus={(event, editor) => {
-                    console.log("Focus.", editor);
-                  }}
                 />
-                <div className="toolbar-container" />
 
+                <div className="toolbar-container" />
                 <style jsx>
                   {`
                     .custom-dialog-content table {
