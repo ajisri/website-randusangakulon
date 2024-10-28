@@ -53,6 +53,7 @@ model Administrator {
   ProfilLembaga ProfilLembaga[]
   Anggota Anggota[]
   Pengumuman Pengumuman[]
+  Galeri Galeri[]
 }
 
 model User{
@@ -293,6 +294,19 @@ model Agenda {
 }
 
 model Pengumuman {
+  id              Int             @id @default(autoincrement())
+  uuid            String          @default(uuid()) @unique
+  title           String
+  content         String          @db.LongText
+  file_url        String?         // URL file yang di-upload
+  status          Status          @default(DRAFT)
+  created_at      DateTime        @default(now())
+  updated_at      DateTime        @updatedAt
+  createdbyId String
+  createdBy     Administrator? @relation(fields: [createdbyId], references: [uuid])
+}
+
+model Galeri {
   id              Int             @id @default(autoincrement())
   uuid            String          @default(uuid()) @unique
   title           String

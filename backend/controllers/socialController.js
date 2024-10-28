@@ -236,6 +236,9 @@ export const getPengumumanPengunjung = async (req, res) => {
   try {
     // Ambil data dari tabel Agenda
     const pengumumans = await prisma.pengumuman.findMany({
+      where: {
+        status: "PUBLISH",
+      },
       include: {
         createdBy: {
           select: {
@@ -413,7 +416,7 @@ export const updatePengumuman = async (req, res) => {
 
     return res.status(200).json({
       msg: "Pengumuman berhasil diperbarui",
-      demographic: updatedPengumuman,
+      pengumuman: updatedPengumuman,
     });
   } catch (error) {
     console.error("Error memperbarui Pengumuman:", error);
@@ -472,6 +475,251 @@ export const deletePengumuman = async (req, res) => {
     return res.status(200).json({ msg: "Pengumuman deleted successfully" });
   } catch (error) {
     console.error("Error deleting pengumuman:", error);
+    res.status(500).json({ msg: "Terjadi kesalahan pada server" });
+  }
+};
+
+//galeri pengunjung
+export const getGaleriPengunjung = async (req, res) => {
+  try {
+    // Ambil data dari tabel Agenda
+    const galeris = await prisma.galeri.findMany({
+      where: {
+        status: "PUBLISH",
+      },
+      include: {
+        createdBy: {
+          select: {
+            name: true, // Hanya mengambil field 'name' dari relasi 'createdBy'
+          },
+        },
+      },
+    });
+
+    // Cek jika tidak ada data
+    if (galeris.length === 0) {
+      return res.status(200).json({ galeri: [] });
+    }
+
+    // Kirimkan data pengumuman
+    res.status(200).json({ galeris });
+  } catch (error) {
+    console.error("Error saat mengambil data galeri untuk pengunjung:", error);
+    res.status(500).json({ msg: "Terjadi kesalahan pada server" });
+  }
+};
+
+//galeri admin
+export const getGaleriAdmin = async (req, res) => {
+  try {
+    const refreshToken = req.cookies.refreshToken;
+
+    if (!refreshToken) {
+      return res.status(401).json({ msg: "Token tidak ditemukan" });
+    }
+
+    const administrator = await prisma.administrator.findUnique({
+      where: {
+        refresh_token: refreshToken,
+      },
+    });
+
+    if (!administrator) {
+      return res.status(401).json({ msg: "Pengguna tidak ditemukan" });
+    }
+
+    if (administrator.role !== "administrator") {
+      return res.status(403).json({ msg: "Akses ditolak" });
+    }
+
+    const galeris = await prisma.galeri.findMany({
+      include: {
+        createdBy: {
+          select: {
+            uuid: true,
+            name: true, // Hanya mengambil field 'name' dari relasi 'createdBy'
+          },
+        },
+      },
+    });
+
+    if (galeris.length === 0) {
+      return res.status(200).json({ galeris: [] });
+    }
+
+    res.status(200).json({ galeris });
+  } catch (error) {
+    console.error("Error saat mengambil data galeri untuk admin:", error);
+    res.status(500).json({ msg: "Terjadi kesalahan pada server" });
+  }
+};
+
+export const createGaleri = async (req, res) => {
+  // Validate input
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { title, content, status } = req.body;
+
+  const file = req.file;
+
+  try {
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) {
+      return res.status(401).json({ msg: "Token tidak ditemukan" });
+    }
+
+    const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+    const administrator = await prisma.administrator.findUnique({
+      where: { id: decoded.administratorId },
+    });
+
+    if (!administrator || administrator.role !== "administrator") {
+      return res.status(403).json({ msg: "Akses ditolak" });
+    }
+
+    const newGaleri = await prisma.galeri.create({
+      data: {
+        title,
+        content,
+        status,
+        file_url: file ? `/uploads/galeri/${file.filename}` : null,
+        createdbyId: administrator.uuid,
+      },
+    });
+
+    return res.status(201).json({
+      msg: "galeri created successfully",
+      galeri: newGaleri,
+    });
+  } catch (error) {
+    console.error("Error creating galeri:", error);
+    res.status(500).json({ msg: "Terjadi kesalahan pada server" });
+  }
+};
+
+export const updateGaleri = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { uuid, title, content, status } = req.body;
+  const file = req.file;
+
+  try {
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) {
+      return res.status(401).json({ msg: "Token tidak ditemukan" });
+    }
+
+    const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+    const administrator = await prisma.administrator.findUnique({
+      where: { id: decoded.administratorId },
+    });
+
+    if (!administrator || administrator.role !== "administrator") {
+      return res.status(403).json({ msg: "Akses ditolak" });
+    }
+
+    const existingGaleri = await prisma.galeri.findUnique({
+      where: { uuid },
+    });
+    if (!existingGaleri) {
+      return res.status(404).json({ msg: "Galeri tidak ditemukan" });
+    }
+
+    let filePathToDelete = null;
+    if (file && existingGaleri.file_url) {
+      filePathToDelete = path.join(
+        __dirname,
+        "..",
+        "uploads/galeri",
+        path.basename(existingGaleri.file_url)
+      );
+    }
+
+    const updatedGaleri = await prisma.galeri.update({
+      where: { uuid },
+      data: {
+        title,
+        content,
+        status,
+        file_url: file
+          ? `/uploads/galeri/${file.filename}`
+          : existingGaleri.file_url,
+        updated_at: new Date(),
+      },
+    });
+
+    if (filePathToDelete && fs.existsSync(filePathToDelete)) {
+      fs.unlinkSync(filePathToDelete);
+      console.log(`Berhasil menghapus file lama: ${filePathToDelete}`);
+    }
+
+    return res.status(200).json({
+      msg: "Galeri berhasil diperbarui",
+      galeri: updatedGaleri,
+    });
+  } catch (error) {
+    console.error("Error memperbarui Galeri:", error);
+    res.status(500).json({ msg: "Terjadi kesalahan pada server" });
+  }
+};
+
+export const deleteGaleri = async (req, res) => {
+  const { uuid } = req.params;
+
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  try {
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) {
+      return res.status(401).json({ msg: "Token tidak ditemukan" });
+    }
+
+    const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+    const administrator = await prisma.administrator.findUnique({
+      where: { id: decoded.administratorId },
+    });
+
+    if (!administrator || administrator.role !== "administrator") {
+      return res.status(403).json({ msg: "Akses ditolak" });
+    }
+
+    const existingGaleri = await prisma.galeri.findUnique({
+      where: { uuid },
+    });
+    if (!existingGaleri) {
+      return res.status(404).json({ msg: "Galeri not found" });
+    }
+
+    // Delete file if it exists
+    const filePathToDelete = path.join(
+      __dirname,
+      "..",
+      "uploads/galeri",
+      path.basename(existingGaleri.file_url)
+    );
+
+    if (fs.existsSync(filePathToDelete)) {
+      fs.unlinkSync(filePathToDelete);
+      console.log(`Successfully deleted file: ${filePathToDelete}`);
+    }
+
+    // Delete galeri record
+    await prisma.galeri.delete({
+      where: { uuid },
+    });
+
+    return res.status(200).json({ msg: "Galeri deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting galeri:", error);
     res.status(500).json({ msg: "Terjadi kesalahan pada server" });
   }
 };

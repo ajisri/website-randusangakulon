@@ -1,5 +1,6 @@
 import express from "express";
 import uploadPengumuman from "../middleware/fileUploadPengumuman.js";
+import uploadGaleri from "../middleware/fileUploadGaleri.js";
 import {
   getAgendaPengunjung,
   getAgendaAdmin,
@@ -11,6 +12,11 @@ import {
   createPengumuman,
   updatePengumuman,
   deletePengumuman,
+  getGaleriPengunjung,
+  getGaleriAdmin,
+  createGaleri,
+  updateGaleri,
+  deleteGaleri,
 } from "../controllers/socialController.js"; // Pastikan untuk menyesuaikan path ini dengan lokasi controller Anda
 import { verifyToken, superOnly } from "../middleware/verifyToken.js";
 
@@ -45,5 +51,27 @@ router.patch(
   updatePengumuman
 );
 router.delete("/pengumuman/:uuid", verifyToken, superOnly, deletePengumuman);
+
+//Galeri
+//pengunjung
+router.get("/galeripengunjung", getGaleriPengunjung);
+
+// Admin
+router.get("/galeri", verifyToken, superOnly, getGaleriAdmin);
+router.post(
+  "/cgaleri",
+  verifyToken,
+  superOnly,
+  uploadGaleri.single("file"),
+  createGaleri
+);
+router.patch(
+  "/galeri/:uuid",
+  verifyToken,
+  superOnly,
+  uploadGaleri.single("file"),
+  updateGaleri
+);
+router.delete("/galeri/:uuid", verifyToken, superOnly, deleteGaleri);
 
 export default router;
