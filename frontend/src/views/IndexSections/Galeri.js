@@ -1,29 +1,36 @@
 import React, { useState, useEffect } from "react";
+import useSWR from "swr";
 import { Galleria } from "primereact/galleria";
-import { PhotoService } from "./service/PhotoServices";
+
+const fetcher = (url) => fetch(url).then((res) => res.json());
 
 const Galeri = () => {
-  const [images, setImages] = useState(null);
+  const { data: galeriData, error: galeriError } = useSWR(
+    "http://localhost:5000/galeripengunjung",
+    fetcher
+  );
   const [isWideScreen, setIsWideScreen] = useState(window.innerWidth > 1200); // Tambahkan state untuk mengecek layar lebar
 
   const responsiveOptions = [
     {
-      breakpoint: "991px",
+      breakpoint: "1200px", // Untuk layar lebar (desktop)
+      numVisible: 5,
+    },
+    {
+      breakpoint: "991px", // Untuk layar sedang (tablet potret)
       numVisible: 4,
     },
     {
-      breakpoint: "767px",
+      breakpoint: "767px", // Untuk layar kecil (tablet lanskap/ponsel besar)
       numVisible: 3,
     },
     {
-      breakpoint: "575px",
+      breakpoint: "575px", // Untuk layar sangat kecil (ponsel)
       numVisible: 1,
     },
   ];
 
   useEffect(() => {
-    PhotoService.getImages().then((data) => setImages(data));
-
     const handleResize = () => {
       setIsWideScreen(window.innerWidth > 1200);
     };
@@ -35,18 +42,42 @@ const Galeri = () => {
     };
   }, []);
 
+  if (galeriError) {
+    return <div>Error loading images</div>;
+  }
+
+  if (!galeriData) {
+    return <div>Loading...</div>;
+  }
+
+  // Ubah data API sesuai dengan format yang dibutuhkan oleh Galleria
+  const images = galeriData.galeris.map((item) => ({
+    itemImageSrc: `http://localhost:5000${item.file_url}`, // Gambar utama
+    thumbnailImageSrc: `http://localhost:5000${item.file_url}`, // Gambar thumbnail
+    alt: item.title,
+    title: item.title,
+  }));
+
   const itemTemplate = (item) => {
     return (
-      <img
-        src={item.itemImageSrc}
-        alt={item.alt}
+      <div
         style={{
-          width: "100%", // Lebar penuh
-          height: isWideScreen ? "70vh" : "60vh", // Tinggi disesuaikan dengan ukuran layar
-          objectFit: "cover",
-          display: "block",
+          width: "100%",
+          height: isWideScreen ? "70vh" : "60vh",
+          overflow: "hidden",
         }}
-      />
+      >
+        <img
+          src={item.itemImageSrc}
+          alt={item.alt}
+          style={{
+            width: "100%", // Lebar penuh
+            height: "100%", // Tinggi penuh
+            objectFit: "contain", // Menjaga gambar agar tidak terpotong
+            display: "block",
+          }}
+        />
+      </div>
     );
   };
 
@@ -55,7 +86,13 @@ const Galeri = () => {
       <img
         src={item.thumbnailImageSrc}
         alt={item.alt}
-        style={{ display: "block" }}
+        style={{
+          display: "block",
+          width: "80px", // Atur lebar thumbnail
+          height: "60px", // Atur tinggi thumbnail
+          objectFit: "cover", // Pastikan gambar sesuai area tanpa distorsi
+          borderRadius: "5px", // Jika ingin menambahkan sedikit efek rounded
+        }}
       />
     );
   };
@@ -81,7 +118,7 @@ const Galeri = () => {
       <Galleria
         value={images}
         responsiveOptions={responsiveOptions}
-        numVisible={8}
+        numVisible={5}
         item={itemTemplate}
         thumbnail={thumbnailTemplate}
         caption={caption}
@@ -90,6 +127,7 @@ const Galeri = () => {
           height: "100vh",
         }}
         showItemNavigators
+        showThumbnailNavigators
       />
     </div>
   );
