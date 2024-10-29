@@ -482,7 +482,7 @@ export const deletePengumuman = async (req, res) => {
 //galeri pengunjung
 export const getGaleriPengunjung = async (req, res) => {
   try {
-    // Ambil data dari tabel Agenda
+    // Ambil data dari tabel Galeri
     const galeris = await prisma.galeri.findMany({
       where: {
         status: "PUBLISH",
@@ -496,12 +496,12 @@ export const getGaleriPengunjung = async (req, res) => {
       },
     });
 
-    // Cek jika tidak ada data
-    if (galeris.length === 0) {
-      return res.status(200).json({ galeri: [] });
+    // Cek jika galeris undefined atau array kosong
+    if (!galeris || galeris.length === 0) {
+      return res.status(200).json({ galeris: [] });
     }
 
-    // Kirimkan data pengumuman
+    // Kirimkan data galeri jika ada
     res.status(200).json({ galeris });
   } catch (error) {
     console.error("Error saat mengambil data galeri untuk pengunjung:", error);
@@ -720,6 +720,251 @@ export const deleteGaleri = async (req, res) => {
     return res.status(200).json({ msg: "Galeri deleted successfully" });
   } catch (error) {
     console.error("Error deleting galeri:", error);
+    res.status(500).json({ msg: "Terjadi kesalahan pada server" });
+  }
+};
+
+//berita pengunjung
+export const getBeritaPengunjung = async (req, res) => {
+  try {
+    // Ambil data dari tabel Berita
+    const beritas = await prisma.berita.findMany({
+      where: {
+        status: "PUBLISH",
+      },
+      include: {
+        createdBy: {
+          select: {
+            name: true, // Hanya mengambil field 'name' dari relasi 'createdBy'
+          },
+        },
+      },
+    });
+
+    // Cek jika beritas undefined atau array kosong
+    if (!beritas || beritas.length === 0) {
+      return res.status(200).json({ beritas: [] });
+    }
+
+    // Kirimkan data berita jika ada
+    res.status(200).json({ beritas });
+  } catch (error) {
+    console.error("Error saat mengambil data berita untuk pengunjung:", error);
+    res.status(500).json({ msg: "Terjadi kesalahan pada server" });
+  }
+};
+
+//berita admin
+export const getBeritaAdmin = async (req, res) => {
+  try {
+    const refreshToken = req.cookies.refreshToken;
+
+    if (!refreshToken) {
+      return res.status(401).json({ msg: "Token tidak ditemukan" });
+    }
+
+    const administrator = await prisma.administrator.findUnique({
+      where: {
+        refresh_token: refreshToken,
+      },
+    });
+
+    if (!administrator) {
+      return res.status(401).json({ msg: "Pengguna tidak ditemukan" });
+    }
+
+    if (administrator.role !== "administrator") {
+      return res.status(403).json({ msg: "Akses ditolak" });
+    }
+
+    const beritas = await prisma.berita.findMany({
+      include: {
+        createdBy: {
+          select: {
+            uuid: true,
+            name: true, // Hanya mengambil field 'name' dari relasi 'createdBy'
+          },
+        },
+      },
+    });
+
+    if (beritas.length === 0) {
+      return res.status(200).json({ beritas: [] });
+    }
+
+    res.status(200).json({ beritas });
+  } catch (error) {
+    console.error("Error saat mengambil data berita untuk admin:", error);
+    res.status(500).json({ msg: "Terjadi kesalahan pada server" });
+  }
+};
+
+export const createBerita = async (req, res) => {
+  // Validate input
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { title, content, status } = req.body;
+
+  const file = req.file;
+
+  try {
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) {
+      return res.status(401).json({ msg: "Token tidak ditemukan" });
+    }
+
+    const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+    const administrator = await prisma.administrator.findUnique({
+      where: { id: decoded.administratorId },
+    });
+
+    if (!administrator || administrator.role !== "administrator") {
+      return res.status(403).json({ msg: "Akses ditolak" });
+    }
+
+    const newBerita = await prisma.berita.create({
+      data: {
+        title,
+        content,
+        status,
+        file_url: file ? `/uploads/berita/${file.filename}` : null,
+        createdbyId: administrator.uuid,
+      },
+    });
+
+    return res.status(201).json({
+      msg: "berita created successfully",
+      berita: newBerita,
+    });
+  } catch (error) {
+    console.error("Error creating berita:", error);
+    res.status(500).json({ msg: "Terjadi kesalahan pada server" });
+  }
+};
+
+export const updateBerita = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { uuid, title, content, status } = req.body;
+  const file = req.file;
+
+  try {
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) {
+      return res.status(401).json({ msg: "Token tidak ditemukan" });
+    }
+
+    const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+    const administrator = await prisma.administrator.findUnique({
+      where: { id: decoded.administratorId },
+    });
+
+    if (!administrator || administrator.role !== "administrator") {
+      return res.status(403).json({ msg: "Akses ditolak" });
+    }
+
+    const existingBerita = await prisma.berita.findUnique({
+      where: { uuid },
+    });
+    if (!existingBerita) {
+      return res.status(404).json({ msg: "Berita tidak ditemukan" });
+    }
+
+    let filePathToDelete = null;
+    if (file && existingBerita.file_url) {
+      filePathToDelete = path.join(
+        __dirname,
+        "..",
+        "uploads/berita",
+        path.basename(existingBerita.file_url)
+      );
+    }
+
+    const updatedBerita = await prisma.berita.update({
+      where: { uuid },
+      data: {
+        title,
+        content,
+        status,
+        file_url: file
+          ? `/uploads/berita/${file.filename}`
+          : existingBerita.file_url,
+        updated_at: new Date(),
+      },
+    });
+
+    if (filePathToDelete && fs.existsSync(filePathToDelete)) {
+      fs.unlinkSync(filePathToDelete);
+      console.log(`Berhasil menghapus file lama: ${filePathToDelete}`);
+    }
+
+    return res.status(200).json({
+      msg: "Berita berhasil diperbarui",
+      berita: updatedBerita,
+    });
+  } catch (error) {
+    console.error("Error memperbarui Berita:", error);
+    res.status(500).json({ msg: "Terjadi kesalahan pada server" });
+  }
+};
+
+export const deleteBerita = async (req, res) => {
+  const { uuid } = req.params;
+
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  try {
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) {
+      return res.status(401).json({ msg: "Token tidak ditemukan" });
+    }
+
+    const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+    const administrator = await prisma.administrator.findUnique({
+      where: { id: decoded.administratorId },
+    });
+
+    if (!administrator || administrator.role !== "administrator") {
+      return res.status(403).json({ msg: "Akses ditolak" });
+    }
+
+    const existingBerita = await prisma.berita.findUnique({
+      where: { uuid },
+    });
+    if (!existingBerita) {
+      return res.status(404).json({ msg: "Berita not found" });
+    }
+
+    // Delete file if it exists
+    const filePathToDelete = path.join(
+      __dirname,
+      "..",
+      "uploads/berita",
+      path.basename(existingBerita.file_url)
+    );
+
+    if (fs.existsSync(filePathToDelete)) {
+      fs.unlinkSync(filePathToDelete);
+      console.log(`Successfully deleted file: ${filePathToDelete}`);
+    }
+
+    // Delete berita record
+    await prisma.berita.delete({
+      where: { uuid },
+    });
+
+    return res.status(200).json({ msg: "Berita deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting berita:", error);
     res.status(500).json({ msg: "Terjadi kesalahan pada server" });
   }
 };
