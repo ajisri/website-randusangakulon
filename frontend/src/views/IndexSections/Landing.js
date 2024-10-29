@@ -751,8 +751,8 @@ const Landing = () => {
               <div
                 className="col-12 md:col-8 lg:col-9"
                 style={{
-                  flex: "1 1 70%",
-                  width: "70%", // Menyisakan 30% untuk berita
+                  flex: "1 1 60%",
+                  width: "60%", // Menyisakan 30% untuk berita
                   margin: "0", // Hilangkan margin di sekitar
                   padding: "0", // Hilangkan padding di sekitar
                   maxWidth: "none",
@@ -766,7 +766,7 @@ const Landing = () => {
               <div
                 className="col-12 md:col-4 lg:col-3"
                 style={{
-                  width: "30%",
+                  width: "40%",
                   paddingLeft: "10px",
                   minWidth: "300px",
                   marginBottom: "0", // Menghilangkan margin bawah

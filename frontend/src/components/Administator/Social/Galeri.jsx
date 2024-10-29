@@ -9,6 +9,7 @@ import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
+import { ProgressSpinner } from "primereact/progressspinner";
 import { FilterMatchMode } from "primereact/api";
 import { Dialog } from "primereact/dialog";
 import { Image } from "primereact/image";
@@ -136,6 +137,18 @@ const Galeri = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Cek apakah field wajib sudah diisi
+    if (!formData.title || !formData.content || !formData.status) {
+      toast.current.show({
+        severity: "warn",
+        summary: "Warning",
+        detail: "Harap lengkapi semua data yang wajib diisi.",
+        life: 3000,
+      });
+      return; // Hentikan proses submit jika data belum lengkap
+    }
+
     const dataToSend = new FormData();
     Object.keys(formData).forEach((key) => {
       dataToSend.append(key, formData[key]);
@@ -144,6 +157,7 @@ const Galeri = () => {
       dataToSend.append("file", selectedFile);
     }
 
+    // Lanjutkan proses submit jika data sudah lengkap
     try {
       if (isEditMode) {
         await axiosJWT.patch(
@@ -257,8 +271,27 @@ const Galeri = () => {
     setRows(e.rows);
   };
 
-  if (isLoading) return <p>Loading...</p>;
-  if (error) return <p>Error fetching data</p>;
+  if (isLoading) {
+    // Menampilkan loading spinner
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
+        <ProgressSpinner />
+        <p>Memuat data galeri...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    // Menampilkan pesan error
+    return <p>Terjadi kesalahan saat mengambil data.</p>;
+  }
 
   return (
     <div>
@@ -275,6 +308,7 @@ const Galeri = () => {
         globalFilterFields={["title", "content", "status"]}
         header={header}
         tableStyle={{ minWidth: "50rem" }}
+        emptyMessage="Data tidak tersedia."
         footer={`Total data: ${galeriList.length}`}
         breakpoints={{
           "960px": {

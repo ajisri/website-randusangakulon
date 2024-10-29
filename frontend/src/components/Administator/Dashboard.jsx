@@ -29,6 +29,7 @@ import Produkhukum from "./Transparansi/ProdukHukum";
 import Agenda from "./Social/Agenda";
 import Pengumuman from "./Social/Pengumuman";
 import Galeri from "./Social/Galeri";
+import Berita from "./Social/Berita";
 
 import "primereact/resources/themes/saga-blue/theme.css";
 import "primereact/resources/primereact.min.css";
@@ -146,6 +147,8 @@ const Dashboard = () => {
         return <Pengumuman />;
       case "Galeri":
         return <Galeri />;
+      case "Berita":
+        return <Berita />;
       default:
         return <Tentang />;
     }
@@ -696,6 +699,22 @@ const Dashboard = () => {
                 style={{ marginRight: "10px" }}
               ></i>
               {isSidebarHovered && <span>Galeri</span>}
+              <Ripple />
+            </div>
+            <div
+              onClick={() => setActiveMenu("Berita")}
+              className="menu-item"
+              style={{
+                marginBottom: "10px",
+                cursor: "pointer",
+                padding: "10px",
+              }}
+            >
+              <i
+                className="pi pi-fw pi-book"
+                style={{ marginRight: "10px" }}
+              ></i>
+              {isSidebarHovered && <span>Berita</span>}
               <Ripple />
             </div>
             <div
