@@ -55,6 +55,11 @@ model Administrator {
   Pengumuman Pengumuman[]
   Galeri Galeri[]
   Berita Berita[]
+  PembiayaanDesa PembiayaanDesa[]
+  LaporanKeuangan LaporanKeuangan[]
+  RincianKeuangan RincianKeuangan[]
+  SubKategoriKeuangan SubKategoriKeuangan[]
+  KategoriKeuangan KategoriKeuangan[]
 }
 
 model User{
@@ -331,5 +336,76 @@ model Berita {
   updated_at      DateTime        @updatedAt
   createdbyId String
   createdBy     Administrator? @relation(fields: [createdbyId], references: [uuid])
+}
+
+// Kategori Keuangan
+model KategoriKeuangan {
+  id        Int       @id @default(autoincrement())
+  uuid      String    @unique @default(uuid())
+  nama      String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  createdbyId String
+  createdBy   Administrator? @relation(fields: [createdbyId], references: [uuid])
+  SubKategoriKeuangan SubKategoriKeuangan[]
+}
+
+// Sub Kategori Keuangan
+model SubKategoriKeuangan {
+  id                  Int                @id @default(autoincrement())
+  uuid                String             @unique @default(uuid())
+  nama                String
+  kategoriKeuanganId  String
+  KategoriKeuangan    KategoriKeuangan   @relation(fields: [kategoriKeuanganId], references: [uuid])
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  createdbyId         String
+  createdBy           Administrator?     @relation(fields: [createdbyId], references: [uuid])
+  RincianKeuangan     RincianKeuangan[]
+}
+
+// Rincian Keuangan
+model RincianKeuangan {
+  id                 Int                 @id @default(autoincrement())
+  uuid               String              @unique @default(uuid())
+  nama               String
+  subKategoriKeuanganId String
+  SubKategoriKeuangan SubKategoriKeuangan @relation(fields: [subKategoriKeuanganId], references: [uuid])
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  createdbyId        String
+  createdBy          Administrator?      @relation(fields: [createdbyId], references: [uuid])
+  LaporanKeuangan    LaporanKeuangan[]
+}
+
+// Laporan Keuangan
+model LaporanKeuangan {
+  id               Int                @id @default(autoincrement())
+  uuid             String             @unique @default(uuid())
+  tahun            Int
+  rincianKeuanganId String
+  RincianKeuangan  RincianKeuangan    @relation(fields: [rincianKeuanganId], references: [uuid])
+  anggaran         Decimal            @default(0.0)
+  realisasi        Decimal            @default(0.0)
+  sisa             Decimal            @default(0.0)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  createdbyId      String
+  createdBy        Administrator?     @relation(fields: [createdbyId], references: [uuid])
+
+  PembiayaanDesa PembiayaanDesa[]
+}
+
+// Pembiayaan Desa
+model PembiayaanDesa {
+  id               Int                @id @default(autoincrement())
+  uuid             String             @unique @default(uuid())
+  nama             String
+  laporanKeuanganId String
+  LaporanKeuangan  LaporanKeuangan    @relation(fields: [laporanKeuanganId], references: [uuid])
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  createdbyId      String
+  createdBy        Administrator?     @relation(fields: [createdbyId], references: [uuid])
 }
 
