@@ -17,7 +17,7 @@ import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 
 import { CKEditor } from "@ckeditor/ckeditor5-react";
-import DecoupledEditor from "@ckeditor/ckeditor5-build-decoupled-document";
+import DecoupledEditor from "../../Ckeditor/build/ckeditor";
 
 import "./Lembaga.css"; // Custom CSS for styling
 

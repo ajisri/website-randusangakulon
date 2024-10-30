@@ -9,7 +9,7 @@ const Galeri = () => {
     "http://localhost:5000/galeripengunjung",
     fetcher
   );
-  const [isWideScreen, setIsWideScreen] = useState(window.innerWidth > 1200);
+  const [isWideScreen, setIsWideScreen] = useState(null);
 
   const responsiveOptions = [
     {
@@ -35,6 +35,7 @@ const Galeri = () => {
       setIsWideScreen(window.innerWidth > 1200);
     };
 
+    handleResize(); // Set initial state
     window.addEventListener("resize", handleResize);
     return () => {
       window.removeEventListener("resize", handleResize);
@@ -61,7 +62,8 @@ const Galeri = () => {
       <div
         style={{
           width: "100%",
-          height: isWideScreen ? "70vh" : "60vh",
+          height:
+            isWideScreen === null ? "60vh" : isWideScreen ? "70vh" : "60vh",
           overflow: "hidden",
           background:
             "linear-gradient(180deg, #FFFFFF 0%, #F0F0F0 50%, #E0E0E0 100%)",
@@ -94,7 +96,9 @@ const Galeri = () => {
           height: "60px",
           objectFit: "cover",
           borderRadius: "8px",
-          margin: "2px", // Jarak antara thumbnail dan border
+          margin: "2px",
+          border: "2px solid black",
+          padding: "2px",
         }}
       />
     );
@@ -118,9 +122,9 @@ const Galeri = () => {
         height: "90vh",
         background:
           "linear-gradient(180deg, #FFFFFF 0%, #F0F0F0 50%, #E0E0E0 100%)",
-        border: "1px solid black", // Mengurangi ketebalan garis hitam di sekeliling Galeri menjadi 1px
-        boxSizing: "border-box", // Pastikan padding dihitung dalam ukuran total
-        padding: "10px", // Ruang di dalam border
+        border: "1px solid black",
+        boxSizing: "border-box",
+        padding: "10px",
         borderRadius: "5px",
       }}
     >
@@ -134,12 +138,11 @@ const Galeri = () => {
         style={{
           maxWidth: "100%",
           height: "100%",
-          background: "none", // Menghilangkan background agar lebih rapi
+          background: "none",
         }}
         showItemNavigators
         showThumbnailNavigators
-        thumbnailStyle={{ border: "2px solid black", padding: "2px" }} // Garis hitam di sekeliling thumbnail
-        itemStyle={{ border: "none" }} // Menghilangkan garis horizontal di antara item
+        itemStyle={{ border: "none" }}
       />
     </div>
   );

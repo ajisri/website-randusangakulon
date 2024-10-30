@@ -39,17 +39,18 @@ const Berita = () => {
 
   const styles = {
     container: {
-      maxHeight: "800px", // Tinggi maksimal kontainer berita
+      maxHeight: "800px",
       overflowY: "scroll",
       padding: "20px",
+      gap: "40px",
       paddingRight: "40px",
-      width: isSmallScreen ? "100%" : "80%",
+      width: isSmallScreen ? "100%" : "95%",
       margin: "0 auto",
-      height: "90vh", // Mengatur agar mengambil 90% dari tinggi viewport
+      height: "90vh",
       boxSizing: "border-box",
       display: "flex",
       flexDirection: "column",
-      alignItems: "flex-end",
+      alignItems: "center",
     },
     card: {
       display: "flex",
@@ -58,17 +59,19 @@ const Berita = () => {
       border: "1px solid #ccc",
       padding: "10px",
       borderRadius: "8px",
-      marginBottom: "20px",
+      marginBottom: "40px",
       transition: "box-shadow 0.3s ease",
-      width: "95%",
+      width: "100%",
+      maxWidth: "900px", // Perbesar maxWidth card
+      margin: "0 auto",
     },
     cardHover: {
       boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
     },
     image: {
       width: "100%",
-      height: "200px",
-      objectFit: "cover",
+      height: "auto", // Ubah height menjadi auto untuk menjaga proporsi
+      objectFit: "contain", // Gunakan contain agar gambar tidak terpotong
       borderRadius: "8px",
     },
     content: {
@@ -93,8 +96,8 @@ const Berita = () => {
     },
     dialogImage: {
       width: "100%",
-      height: "300px",
-      objectFit: "cover",
+      height: "auto", // Ubah height menjadi auto untuk menjaga proporsi
+      objectFit: "contain", // Gunakan contain agar gambar tidak terpotong
       borderRadius: "8px",
       marginBottom: "10px",
     },
@@ -149,7 +152,7 @@ const Berita = () => {
           visible={!!selectedBerita}
           onHide={() => setSelectedBerita(null)}
           maximizable
-          style={{ width: "70vw" }}
+          style={{ width: "80vw" }}
         >
           <img
             src={

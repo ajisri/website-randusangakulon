@@ -727,24 +727,24 @@ const Landing = () => {
           style={{
             background:
               "linear-gradient(180deg, #FFFFFF 0%, #F7F9FA 70%, #EAEFF1 100%)",
-            border: "5px solid black",
+            border: "2px solid black",
             padding: "10px",
-            borderRadius: "5px",
+            borderRadius: "2px",
             position: "relative",
-            minHeight: "100vh",
           }}
         >
           <Container
             className="container-fluid py-lg-md d-flex"
             style={{
+              minHeight: "500px",
               paddingLeft: "0",
               paddingRight: "0",
               margin: "0",
               width: "100vw",
               maxWidth: "100%",
+              marginBottom: "0",
               paddingBottom: "0",
-              justifyContent: "flex-end",
-              height: "100%",
+              flexDirection: "column",
             }}
           >
             <div
@@ -752,7 +752,7 @@ const Landing = () => {
               style={{
                 display: "flex",
                 flexDirection: "row",
-                flexWrap: "wrap",
+                flexWrap: "nowrap",
                 width: "100%",
                 margin: "0",
                 alignItems: "stretch",
@@ -763,40 +763,24 @@ const Landing = () => {
               <div
                 className="col-12 md:col-8 lg:col-9"
                 style={{
-                  flex: "1 1 100%",
-                  maxWidth: "100%",
+                  flex: "1 1 58%",
+                  maxWidth: "780px",
                   margin: "0",
                   padding: "0",
                   display: "flex",
                   flexDirection: "column",
+                  marginRight: "28px",
                 }}
               >
                 <Galeri />
               </div>
 
-              {/* Garis pemisah */}
+              {/* Garis pemisah vertikal antara galeri dan berita */}
               <div
+                className="separator-vertical"
                 style={{
                   width: "2px",
-                  height: "100%",
                   backgroundColor: "black",
-                  position: "absolute",
-                  top: "0",
-                  bottom: "0",
-                  left: "60%",
-                  margin: "0 30px",
-                  display: window.innerWidth < 768 ? "none" : "block", // Sembunyikan garis vertikal di tampilan mobile
-                }}
-              />
-
-              {/* Garis horizontal pemisah untuk tampilan mobile */}
-              <div
-                style={{
-                  width: "100%",
-                  height: "2px",
-                  backgroundColor: "black",
-                  margin: "20px 0",
-                  display: window.innerWidth >= 768 ? "none" : "block", // Tampilkan garis horizontal di tampilan mobile
                 }}
               />
 
@@ -804,19 +788,69 @@ const Landing = () => {
               <div
                 className="col-12 md:col-4 lg:col-3"
                 style={{
-                  flex: "1 1 100%",
-                  minWidth: "100%",
-                  paddingBottom: "0",
+                  flex: "1 1 40%",
+                  minWidth: "300px",
+                  margin: "0",
+                  padding: "0",
                   display: "flex",
                   flexDirection: "column",
-                  justifyContent: "flex-start",
-                  alignItems: "flex-end",
+                  justifyContent: "center",
+                  alignItems: "center",
                 }}
               >
                 <Berita />
               </div>
             </div>
+
+            {/* Garis pemisah horizontal di bawah galeri (untuk tampilan mobile) */}
+            <div
+              className="separator-horizontal"
+              style={{
+                height: "2px",
+                backgroundColor: "black",
+                margin: "10px 0",
+              }}
+            />
+
+            {/* Berita di bawah galeri untuk tampilan mobile */}
+            <div className="mobile-berita" style={{ width: "100%" }}>
+              <Berita />
+            </div>
           </Container>
+
+          <style jsx>{`
+            @media (max-width: 768px) {
+              .grid {
+                flex-direction: column;
+              }
+              .col-12.md:col-8,
+              .col-12.md:col-4 {
+                flex: 1 1 100%;
+                max-width: 100%;
+              }
+              .grid > div {
+                margin-bottom: 20px; /* Spasi antara Galeri dan Berita di layar kecil */
+              }
+              .separator-vertical {
+                display: none; /* Sembunyikan garis vertikal di layar kecil */
+              }
+              .separator-horizontal {
+                display: block; /* Tampilkan garis horizontal di layar kecil */
+              }
+              .mobile-berita {
+                display: block; /* Tampilkan berita di bawah galeri di layar kecil */
+              }
+            }
+
+            @media (min-width: 769px) {
+              .separator-horizontal {
+                display: none; /* Sembunyikan garis horizontal di layar besar */
+              }
+              .mobile-berita {
+                display: none; /* Sembunyikan berita di bawah galeri di layar besar */
+              }
+            }
+          `}</style>
         </section>
 
         {/* pegawai */}
