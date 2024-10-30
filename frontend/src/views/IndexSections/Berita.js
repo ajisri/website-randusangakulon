@@ -39,13 +39,17 @@ const Berita = () => {
 
   const styles = {
     container: {
-      maxHeight: "600px",
+      maxHeight: "800px", // Tinggi maksimal kontainer berita
       overflowY: "scroll",
       padding: "20px",
+      paddingRight: "40px",
       width: isSmallScreen ? "100%" : "80%",
       margin: "0 auto",
-      height: "90vh",
+      height: "90vh", // Mengatur agar mengambil 90% dari tinggi viewport
       boxSizing: "border-box",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "flex-end",
     },
     card: {
       display: "flex",
@@ -56,6 +60,7 @@ const Berita = () => {
       borderRadius: "8px",
       marginBottom: "20px",
       transition: "box-shadow 0.3s ease",
+      width: "95%",
     },
     cardHover: {
       boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",

@@ -722,18 +722,29 @@ const Landing = () => {
           </section>
         </div>
         {/* Galeri dan Berita */}
-        <section className="section section-lg section-shaped">
+        <section
+          className="section section-lg section-shaped"
+          style={{
+            background:
+              "linear-gradient(180deg, #FFFFFF 0%, #F7F9FA 70%, #EAEFF1 100%)",
+            border: "5px solid black",
+            padding: "10px",
+            borderRadius: "5px",
+            position: "relative",
+            minHeight: "100vh",
+          }}
+        >
           <Container
             className="container-fluid py-lg-md d-flex"
             style={{
-              minHeight: "500px",
-              paddingLeft: "0", // Hilangkan padding di kiri
+              paddingLeft: "0",
               paddingRight: "0",
-              margin: "0", // Pastikan tidak ada margin
-              width: "100vw", // Buat lebar selebar layar
+              margin: "0",
+              width: "100vw",
               maxWidth: "100%",
-              marginBottom: "0", // Menghilangkan margin bawah
-              paddingBottom: "0", // Menghilangkan padding bawah
+              paddingBottom: "0",
+              justifyContent: "flex-end",
+              height: "100%",
             }}
           >
             <div
@@ -741,39 +752,65 @@ const Landing = () => {
               style={{
                 display: "flex",
                 flexDirection: "row",
-                flexWrap: "wrap", // Pastikan bisa wrap di layar kecil
+                flexWrap: "wrap",
                 width: "100%",
                 margin: "0",
                 alignItems: "stretch",
+                position: "relative",
               }}
             >
               {/* Galeri di kiri */}
               <div
                 className="col-12 md:col-8 lg:col-9"
                 style={{
-                  flex: "1 1 60%",
-                  width: "60%", // Menyisakan 30% untuk berita
-                  margin: "0", // Hilangkan margin di sekitar
-                  padding: "0", // Hilangkan padding di sekitar
-                  maxWidth: "none",
+                  flex: "1 1 100%",
+                  maxWidth: "100%",
+                  margin: "0",
+                  padding: "0",
+                  display: "flex",
                   flexDirection: "column",
                 }}
               >
                 <Galeri />
               </div>
 
+              {/* Garis pemisah */}
+              <div
+                style={{
+                  width: "2px",
+                  height: "100%",
+                  backgroundColor: "black",
+                  position: "absolute",
+                  top: "0",
+                  bottom: "0",
+                  left: "60%",
+                  margin: "0 30px",
+                  display: window.innerWidth < 768 ? "none" : "block", // Sembunyikan garis vertikal di tampilan mobile
+                }}
+              />
+
+              {/* Garis horizontal pemisah untuk tampilan mobile */}
+              <div
+                style={{
+                  width: "100%",
+                  height: "2px",
+                  backgroundColor: "black",
+                  margin: "20px 0",
+                  display: window.innerWidth >= 768 ? "none" : "block", // Tampilkan garis horizontal di tampilan mobile
+                }}
+              />
+
               {/* Berita di kanan */}
               <div
                 className="col-12 md:col-4 lg:col-3"
                 style={{
-                  width: "40%",
-                  paddingLeft: "10px",
-                  minWidth: "300px",
-                  marginBottom: "0", // Menghilangkan margin bawah
-                  paddingBottom: "0", // Menghilangkan padding bawah
+                  flex: "1 1 100%",
+                  minWidth: "100%",
+                  paddingBottom: "0",
                   display: "flex",
                   flexDirection: "column",
                   justifyContent: "flex-start",
+                  alignItems: "flex-end",
                 }}
               >
                 <Berita />
@@ -781,6 +818,7 @@ const Landing = () => {
             </div>
           </Container>
         </section>
+
         {/* pegawai */}
         <section className="lg-12">
           <div className="py-5 bg-secondary">
@@ -817,7 +855,10 @@ const Landing = () => {
           </div>
         </section>
         {/* saran dan kritik */}
-        <section className="section section-lg bg-gradient-default ">
+        <section
+          className="section section-lg"
+          style={{ backgroundColor: "#4183b5" }}
+        >
           <Container className="pt-lg pb-100"></Container>
           {/* SVG separator */}
           <div className="separator separator-bottom separator-skew zindex-100">

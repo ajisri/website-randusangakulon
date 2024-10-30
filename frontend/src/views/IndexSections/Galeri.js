@@ -9,23 +9,23 @@ const Galeri = () => {
     "http://localhost:5000/galeripengunjung",
     fetcher
   );
-  const [isWideScreen, setIsWideScreen] = useState(window.innerWidth > 1200); // Tambahkan state untuk mengecek layar lebar
+  const [isWideScreen, setIsWideScreen] = useState(window.innerWidth > 1200);
 
   const responsiveOptions = [
     {
-      breakpoint: "1200px", // Untuk layar lebar (desktop)
+      breakpoint: "1200px",
       numVisible: 5,
     },
     {
-      breakpoint: "991px", // Untuk layar sedang (tablet potret)
+      breakpoint: "991px",
       numVisible: 4,
     },
     {
-      breakpoint: "767px", // Untuk layar kecil (tablet lanskap/ponsel besar)
+      breakpoint: "767px",
       numVisible: 3,
     },
     {
-      breakpoint: "575px", // Untuk layar sangat kecil (ponsel)
+      breakpoint: "575px",
       numVisible: 1,
     },
   ];
@@ -36,7 +36,6 @@ const Galeri = () => {
     };
 
     window.addEventListener("resize", handleResize);
-
     return () => {
       window.removeEventListener("resize", handleResize);
     };
@@ -50,10 +49,9 @@ const Galeri = () => {
     return <div>Loading...</div>;
   }
 
-  // Ubah data API sesuai dengan format yang dibutuhkan oleh Galleria
   const images = galeriData.galeris.map((item) => ({
-    itemImageSrc: `http://localhost:5000${item.file_url}`, // Gambar utama
-    thumbnailImageSrc: `http://localhost:5000${item.file_url}`, // Gambar thumbnail
+    itemImageSrc: `http://localhost:5000${item.file_url}`,
+    thumbnailImageSrc: `http://localhost:5000${item.file_url}`,
     alt: item.title,
     title: item.title,
   }));
@@ -65,16 +63,20 @@ const Galeri = () => {
           width: "100%",
           height: isWideScreen ? "70vh" : "60vh",
           overflow: "hidden",
+          background:
+            "linear-gradient(180deg, #FFFFFF 0%, #F0F0F0 50%, #E0E0E0 100%)",
         }}
       >
         <img
           src={item.itemImageSrc}
           alt={item.alt}
           style={{
-            width: "100%", // Lebar penuh
-            height: "100%", // Tinggi penuh
-            objectFit: "contain", // Menjaga gambar agar tidak terpotong
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
             display: "block",
+            background:
+              "linear-gradient(180deg, #FFFFFF 0%, #F0F0F0 50%, #E0E0E0 100%)",
           }}
         />
       </div>
@@ -88,10 +90,11 @@ const Galeri = () => {
         alt={item.alt}
         style={{
           display: "block",
-          width: "80px", // Atur lebar thumbnail
-          height: "60px", // Atur tinggi thumbnail
-          objectFit: "cover", // Pastikan gambar sesuai area tanpa distorsi
-          borderRadius: "5px", // Jika ingin menambahkan sedikit efek rounded
+          width: "80px",
+          height: "60px",
+          objectFit: "cover",
+          borderRadius: "8px",
+          margin: "2px", // Jarak antara thumbnail dan border
         }}
       />
     );
@@ -112,7 +115,13 @@ const Galeri = () => {
       style={{
         width: "100%",
         margin: "0",
-        height: "100vh",
+        height: "90vh",
+        background:
+          "linear-gradient(180deg, #FFFFFF 0%, #F0F0F0 50%, #E0E0E0 100%)",
+        border: "1px solid black", // Mengurangi ketebalan garis hitam di sekeliling Galeri menjadi 1px
+        boxSizing: "border-box", // Pastikan padding dihitung dalam ukuran total
+        padding: "10px", // Ruang di dalam border
+        borderRadius: "5px",
       }}
     >
       <Galleria
@@ -123,11 +132,14 @@ const Galeri = () => {
         thumbnail={thumbnailTemplate}
         caption={caption}
         style={{
-          maxWidth: isWideScreen ? "100%" : "100%", // Sesuaikan lebar berdasarkan ukuran layar
-          height: "100vh",
+          maxWidth: "100%",
+          height: "100%",
+          background: "none", // Menghilangkan background agar lebih rapi
         }}
         showItemNavigators
         showThumbnailNavigators
+        thumbnailStyle={{ border: "2px solid black", padding: "2px" }} // Garis hitam di sekeliling thumbnail
+        itemStyle={{ border: "none" }} // Menghilangkan garis horizontal di antara item
       />
     </div>
   );
