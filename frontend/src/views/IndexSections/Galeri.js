@@ -9,7 +9,7 @@ const Galeri = () => {
     "http://localhost:5000/galeripengunjung",
     fetcher
   );
-  const [isWideScreen, setIsWideScreen] = useState(null);
+  const [isWideScreen, setIsWideScreen] = useState(window.innerWidth > 1200);
 
   const responsiveOptions = [
     {
@@ -35,7 +35,6 @@ const Galeri = () => {
       setIsWideScreen(window.innerWidth > 1200);
     };
 
-    handleResize(); // Set initial state
     window.addEventListener("resize", handleResize);
     return () => {
       window.removeEventListener("resize", handleResize);
@@ -62,9 +61,12 @@ const Galeri = () => {
       <div
         style={{
           width: "100%",
-          height:
-            isWideScreen === null ? "60vh" : isWideScreen ? "70vh" : "60vh",
+          height: isWideScreen ? "70vh" : "60vh",
+          maxHeight: "80vh",
           overflow: "hidden",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
           background:
             "linear-gradient(180deg, #FFFFFF 0%, #F0F0F0 50%, #E0E0E0 100%)",
         }}
@@ -74,11 +76,10 @@ const Galeri = () => {
           alt={item.alt}
           style={{
             width: "100%",
-            height: "100%",
+            height: "auto",
             objectFit: "cover",
             display: "block",
-            background:
-              "linear-gradient(180deg, #FFFFFF 0%, #F0F0F0 50%, #E0E0E0 100%)",
+            maxHeight: isWideScreen ? "70vh" : "60vh",
           }}
         />
       </div>

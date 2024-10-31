@@ -41,9 +41,9 @@ const Berita = () => {
     container: {
       maxHeight: "800px",
       overflowY: "scroll",
-      padding: "20px",
-      gap: "40px",
-      paddingRight: "40px",
+      padding: "10px",
+      gap: "20px",
+      paddingRight: "30px",
       width: isSmallScreen ? "100%" : "95%",
       margin: "0 auto",
       height: "90vh",
@@ -54,38 +54,46 @@ const Berita = () => {
     },
     card: {
       display: "flex",
-      flexDirection: "column",
+      flexDirection: "row",
+      alignItems: "center",
       cursor: "pointer",
       border: "1px solid #ccc",
       padding: "10px",
       borderRadius: "8px",
-      marginBottom: "40px",
+      marginBottom: "20px",
       transition: "box-shadow 0.3s ease",
-      width: "100%",
-      maxWidth: "900px", // Perbesar maxWidth card
-      margin: "0 auto",
+      width: "95%",
     },
     cardHover: {
       boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
     },
+    imageContainer: {
+      width: isSmallScreen ? "100px" : "150px",
+      height: isSmallScreen ? "100px" : "150px",
+      borderRadius: "8px",
+      overflow: "hidden",
+      marginRight: "10px",
+    },
     image: {
       width: "100%",
-      height: "auto", // Ubah height menjadi auto untuk menjaga proporsi
-      objectFit: "contain", // Gunakan contain agar gambar tidak terpotong
-      borderRadius: "8px",
+      height: "100%",
+      objectFit: "cover",
     },
     content: {
-      marginTop: "10px",
+      flex: "1",
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "center",
     },
     title: {
       fontWeight: "bold",
-      fontSize: "1.5rem",
+      fontSize: isSmallScreen ? "0.9rem" : "1rem",
       margin: 0,
       color: "#333",
     },
     date: {
       color: "#888",
-      fontSize: "1rem",
+      fontSize: "0.8rem",
       marginTop: "5px",
     },
     description: {
@@ -96,8 +104,9 @@ const Berita = () => {
     },
     dialogImage: {
       width: "100%",
-      height: "auto", // Ubah height menjadi auto untuk menjaga proporsi
-      objectFit: "contain", // Gunakan contain agar gambar tidak terpotong
+      height: "auto",
+      maxHeight: isSmallScreen ? "200px" : "300px",
+      objectFit: "contain",
       borderRadius: "8px",
       marginBottom: "10px",
     },
@@ -127,18 +136,20 @@ const Berita = () => {
             }
             onMouseLeave={(e) => (e.currentTarget.style.boxShadow = "none")}
           >
-            <img
-              src={
-                `http://localhost:5000${item.file_url}` ||
-                "default-image-url.jpg"
-              }
-              alt={item.title}
-              style={styles.image}
-            />
+            <div style={styles.imageContainer}>
+              <img
+                src={
+                  `http://localhost:5000${item.file_url}` ||
+                  "default-image-url.jpg"
+                }
+                alt={item.title}
+                style={styles.image}
+              />
+            </div>
             <div style={styles.content}>
               <h4 style={styles.title}>{item.title}</h4>
-              <span style={styles.date}>{formatTanggal(item.created_at)}</span>
               <p style={styles.description}>{item.short_description}</p>
+              <span style={styles.date}>{formatTanggal(item.created_at)}</span>
             </div>
           </div>
         ))
@@ -152,7 +163,7 @@ const Berita = () => {
           visible={!!selectedBerita}
           onHide={() => setSelectedBerita(null)}
           maximizable
-          style={{ width: "80vw" }}
+          style={{ width: "90vw" }}
         >
           <img
             src={

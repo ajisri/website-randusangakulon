@@ -44,6 +44,7 @@ const Landing = () => {
   const [photos, setPhotos] = useState([]);
   const [nameFocused, setNameFocused] = useState(false);
   const [emailFocused, setEmailFocused] = useState(false);
+  const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 768);
 
   const [selectedAgenda, setSelectedAgenda] = useState(null);
 
@@ -62,6 +63,17 @@ const Landing = () => {
   const handleEmailBlur = () => {
     setEmailFocused(false);
   };
+
+  const handleResize = () => {
+    setIsSmallScreen(window.innerWidth < 768);
+  };
+
+  useEffect(() => {
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   const {
     data: agendaData,
@@ -779,45 +791,53 @@ const Landing = () => {
               <div
                 className="separator-vertical"
                 style={{
-                  width: "2px",
+                  width: "1px",
                   backgroundColor: "black",
+                  marginLeft: "10px",
                 }}
               />
 
-              {/* Berita di kanan */}
-              <div
-                className="col-12 md:col-4 lg:col-3"
-                style={{
-                  flex: "1 1 40%",
-                  minWidth: "300px",
-                  margin: "0",
-                  padding: "0",
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <Berita />
-              </div>
+              {/* Berita di kanan, hanya tampil di layar besar */}
+              {!isSmallScreen && (
+                <div
+                  className="col-12 md:col-4 lg:col-3"
+                  style={{
+                    flex: "1 1 40%",
+                    minWidth: "300px",
+                    margin: "0",
+                    padding: "0",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <Berita />
+                </div>
+              )}
             </div>
 
             {/* Garis pemisah horizontal di bawah galeri (untuk tampilan mobile) */}
-            <div
-              className="separator-horizontal"
-              style={{
-                height: "2px",
-                backgroundColor: "black",
-                margin: "10px 0",
-              }}
-            />
+            {isSmallScreen && (
+              <div
+                className="separator-horizontal"
+                style={{
+                  height: "2px",
+                  backgroundColor: "black",
+                  margin: "10px 0",
+                }}
+              />
+            )}
 
             {/* Berita di bawah galeri untuk tampilan mobile */}
-            <div className="mobile-berita" style={{ width: "100%" }}>
-              <Berita />
-            </div>
+            {isSmallScreen && (
+              <div className="mobile-berita" style={{ width: "100%" }}>
+                <Berita />
+              </div>
+            )}
           </Container>
 
+          {/* Styles untuk media query */}
           <style jsx>{`
             @media (max-width: 768px) {
               .grid {
