@@ -25,6 +25,8 @@ import Pendaftarannikah from "./Layanan/Pendaftarannikah";
 import Aktifasibpjs from "./Layanan/Aktifasibpjs";
 //Transparansi
 import Produkhukum from "./Transparansi/ProdukHukum";
+import Keuangan from "./Transparansi/Keuangan";
+import Kategori from "./Transparansi/Kategori";
 //sosial
 import Agenda from "./Social/Agenda";
 import Pengumuman from "./Social/Pengumuman";
@@ -56,6 +58,9 @@ const Dashboard = () => {
     setLayananSubmenuVisible(!isLayananSubmenuVisible);
   const toggleTransparansiSubmenu = () =>
     setTransparansiSubmenuVisible(!isTransparansiSubmenuVisible);
+  const [isKeuanganSubmenuVisible, setKeuanganSubmenuVisible] = useState(false);
+  const toggleKeuanganSubmenu = () =>
+    setKeuanganSubmenuVisible(!isKeuanganSubmenuVisible);
   const toggleSocialSubmenu = () =>
     setSocialSubmenuVisible(!isSocialSubmenuVisible);
 
@@ -141,6 +146,10 @@ const Dashboard = () => {
         return <Pendaftarannikah />;
       case "Produkhukum":
         return <Produkhukum />;
+      case "Keuangan":
+        return <Keuangan />;
+      case "Kategori":
+        return <Kategori />;
       case "Agenda":
         return <Agenda />;
       case "Pengumuman":
@@ -620,6 +629,106 @@ const Dashboard = () => {
               {isSidebarHovered && <span>Download</span>}
               <Ripple />
             </div>
+            {/* Menu untuk Keuangan, Kategori, Subkategori, dan Budget Items */}
+            <div
+              onClick={toggleKeuanganSubmenu}
+              className="menu-item"
+              style={{
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                marginBottom: "10px",
+                padding: "10px",
+                paddingLeft: "10px",
+              }}
+            >
+              <i
+                className="pi pi-fw pi-money-bill"
+                style={{ marginRight: "10px" }}
+              ></i>
+              {isSidebarHovered && <span>Keuangan</span>}
+              <i
+                className={`pi pi-fw ${
+                  isKeuanganSubmenuVisible
+                    ? "pi-chevron-down"
+                    : "pi-chevron-right"
+                }`}
+                style={{ marginLeft: "auto" }}
+              ></i>
+              <Ripple />
+            </div>
+            {isSidebarHovered && isKeuanganSubmenuVisible && (
+              <div
+                className="submenu"
+                style={{ marginLeft: "20px", marginBottom: "10px" }}
+              >
+                <div
+                  onClick={() => setActiveMenu("Keuangan")}
+                  className="menu-item"
+                  style={{
+                    marginBottom: "10px",
+                    cursor: "pointer",
+                    padding: "10px",
+                  }}
+                >
+                  <i
+                    className="pi pi-fw pi-money-bill"
+                    style={{ marginRight: "10px" }}
+                  ></i>
+                  {isSidebarHovered && <span>Keuangan</span>}
+                  <Ripple />
+                </div>
+                <div
+                  onClick={() => setActiveMenu("Kategori")}
+                  className="menu-item"
+                  style={{
+                    marginBottom: "10px",
+                    cursor: "pointer",
+                    padding: "10px",
+                  }}
+                >
+                  <i
+                    className="pi pi-fw pi-tags"
+                    style={{ marginRight: "10px" }}
+                  ></i>
+                  {isSidebarHovered && <span>Kategori</span>}
+                  <Ripple />
+                </div>
+
+                <div
+                  onClick={() => setActiveMenu("Subkategori")}
+                  className="menu-item"
+                  style={{
+                    marginBottom: "10px",
+                    cursor: "pointer",
+                    padding: "10px",
+                  }}
+                >
+                  <i
+                    className="pi pi-fw pi-folder"
+                    style={{ marginRight: "10px" }}
+                  ></i>
+                  {isSidebarHovered && <span>Subkategori</span>}
+                  <Ripple />
+                </div>
+                <div
+                  onClick={() => setActiveMenu("BudgetItems")}
+                  className="menu-item"
+                  style={{
+                    marginBottom: "10px",
+                    cursor: "pointer",
+                    padding: "10px",
+                  }}
+                >
+                  <i
+                    className="pi pi-fw pi-chart-line"
+                    style={{ marginRight: "10px" }}
+                  ></i>
+                  {isSidebarHovered && <span>Budget Items</span>}
+                  <Ripple />
+                </div>
+              </div>
+            )}
           </div>
         )}
 
