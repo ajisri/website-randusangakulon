@@ -102,16 +102,13 @@
 
 /* Right Column */
 .right-column {
-  width: 300px;
-  position: sticky; /* Fixed right column */
-  top: 0px;
-  right: 0px;
+  max-width: 300px; /* Maksimal lebar kolom kanan */
+  position: sticky; /* Kolom tetap mengikuti scroll */
+  top: 20px; /* Jarak dari atas */
   height: fit-content;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   padding: 10px;
   background-color: white;
-  transition: top 0.3s ease;
-  /* height: calc(100vh - 20px); */
   z-index: 10;
 }
 

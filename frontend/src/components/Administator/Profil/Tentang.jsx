@@ -120,94 +120,6 @@ const Tentang = () => {
     handleSubmit(e);
   };
 
-  const leftColumnRef = useRef(null);
-  const rightColumnRef = useRef(null);
-
-  useEffect(() => {
-    let animationFrameId;
-    let resizeObserver;
-
-    const handleScroll = () => {
-      animationFrameId = requestAnimationFrame(() => {
-        const leftColumn = leftColumnRef.current;
-        const rightColumn = rightColumnRef.current;
-
-        if (leftColumn && rightColumn) {
-          // Get the scroll position of the left column and the viewport
-          const leftColumnScrollTop = leftColumn.scrollTop;
-          const viewportScrollTop = window.scrollY;
-
-          // Get the height of the viewport
-          const viewportHeight = window.innerHeight;
-
-          // Get the height of the right column
-          const rightColumnHeight = rightColumn.offsetHeight;
-
-          // Calculate the top position of the right column
-          const scrollTop = Math.min(leftColumnScrollTop, viewportScrollTop);
-
-          // Get the position and size of the title and Quill editor
-          const fileElement = document.querySelector(".custom-file-input");
-          const quillElement = document.querySelector(".quill-wrapper");
-
-          // Ensure elements are found before proceeding
-          if (!fileElement || !quillElement) return;
-
-          const titleRect = fileElement.getBoundingClientRect();
-
-          // Calculate limitTop and limitBottom
-          const limitTop =
-            titleRect.top - leftColumn.getBoundingClientRect().top;
-          const limitBottom = viewportHeight - rightColumnHeight - 90;
-
-          // Calculate the new top position for the right-column
-          let newTop = scrollTop;
-
-          // Ensure the newTop does not exceed the limitBottom
-          newTop = Math.min(newTop, limitBottom);
-
-          // Ensure the newTop does not go above the limitTop
-          newTop = Math.max(newTop, limitTop);
-
-          // Set the top position of the right-column
-          rightColumn.style.top = `${newTop}px`;
-        }
-      });
-    };
-
-    // Create a ResizeObserver to watch for size changes in the columns
-    resizeObserver = new ResizeObserver(() => {
-      handleScroll(); // Recalculate scroll on resize
-    });
-
-    const leftColumn = leftColumnRef.current;
-    const rightColumn = rightColumnRef.current;
-
-    if (leftColumn) {
-      leftColumn.addEventListener("scroll", handleScroll);
-      resizeObserver.observe(leftColumn);
-    }
-    if (rightColumn) {
-      resizeObserver.observe(rightColumn);
-    }
-
-    // Listen to the window scroll event
-    window.addEventListener("scroll", handleScroll);
-
-    return () => {
-      if (leftColumn) {
-        leftColumn.removeEventListener("scroll", handleScroll);
-      }
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
-      }
-      if (resizeObserver) {
-        resizeObserver.disconnect();
-      }
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
-
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>{error.message}</p>;
 
@@ -217,7 +129,7 @@ const Tentang = () => {
       <form onSubmit={handleSubmit} encType="multipart/form-data">
         <div className="content-wrapper">
           {/* Left Column */}
-          <div className="left-column" ref={leftColumnRef}>
+          <div className="left-column">
             <h3 className="section-title">Create New Post</h3>
             <div className="post-content-container scrollable-container">
               <Card className="cart">
@@ -280,7 +192,7 @@ const Tentang = () => {
           </div>
 
           {/* Right Column */}
-          <div className="right-column" ref={rightColumnRef}>
+          <div className="right-column">
             <Card className="cardr" title="Publish Options">
               <div>
                 <div className="publish-options-top">
