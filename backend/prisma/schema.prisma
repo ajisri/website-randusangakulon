@@ -55,11 +55,10 @@ model Administrator {
   Pengumuman Pengumuman[]
   Galeri Galeri[]
   Berita Berita[]
-  PembiayaanDesa PembiayaanDesa[]
-  LaporanKeuangan LaporanKeuangan[]
-  RincianKeuangan RincianKeuangan[]
-  SubKategoriKeuangan SubKategoriKeuangan[]
-  KategoriKeuangan KategoriKeuangan[]
+  Keuangan Keuangan[]
+  Kategori Kategori[]
+  Subkategori Subkategori[]
+  BudgetItem BudgetItem[]
 }
 
 model User{
@@ -338,74 +337,52 @@ model Berita {
   createdBy     Administrator? @relation(fields: [createdbyId], references: [uuid])
 }
 
-// Kategori Keuangan
-model KategoriKeuangan {
-  id        Int       @id @default(autoincrement())
-  uuid      String    @unique @default(uuid())
-  nama      String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  createdbyId String
-  createdBy   Administrator? @relation(fields: [createdbyId], references: [uuid])
-  SubKategoriKeuangan SubKategoriKeuangan[]
+// Keuangan
+model Keuangan {
+  id          Int        @id @default(autoincrement())
+  uuid        String     @default(uuid()) @unique
+  name        String
+  type        String     // bisa menggunakan ENUM jika diinginkan
+  createdById String
+  createdBy   Administrator? @relation(fields: [createdById], references: [uuid])
+  kategori    Kategori[]
 }
 
-// Sub Kategori Keuangan
-model SubKategoriKeuangan {
-  id                  Int                @id @default(autoincrement())
-  uuid                String             @unique @default(uuid())
-  nama                String
-  kategoriKeuanganId  String
-  KategoriKeuangan    KategoriKeuangan   @relation(fields: [kategoriKeuanganId], references: [uuid])
-  createdAt           DateTime           @default(now())
-  updatedAt           DateTime           @updatedAt
-  createdbyId         String
-  createdBy           Administrator?     @relation(fields: [createdbyId], references: [uuid])
-  RincianKeuangan     RincianKeuangan[]
+model Kategori {
+  id          Int        @id @default(autoincrement())
+  uuid        String     @default(uuid()) @unique
+  keuanganId  Int
+  name        String
+  number      String
+  createdById String
+  createdBy   Administrator? @relation(fields: [createdById], references: [uuid])
+  subkategori Subkategori[]
+  keuangan    Keuangan   @relation(fields: [keuanganId], references: [id])
 }
 
-// Rincian Keuangan
-model RincianKeuangan {
-  id                 Int                 @id @default(autoincrement())
-  uuid               String              @unique @default(uuid())
-  nama               String
-  subKategoriKeuanganId String
-  SubKategoriKeuangan SubKategoriKeuangan @relation(fields: [subKategoriKeuanganId], references: [uuid])
-  createdAt          DateTime            @default(now())
-  updatedAt          DateTime            @updatedAt
-  createdbyId        String
-  createdBy          Administrator?      @relation(fields: [createdbyId], references: [uuid])
-  LaporanKeuangan    LaporanKeuangan[]
+model Subkategori {
+  id            Int        @id @default(autoincrement())
+  uuid          String     @default(uuid()) @unique
+  kategoriId    Int
+  name          String
+  number        String
+  createdById   String
+  createdBy     Administrator? @relation(fields: [createdById], references: [uuid])
+  budgetItems   BudgetItem[]
+  kategori      Kategori   @relation(fields: [kategoriId], references: [id])
 }
 
-// Laporan Keuangan
-model LaporanKeuangan {
-  id               Int                @id @default(autoincrement())
-  uuid             String             @unique @default(uuid())
-  tahun            Int
-  rincianKeuanganId String
-  RincianKeuangan  RincianKeuangan    @relation(fields: [rincianKeuanganId], references: [uuid])
-  anggaran         Decimal            @default(0.0)
-  realisasi        Decimal            @default(0.0)
-  sisa             Decimal            @default(0.0)
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
-  createdbyId      String
-  createdBy        Administrator?     @relation(fields: [createdbyId], references: [uuid])
-
-  PembiayaanDesa PembiayaanDesa[]
-}
-
-// Pembiayaan Desa
-model PembiayaanDesa {
-  id               Int                @id @default(autoincrement())
-  uuid             String             @unique @default(uuid())
-  nama             String
-  laporanKeuanganId String
-  LaporanKeuangan  LaporanKeuangan    @relation(fields: [laporanKeuanganId], references: [uuid])
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
-  createdbyId      String
-  createdBy        Administrator?     @relation(fields: [createdbyId], references: [uuid])
+model BudgetItem {
+  id            Int        @id @default(autoincrement())
+  uuid          String     @default(uuid()) @unique
+  subkategoriId Int
+  budget        Decimal
+  realization   Decimal
+  remaining      Decimal
+  createdById   String
+  createdBy     Administrator? @relation(fields: [createdById], references: [uuid])
+  subkategori    Subkategori @relation(fields: [subkategoriId], references: [id])
+  file_url      String?    // Menyimpan URL file pendukung
+  year          Int
 }
 
