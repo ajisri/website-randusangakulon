@@ -32,6 +32,11 @@ const Kategori = () => {
   });
 
   const [kategoriList, setKategoriList] = useState([]);
+  const [subkategoriFormData, setSubkategoriFormData] = useState([
+    { uuid: "", name: "", kategoriId: "" },
+  ]);
+  const [isSubkategoriDialogVisible, setSubkategoriDialogVisible] =
+    useState(false);
 
   const navigate = useNavigate();
   const toast = useRef(null);
@@ -149,6 +154,25 @@ const Kategori = () => {
     }
   };
 
+  const handleSubkategoriSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      for (const data of subkategoriFormData) {
+        await axiosJWT.post("http://localhost:5000/subkategori", data);
+      }
+      toast.current.show({
+        severity: "success",
+        summary: "Success",
+        detail: "Subkategori saved successfully!",
+        life: 3000,
+      });
+      await mutate("http://localhost:5000/subkategori");
+      setSubkategoriDialogVisible(false);
+    } catch (error) {
+      handleError(error);
+    }
+  };
+
   const resetForm = () => {
     setFormData({
       uuid: "",
@@ -181,6 +205,25 @@ const Kategori = () => {
         handleError(error);
       }
     }
+  };
+
+  const addSubkategoriField = () => {
+    setSubkategoriFormData((prev) => [
+      ...prev,
+      { uuid: "", name: "", kategoriId: "" },
+    ]);
+  };
+
+  const removeSubkategoriField = (index) => {
+    const newFormData = subkategoriFormData.filter((_, i) => i !== index);
+    setSubkategoriFormData(newFormData);
+  };
+
+  const handleSubkategoriChange = (index, e) => {
+    const { name, value } = e.target;
+    const newFormData = [...subkategoriFormData];
+    newFormData[index][name] = value;
+    setSubkategoriFormData(newFormData);
   };
 
   const handlePageChange = (e) => {
@@ -251,6 +294,16 @@ const Kategori = () => {
           body={(rowData) => (
             <div style={{ display: "flex", gap: "0.5rem" }}>
               <Button
+                label="Add Subkategori"
+                onClick={() => {
+                  setSubkategoriFormData([
+                    { uuid: "", name: "", kategoriId: rowData.uuid },
+                  ]); // Set kategoriId to current kategori
+                  setSubkategoriDialogVisible(true);
+                }}
+                className="add-subkategori-button"
+              />
+              <Button
                 icon="pi pi-pencil"
                 onClick={() => editKategori(rowData)}
                 className="edit-button coastal-button p-button-rounded"
@@ -278,6 +331,56 @@ const Kategori = () => {
           )}
         />
       </DataTable>
+      <Dialog
+        header="Add Subkategori"
+        visible={isSubkategoriDialogVisible}
+        onHide={() => setSubkategoriDialogVisible(false)}
+        dismissableMask={true}
+        modal={true}
+        style={{ width: "70vw" }}
+      >
+        <div>
+          <form onSubmit={handleSubkategoriSubmit}>
+            {subkategoriFormData.map((item, index) => (
+              <div key={index}>
+                <div className="field">
+                  <label htmlFor={`subkategoriName_${index}`}>
+                    Subkategori Name:
+                  </label>
+                  <InputText
+                    id={`subkategoriName_${index}`}
+                    name="name"
+                    value={item.name}
+                    onChange={(e) => handleSubkategoriChange(index, e)}
+                    required
+                    className="input-field"
+                  />
+                </div>
+                <div className="remove-button-container">
+                  <Button
+                    type="button"
+                    label="Hapus"
+                    className="remove-button"
+                    onClick={() => removeSubkategoriField(index)}
+                  />
+                </div>
+              </div>
+            ))}
+            <div className="add-jabatan-container">
+              {" "}
+              <Button
+                type="button"
+                label="Tambah"
+                raised
+                rounded
+                icon="pi pi-plus"
+                onClick={addSubkategoriField}
+              />
+            </div>
+            <Button type="submit" label="Save Subkategori" />
+          </form>
+        </div>
+      </Dialog>
 
       <Dialog
         header={isEditMode ? "Edit Kategori Data" : "Add Kategori Data"}
