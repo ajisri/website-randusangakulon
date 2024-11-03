@@ -18,7 +18,8 @@ import {
   updateKategori,
   deleteKategori,
   createSubkategori,
-  getAllSubkategori,
+  getSubkategoriAdmin,
+  getSubkategoriByKategoriId,
   updateSubkategori,
   deleteSubkategori,
   createBudgetItem,
@@ -65,7 +66,13 @@ router.patch("/kategori/:uuid", verifyToken, superOnly, updateKategori);
 router.delete("/kategori/:uuid", verifyToken, superOnly, deleteKategori);
 
 // Rute Subkategori
-router.get("/subkategori", verifyToken, superOnly, getAllSubkategori);
+router.get("/subkategori", verifyToken, superOnly, getSubkategoriAdmin);
+router.get(
+  "/subkategoribykategori/:kategoriId",
+  verifyToken,
+  superOnly,
+  getSubkategoriByKategoriId
+);
 router.post("/csubkategori", verifyToken, superOnly, createSubkategori);
 router.patch("/subkategori/:uuid", verifyToken, superOnly, updateSubkategori);
 router.delete("/subkategori/:uuid", verifyToken, superOnly, deleteSubkategori);

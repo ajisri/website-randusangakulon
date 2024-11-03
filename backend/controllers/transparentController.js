@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 
 import jwt from "jsonwebtoken";
-import { body, validationResult } from "express-validator";
+import { check, body, validationResult } from "express-validator";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -532,31 +532,117 @@ export const deleteKategori = [
 // Subkategori CRUD
 export const createSubkategori = [
   verifyAdmin,
-  body("name").notEmpty().withMessage("Name is required"),
-  body("number").isNumeric().withMessage("Number must be a numeric value"),
-  body("kategoriId").isUUID().withMessage("KategoriId must be a valid UUID"),
-  body("createdById").isUUID().withMessage("CreatedById must be a valid UUID"),
+  check("subkategoriData")
+    .isArray()
+    .withMessage("subkategoriData harus berupa array"),
+  check("subkategoriData.*.name").notEmpty().withMessage("Name is required"),
+  check("subkategoriData.*.kategoriId")
+    .isUUID()
+    .withMessage("KategoriId must be a valid UUID"),
+
   async (req, res) => {
-    handleValidationErrors(req, res);
-    const { name, number, kategoriId, createdById } = req.body;
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const createdById = req.administratorId;
+    const subkategoriData = req.body.subkategoriData;
+
+    // Pastikan subkategoriData adalah array
+    if (!Array.isArray(subkategoriData)) {
+      return res
+        .status(400)
+        .json({ msg: "subkategoriData harus berupa array" });
+    }
+
     try {
-      const subkategori = await prisma.subkategori.create({
-        data: {
-          name,
-          number,
-          kategoriId,
-          createdById,
+      const createdSubkategoris = [];
+      const uuidsToKeep = new Set(); // Set untuk menyimpan UUID yang harus disimpan
+
+      // Mengambil semua subkategori yang ada untuk mengecek yang perlu diupdate
+      const existingSubkategoris = await prisma.subkategori.findMany();
+      const existingUuids = new Set(existingSubkategoris.map((s) => s.uuid)); // Mengambil UUID yang ada
+
+      for (const subkategori of subkategoriData) {
+        const { uuid, kategoriId, name } = subkategori;
+
+        // Jika UUID ada, lakukan update
+        if (uuid) {
+          const existingSubkategori = existingSubkategoris.find(
+            (s) => s.uuid === uuid
+          );
+          if (existingSubkategori) {
+            // Update subkategori yang ada
+            const updatedSubkategori = await prisma.subkategori.update({
+              where: { uuid },
+              data: { name, kategoriId },
+            });
+            createdSubkategoris.push(updatedSubkategori);
+            uuidsToKeep.add(uuid); // Simpan UUID yang telah diproses
+          } else {
+            console.error("Subkategori dengan UUID ini tidak ditemukan:", uuid);
+          }
+        } else {
+          // Jika tidak ada UUID, buat subkategori baru
+          const count = await prisma.subkategori.count({
+            where: { kategoriId },
+          });
+          const number = (count + 1).toString();
+
+          const createdSubkategori = await prisma.subkategori.create({
+            data: {
+              name,
+              number,
+              kategoriId,
+              createdById,
+            },
+          });
+          createdSubkategoris.push(createdSubkategori);
+        }
+      }
+
+      // Hapus subkategori yang tidak ada di subkategoriData
+      const uuidsToDelete = [...existingUuids].filter(
+        (uuid) => !uuidsToKeep.has(uuid)
+      );
+      await prisma.subkategori.deleteMany({
+        where: {
+          uuid: { in: uuidsToDelete }, // Hapus yang tidak ada di uuidsToKeep
         },
       });
-      res.status(201).json(subkategori);
+
+      return res.status(200).json({
+        message: "Subkategori managed successfully",
+        count: createdSubkategoris.length,
+        createdSubkategoris,
+      });
     } catch (error) {
-      console.error("Error creating Subkategori:", error);
+      console.error("Error managing Subkategori:", error);
+      return res.status(500).json({ msg: "Server error occurred" });
+    }
+  },
+];
+
+// Controller untuk mengambil subkategori berdasarkan kategoriId
+export const getSubkategoriByKategoriId = [
+  verifyAdmin,
+  async (req, res) => {
+    const { kategoriId } = req.params; // Mengambil kategoriId dari parameter
+    try {
+      const subkategoris = await prisma.subkategori.findMany({
+        where: { kategoriId: kategoriId }, // Mencari berdasarkan kategoriId
+        include: { budgetItems: true },
+      });
+      res.status(200).json(subkategoris);
+    } catch (error) {
+      console.error("Error fetching Subkategori:", error);
       res.status(500).json({ msg: "Server error occurred" });
     }
   },
 ];
 
-export const getAllSubkategori = [
+export const getSubkategoriAdmin = [
   verifyAdmin,
   async (req, res) => {
     try {
