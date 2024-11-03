@@ -11,7 +11,7 @@ import { Column } from "primereact/column";
 import { FilterMatchMode } from "primereact/api";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
-import "./Keuangan.css"; // Custom CSS for styling
+import "./Kategori.css"; // Custom CSS for styling
 
 const Kategori = () => {
   const [formData, setFormData] = useState({
@@ -19,7 +19,7 @@ const Kategori = () => {
     name: "",
     keuanganId: "",
   });
-
+  const [currentKategoriId, setCurrentKategoriId] = useState("");
   const [keuanganOptions, setKeuanganOptions] = useState([]);
   const [isDialogVisible, setDialogVisible] = useState(false);
   const [isEditMode, setEditMode] = useState(false);
@@ -75,6 +75,28 @@ const Kategori = () => {
     }
   }, [keuanganData]);
 
+  const fetchSubkategoriByKategoriId = async (kategoriId) => {
+    try {
+      const response = await axiosJWT.get(
+        `http://localhost:5000/subkategoribykategori/${kategoriId}`
+      );
+      setSubkategoriFormData(
+        response.data.map((subkategori) => ({
+          name: subkategori.name || "",
+          kategoriId: kategoriId,
+        }))
+      );
+    } catch (error) {
+      handleError(error);
+    }
+  };
+
+  const handleSubkategoriDialogOpen = (kategoriId) => {
+    setCurrentKategoriId(kategoriId);
+    fetchSubkategoriByKategoriId(kategoriId);
+    setSubkategoriDialogVisible(true);
+  };
+
   const onGlobalFilterChange = (e) => {
     const value = e.target.value;
     let _filters = { ...filters };
@@ -103,8 +125,6 @@ const Kategori = () => {
     const dataToSend = {
       ...formData,
     };
-    console.log("Data to be sent:", dataToSend);
-
     try {
       if (isEditMode) {
         await axiosJWT.patch(
@@ -156,10 +176,34 @@ const Kategori = () => {
 
   const handleSubkategoriSubmit = async (e) => {
     e.preventDefault();
+
+    // Memastikan bahwa subkategoriFormData adalah array dan tidak kosong
+    if (
+      !Array.isArray(subkategoriFormData) ||
+      subkategoriFormData.length === 0
+    ) {
+      toast.current.show({
+        severity: "error",
+        summary: "Error",
+        detail: "Subkategori harus berupa array dan tidak boleh kosong!",
+        life: 5000,
+      });
+      return;
+    }
+
+    console.log("Data yang dikirim ke server:", subkategoriFormData); // Logging data yang akan dikirim
+
     try {
-      for (const data of subkategoriFormData) {
-        await axiosJWT.post("http://localhost:5000/subkategori", data);
-      }
+      // Mengirimkan subkategoriFormData sebagai array ke server
+      const response = await axiosJWT.post(
+        "http://localhost:5000/csubkategori",
+        {
+          subkategoriData: subkategoriFormData,
+        }
+      );
+
+      console.log("Response dari server:", response.data); // Logging response dari server
+
       toast.current.show({
         severity: "success",
         summary: "Success",
@@ -169,6 +213,7 @@ const Kategori = () => {
       await mutate("http://localhost:5000/subkategori");
       setSubkategoriDialogVisible(false);
     } catch (error) {
+      console.error("Error saat mengirim data:", error); // Logging error
       handleError(error);
     }
   };
@@ -210,7 +255,7 @@ const Kategori = () => {
   const addSubkategoriField = () => {
     setSubkategoriFormData((prev) => [
       ...prev,
-      { uuid: "", name: "", kategoriId: "" },
+      { name: "", kategoriId: currentKategoriId },
     ]);
   };
 
@@ -294,14 +339,16 @@ const Kategori = () => {
           body={(rowData) => (
             <div style={{ display: "flex", gap: "0.5rem" }}>
               <Button
-                label="Add Subkategori"
+                icon="pi pi-pw pi-plus"
+                label="Subkategori"
                 onClick={() => {
+                  handleSubkategoriDialogOpen(rowData.uuid);
                   setSubkategoriFormData([
-                    { uuid: "", name: "", kategoriId: rowData.uuid },
-                  ]); // Set kategoriId to current kategori
+                    { name: "", kategoriId: rowData.uuid },
+                  ]);
                   setSubkategoriDialogVisible(true);
                 }}
-                className="add-subkategori-button"
+                className="add-subkategori-button coastal-button p-button-rounded"
               />
               <Button
                 icon="pi pi-pencil"
@@ -332,37 +379,47 @@ const Kategori = () => {
         />
       </DataTable>
       <Dialog
-        header="Add Subkategori"
+        header="Tambah Subkategori"
         visible={isSubkategoriDialogVisible}
         onHide={() => setSubkategoriDialogVisible(false)}
         dismissableMask={true}
         modal={true}
+        maximizable
         style={{ width: "70vw" }}
       >
         <div>
           <form onSubmit={handleSubkategoriSubmit}>
             {subkategoriFormData.map((item, index) => (
-              <div key={index}>
+              <div key={index} className="subkategori-field-container">
                 <div className="field">
                   <label htmlFor={`subkategoriName_${index}`}>
-                    Subkategori Name:
+                    Subkategori:
                   </label>
-                  <InputText
-                    id={`subkategoriName_${index}`}
-                    name="name"
-                    value={item.name}
-                    onChange={(e) => handleSubkategoriChange(index, e)}
-                    required
-                    className="input-field"
-                  />
-                </div>
-                <div className="remove-button-container">
-                  <Button
-                    type="button"
-                    label="Hapus"
-                    className="remove-button"
-                    onClick={() => removeSubkategoriField(index)}
-                  />
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Button
+                      type="button"
+                      label="Hapus"
+                      className="remove-button"
+                      disabled={subkategoriFormData.length === 1}
+                      style={{
+                        alignItems: "center",
+                      }}
+                      onClick={() => removeSubkategoriField(index)}
+                    />
+                    <InputText
+                      id={`subkategoriName_${index}`}
+                      name="name"
+                      value={item.name}
+                      onChange={(e) => handleSubkategoriChange(index, e)}
+                      required
+                      className="input-field"
+                    />
+                  </div>
                 </div>
               </div>
             ))}
@@ -371,13 +428,14 @@ const Kategori = () => {
               <Button
                 type="button"
                 label="Tambah"
+                className="delete-button coastal-button p-button-rounded"
                 raised
                 rounded
                 icon="pi pi-plus"
                 onClick={addSubkategoriField}
               />
             </div>
-            <Button type="submit" label="Save Subkategori" />
+            <Button type="submit" label="Simpan" />
           </form>
         </div>
       </Dialog>
